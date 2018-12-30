@@ -8,7 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		518C8F7D21D777BA00005610 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F7C21D777BA00005610 /* main.c */; };
+		518C8F8521D777EC00005610 /* mpl_node.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8421D777EC00005610 /* mpl_node.c */; };
+		518C8F8821D777FB00005610 /* mpl_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8721D777FB00005610 /* mpl_tree.c */; };
+		518C8F8B21D77BC600005610 /* mpl_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8A21D77BC600005610 /* mpl_utils.c */; };
+		518C8F8E21D7882D00005610 /* mpl_topol.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8D21D7882D00005610 /* mpl_topol.c */; };
+		518C8F9321D7895400005610 /* mpl_cblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9221D7895400005610 /* mpl_cblock.c */; };
+		518C8F9821D7D1DE00005610 /* testmplnode.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9721D7D1DE00005610 /* testmplnode.c */; };
+		518C8F9B21D8049300005610 /* testmpltree.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9A21D8049300005610 /* testmpltree.c */; };
+		51A6B7FB21D8ED610086CE68 /* mpl_taxoninfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */; };
+		51A6B7FE21D8EEBF0086CE68 /* mpl_taxblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FD21D8EEBF0086CE68 /* mpl_taxblock.c */; };
+		51A6B80221D8F6D50086CE68 /* mpl_results.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80121D8F6D50086CE68 /* mpl_results.c */; };
+		51A6B80621D900110086CE68 /* mpl_search.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80521D900110086CE68 /* mpl_search.c */; };
+		51A6B80E21D90BDD0086CE68 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80D21D90BDD0086CE68 /* AppDelegate.swift */; };
+		51A6B81021D90BDD0086CE68 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80F21D90BDD0086CE68 /* ViewController.swift */; };
+		51A6B81221D90BDF0086CE68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51A6B81121D90BDF0086CE68 /* Assets.xcassets */; };
+		51A6B81521D90BDF0086CE68 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51A6B81321D90BDF0086CE68 /* Main.storyboard */; };
+		51A6B82121D90BDF0086CE68 /* Morphy_GUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82021D90BDF0086CE68 /* Morphy_GUITests.swift */; };
+		51A6B82C21D90BDF0086CE68 /* Morphy_GUIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		51A6B81D21D90BDF0086CE68 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 518C8F7121D777BA00005610 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51A6B80A21D90BDD0086CE68;
+			remoteInfo = "Morphy GUI";
+		};
+		51A6B82821D90BDF0086CE68 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 518C8F7121D777BA00005610 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51A6B80A21D90BDD0086CE68;
+			remoteInfo = "Morphy GUI";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		518C8F7721D777BA00005610 /* CopyFiles */ = {
@@ -25,10 +59,67 @@
 /* Begin PBXFileReference section */
 		518C8F7921D777BA00005610 /* Morphy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Morphy; sourceTree = BUILT_PRODUCTS_DIR; };
 		518C8F7C21D777BA00005610 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		518C8F8321D777EC00005610 /* mpl_node.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_node.h; sourceTree = "<group>"; };
+		518C8F8421D777EC00005610 /* mpl_node.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_node.c; sourceTree = "<group>"; };
+		518C8F8621D777FB00005610 /* mpl_tree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_tree.h; sourceTree = "<group>"; };
+		518C8F8721D777FB00005610 /* mpl_tree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_tree.c; sourceTree = "<group>"; };
+		518C8F8921D77BC600005610 /* mpl_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_utils.h; sourceTree = "<group>"; };
+		518C8F8A21D77BC600005610 /* mpl_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_utils.c; sourceTree = "<group>"; };
+		518C8F8C21D7882D00005610 /* mpl_topol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_topol.h; sourceTree = "<group>"; };
+		518C8F8D21D7882D00005610 /* mpl_topol.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_topol.c; sourceTree = "<group>"; };
+		518C8F9121D7895400005610 /* mpl_cblock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_cblock.h; sourceTree = "<group>"; };
+		518C8F9221D7895400005610 /* mpl_cblock.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_cblock.c; sourceTree = "<group>"; };
+		518C8F9521D7CF0900005610 /* mpltest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpltest.h; sourceTree = "<group>"; };
+		518C8F9621D7D1DE00005610 /* testmplnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmplnode.h; sourceTree = "<group>"; };
+		518C8F9721D7D1DE00005610 /* testmplnode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmplnode.c; sourceTree = "<group>"; };
+		518C8F9921D8049300005610 /* testmpltree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmpltree.h; sourceTree = "<group>"; };
+		518C8F9A21D8049300005610 /* testmpltree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmpltree.c; sourceTree = "<group>"; };
+		51A6B7F921D8ED610086CE68 /* mpl_taxoninfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_taxoninfo.h; sourceTree = "<group>"; };
+		51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_taxoninfo.c; sourceTree = "<group>"; };
+		51A6B7FC21D8EEBF0086CE68 /* mpl_taxblock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_taxblock.h; sourceTree = "<group>"; };
+		51A6B7FD21D8EEBF0086CE68 /* mpl_taxblock.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_taxblock.c; sourceTree = "<group>"; };
+		51A6B80021D8F6D50086CE68 /* mpl_results.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_results.h; sourceTree = "<group>"; };
+		51A6B80121D8F6D50086CE68 /* mpl_results.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_results.c; sourceTree = "<group>"; };
+		51A6B80421D900110086CE68 /* mpl_search.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_search.h; sourceTree = "<group>"; };
+		51A6B80521D900110086CE68 /* mpl_search.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_search.c; sourceTree = "<group>"; };
+		51A6B80B21D90BDD0086CE68 /* Morphy GUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Morphy GUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		51A6B80D21D90BDD0086CE68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		51A6B80F21D90BDD0086CE68 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		51A6B81121D90BDF0086CE68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		51A6B81421D90BDF0086CE68 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		51A6B81621D90BDF0086CE68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		51A6B81721D90BDF0086CE68 /* Morphy_GUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Morphy_GUI.entitlements; sourceTree = "<group>"; };
+		51A6B81C21D90BDF0086CE68 /* Morphy GUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Morphy GUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		51A6B82021D90BDF0086CE68 /* Morphy_GUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morphy_GUITests.swift; sourceTree = "<group>"; };
+		51A6B82221D90BDF0086CE68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		51A6B82721D90BDF0086CE68 /* Morphy GUIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Morphy GUIUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morphy_GUIUITests.swift; sourceTree = "<group>"; };
+		51A6B82D21D90BDF0086CE68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		518C8F7621D777BA00005610 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B80821D90BDD0086CE68 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B81921D90BDF0086CE68 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B82421D90BDF0086CE68 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -41,7 +132,10 @@
 		518C8F7021D777BA00005610 = {
 			isa = PBXGroup;
 			children = (
-				518C8F7B21D777BA00005610 /* Morphy */,
+				518C8F7B21D777BA00005610 /* src */,
+				51A6B80C21D90BDD0086CE68 /* Morphy GUI */,
+				51A6B81F21D90BDF0086CE68 /* Morphy GUITests */,
+				51A6B82A21D90BDF0086CE68 /* Morphy GUIUITests */,
 				518C8F7A21D777BA00005610 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,16 +144,122 @@
 			isa = PBXGroup;
 			children = (
 				518C8F7921D777BA00005610 /* Morphy */,
+				51A6B80B21D90BDD0086CE68 /* Morphy GUI.app */,
+				51A6B81C21D90BDF0086CE68 /* Morphy GUITests.xctest */,
+				51A6B82721D90BDF0086CE68 /* Morphy GUIUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		518C8F7B21D777BA00005610 /* Morphy */ = {
+		518C8F7B21D777BA00005610 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				518C8F8921D77BC600005610 /* mpl_utils.h */,
+				518C8F8A21D77BC600005610 /* mpl_utils.c */,
+				51A6B7F821D8ED150086CE68 /* Taxa */,
+				518C8F9421D7895A00005610 /* Characters */,
+				518C8F8F21D788BA00005610 /* Trees */,
+				51A6B80321D8FFF20086CE68 /* Search */,
+				51A6B7FF21D8F6AB0086CE68 /* Results */,
+				518C8F9021D788D700005610 /* Tests */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		518C8F8F21D788BA00005610 /* Trees */ = {
+			isa = PBXGroup;
+			children = (
+				518C8F8321D777EC00005610 /* mpl_node.h */,
+				518C8F8421D777EC00005610 /* mpl_node.c */,
+				518C8F8621D777FB00005610 /* mpl_tree.h */,
+				518C8F8721D777FB00005610 /* mpl_tree.c */,
+				518C8F8C21D7882D00005610 /* mpl_topol.h */,
+				518C8F8D21D7882D00005610 /* mpl_topol.c */,
+			);
+			path = Trees;
+			sourceTree = "<group>";
+		};
+		518C8F9021D788D700005610 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				518C8F9521D7CF0900005610 /* mpltest.h */,
+				518C8F9621D7D1DE00005610 /* testmplnode.h */,
+				518C8F9721D7D1DE00005610 /* testmplnode.c */,
+				518C8F9921D8049300005610 /* testmpltree.h */,
+				518C8F9A21D8049300005610 /* testmpltree.c */,
 				518C8F7C21D777BA00005610 /* main.c */,
 			);
-			path = Morphy;
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		518C8F9421D7895A00005610 /* Characters */ = {
+			isa = PBXGroup;
+			children = (
+				518C8F9121D7895400005610 /* mpl_cblock.h */,
+				518C8F9221D7895400005610 /* mpl_cblock.c */,
+			);
+			name = Characters;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
+		51A6B7F821D8ED150086CE68 /* Taxa */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B7F921D8ED610086CE68 /* mpl_taxoninfo.h */,
+				51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */,
+				51A6B7FC21D8EEBF0086CE68 /* mpl_taxblock.h */,
+				51A6B7FD21D8EEBF0086CE68 /* mpl_taxblock.c */,
+			);
+			path = Taxa;
+			sourceTree = "<group>";
+		};
+		51A6B7FF21D8F6AB0086CE68 /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B80021D8F6D50086CE68 /* mpl_results.h */,
+				51A6B80121D8F6D50086CE68 /* mpl_results.c */,
+			);
+			path = Results;
+			sourceTree = "<group>";
+		};
+		51A6B80321D8FFF20086CE68 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B80421D900110086CE68 /* mpl_search.h */,
+				51A6B80521D900110086CE68 /* mpl_search.c */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		51A6B80C21D90BDD0086CE68 /* Morphy GUI */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B80D21D90BDD0086CE68 /* AppDelegate.swift */,
+				51A6B80F21D90BDD0086CE68 /* ViewController.swift */,
+				51A6B81121D90BDF0086CE68 /* Assets.xcassets */,
+				51A6B81321D90BDF0086CE68 /* Main.storyboard */,
+				51A6B81621D90BDF0086CE68 /* Info.plist */,
+				51A6B81721D90BDF0086CE68 /* Morphy_GUI.entitlements */,
+			);
+			path = "Morphy GUI";
+			sourceTree = "<group>";
+		};
+		51A6B81F21D90BDF0086CE68 /* Morphy GUITests */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B82021D90BDF0086CE68 /* Morphy_GUITests.swift */,
+				51A6B82221D90BDF0086CE68 /* Info.plist */,
+			);
+			path = "Morphy GUITests";
+			sourceTree = "<group>";
+		};
+		51A6B82A21D90BDF0086CE68 /* Morphy GUIUITests */ = {
+			isa = PBXGroup;
+			children = (
+				51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */,
+				51A6B82D21D90BDF0086CE68 /* Info.plist */,
+			);
+			path = "Morphy GUIUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -82,17 +282,82 @@
 			productReference = 518C8F7921D777BA00005610 /* Morphy */;
 			productType = "com.apple.product-type.tool";
 		};
+		51A6B80A21D90BDD0086CE68 /* Morphy GUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51A6B82E21D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUI" */;
+			buildPhases = (
+				51A6B80721D90BDD0086CE68 /* Sources */,
+				51A6B80821D90BDD0086CE68 /* Frameworks */,
+				51A6B80921D90BDD0086CE68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Morphy GUI";
+			productName = "Morphy GUI";
+			productReference = 51A6B80B21D90BDD0086CE68 /* Morphy GUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		51A6B81B21D90BDF0086CE68 /* Morphy GUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51A6B83121D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUITests" */;
+			buildPhases = (
+				51A6B81821D90BDF0086CE68 /* Sources */,
+				51A6B81921D90BDF0086CE68 /* Frameworks */,
+				51A6B81A21D90BDF0086CE68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51A6B81E21D90BDF0086CE68 /* PBXTargetDependency */,
+			);
+			name = "Morphy GUITests";
+			productName = "Morphy GUITests";
+			productReference = 51A6B81C21D90BDF0086CE68 /* Morphy GUITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		51A6B82621D90BDF0086CE68 /* Morphy GUIUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51A6B83421D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUIUITests" */;
+			buildPhases = (
+				51A6B82321D90BDF0086CE68 /* Sources */,
+				51A6B82421D90BDF0086CE68 /* Frameworks */,
+				51A6B82521D90BDF0086CE68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51A6B82921D90BDF0086CE68 /* PBXTargetDependency */,
+			);
+			name = "Morphy GUIUITests";
+			productName = "Morphy GUIUITests";
+			productReference = 51A6B82721D90BDF0086CE68 /* Morphy GUIUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		518C8F7121D777BA00005610 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1010;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Martin Brazeau";
 				TargetAttributes = {
 					518C8F7821D777BA00005610 = {
 						CreatedOnToolsVersion = 10.1;
+					};
+					51A6B80A21D90BDD0086CE68 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					51A6B81B21D90BDF0086CE68 = {
+						CreatedOnToolsVersion = 10.1;
+						TestTargetID = 51A6B80A21D90BDD0086CE68;
+					};
+					51A6B82621D90BDF0086CE68 = {
+						CreatedOnToolsVersion = 10.1;
+						TestTargetID = 51A6B80A21D90BDD0086CE68;
 					};
 				};
 			};
@@ -102,6 +367,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 518C8F7021D777BA00005610;
 			productRefGroup = 518C8F7A21D777BA00005610 /* Products */;
@@ -109,20 +375,109 @@
 			projectRoot = "";
 			targets = (
 				518C8F7821D777BA00005610 /* Morphy */,
+				51A6B80A21D90BDD0086CE68 /* Morphy GUI */,
+				51A6B81B21D90BDF0086CE68 /* Morphy GUITests */,
+				51A6B82621D90BDF0086CE68 /* Morphy GUIUITests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		51A6B80921D90BDD0086CE68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51A6B81221D90BDF0086CE68 /* Assets.xcassets in Resources */,
+				51A6B81521D90BDF0086CE68 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B81A21D90BDF0086CE68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B82521D90BDF0086CE68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		518C8F7521D777BA00005610 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51A6B7FB21D8ED610086CE68 /* mpl_taxoninfo.c in Sources */,
 				518C8F7D21D777BA00005610 /* main.c in Sources */,
+				518C8F8B21D77BC600005610 /* mpl_utils.c in Sources */,
+				518C8F9821D7D1DE00005610 /* testmplnode.c in Sources */,
+				51A6B80221D8F6D50086CE68 /* mpl_results.c in Sources */,
+				518C8F8521D777EC00005610 /* mpl_node.c in Sources */,
+				518C8F9321D7895400005610 /* mpl_cblock.c in Sources */,
+				518C8F8821D777FB00005610 /* mpl_tree.c in Sources */,
+				51A6B7FE21D8EEBF0086CE68 /* mpl_taxblock.c in Sources */,
+				518C8F8E21D7882D00005610 /* mpl_topol.c in Sources */,
+				518C8F9B21D8049300005610 /* testmpltree.c in Sources */,
+				51A6B80621D900110086CE68 /* mpl_search.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B80721D90BDD0086CE68 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51A6B81021D90BDD0086CE68 /* ViewController.swift in Sources */,
+				51A6B80E21D90BDD0086CE68 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B81821D90BDF0086CE68 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51A6B82121D90BDF0086CE68 /* Morphy_GUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51A6B82321D90BDF0086CE68 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51A6B82C21D90BDF0086CE68 /* Morphy_GUIUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		51A6B81E21D90BDF0086CE68 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51A6B80A21D90BDD0086CE68 /* Morphy GUI */;
+			targetProxy = 51A6B81D21D90BDF0086CE68 /* PBXContainerItemProxy */;
+		};
+		51A6B82921D90BDF0086CE68 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51A6B80A21D90BDD0086CE68 /* Morphy GUI */;
+			targetProxy = 51A6B82821D90BDF0086CE68 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		51A6B81321D90BDF0086CE68 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				51A6B81421D90BDF0086CE68 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		518C8F7E21D777BA00005610 /* Debug */ = {
@@ -252,6 +607,132 @@
 			};
 			name = Release;
 		};
+		51A6B82F21D90BDF0086CE68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Morphy GUI/Morphy_GUI.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUI/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		51A6B83021D90BDF0086CE68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Morphy GUI/Morphy_GUI.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUI/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+		51A6B83221D90BDF0086CE68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Morphy GUI.app/Contents/MacOS/Morphy GUI";
+			};
+			name = Debug;
+		};
+		51A6B83321D90BDF0086CE68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Morphy GUI.app/Contents/MacOS/Morphy GUI";
+			};
+			name = Release;
+		};
+		51A6B83521D90BDF0086CE68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUIUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUIUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+				TEST_TARGET_NAME = "Morphy GUI";
+			};
+			name = Debug;
+		};
+		51A6B83621D90BDF0086CE68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Morphy GUIUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUIUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+				TEST_TARGET_NAME = "Morphy GUI";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -269,6 +750,33 @@
 			buildConfigurations = (
 				518C8F8121D777BA00005610 /* Debug */,
 				518C8F8221D777BA00005610 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51A6B82E21D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51A6B82F21D90BDF0086CE68 /* Debug */,
+				51A6B83021D90BDF0086CE68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51A6B83121D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51A6B83221D90BDF0086CE68 /* Debug */,
+				51A6B83321D90BDF0086CE68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51A6B83421D90BDF0086CE68 /* Build configuration list for PBXNativeTarget "Morphy GUIUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51A6B83521D90BDF0086CE68 /* Debug */,
+				51A6B83621D90BDF0086CE68 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
