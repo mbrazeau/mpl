@@ -8,7 +8,7 @@
 
 #include "mpltest.h"
 #include "testmplnode.h"
-#include "../Trees/mpl_node.h"
+#include "../src/Trees/mpl_node.h"
 
 // TODO: Remove/replace:
 static void mpl_node_bin_traverse_temp(mpl_node* n)
@@ -118,6 +118,7 @@ int test_push_to_polynode (void)
     int i = 0;
     for (i = 0; i < nnodes; ++i) {
         ndptrs[i] = mpl_new_node();
+        ndptrs[i]->mem_index = i;
     }
     
     for (i = 1; i < nnodes; ++i) {

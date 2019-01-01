@@ -11,6 +11,8 @@
 
 #include <string.h>
 
+#define MPLTAXNAMEMAX 100
+
 typedef struct _taxoninfo {
     long index;
     char* name;
@@ -19,8 +21,8 @@ typedef struct _taxoninfo {
 //mpl_taxoninfo* mpl_taxoninfo_new(void);
 //int     mpl_taxoninfo_delete(mpl_taxoninfo** ti);
 int     mpl_taxoninfo_set_name(mpl_taxoninfo* ti, const char* n);
-int     mpl_taxoninfo_get_name(char* dest, mpl_taxoninfo* ti);
-int     mpl_taxoninfo_set_index(mpl_taxoninfo* ti, long index);
-long    mpl_taxoninfo_get_index(mpl_taxoninfo* ti);
+int     mpl_taxoninfo_get_name(char* dest, const mpl_taxoninfo* ti);
+int     mpl_taxoninfo_set_index(mpl_taxoninfo* ti, const long index);
+long    mpl_taxoninfo_get_index(const mpl_taxoninfo* ti);
 
 #endif /* mpl_taxoninfo_h */

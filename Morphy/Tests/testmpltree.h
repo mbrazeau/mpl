@@ -10,5 +10,6 @@
 #define testmpltree_h
 
 int test_tree_assembly_from_topology (void);
+int test_binary_postorder (void);
 
 #endif /* testmpltree_h */

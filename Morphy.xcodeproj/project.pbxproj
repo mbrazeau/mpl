@@ -7,12 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5165A14D21DA7C5000A693D6 /* mpl_charblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 5165A14B21DA7C5000A693D6 /* mpl_charblock.c */; };
+		5165A15121DA7DB900A693D6 /* mpl_newick_rdr.c in Sources */ = {isa = PBXBuildFile; fileRef = 5165A15021DA7DB900A693D6 /* mpl_newick_rdr.c */; };
+		5165A15421DA865400A693D6 /* testmplnwkreader.c in Sources */ = {isa = PBXBuildFile; fileRef = 5165A15321DA865400A693D6 /* testmplnwkreader.c */; };
+		516A0CD321DA691B00B58DB8 /* mpl_utils.h in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8921D77BC600005610 /* mpl_utils.h */; };
+		516A0CD421DA691B00B58DB8 /* mpl_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8A21D77BC600005610 /* mpl_utils.c */; };
+		516A0CD521DA691B00B58DB8 /* mpl_handle.h in Sources */ = {isa = PBXBuildFile; fileRef = 517CC83721D96840007D37C0 /* mpl_handle.h */; };
+		516A0CD621DA691B00B58DB8 /* mpl_handle.c in Sources */ = {isa = PBXBuildFile; fileRef = 517CC83821D96840007D37C0 /* mpl_handle.c */; };
+		516A0CD721DA691B00B58DB8 /* mpl_taxoninfo.h in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7F921D8ED610086CE68 /* mpl_taxoninfo.h */; };
+		516A0CD821DA691B00B58DB8 /* mpl_taxoninfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */; };
+		516A0CD921DA691B00B58DB8 /* mpl_taxblock.h in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FC21D8EEBF0086CE68 /* mpl_taxblock.h */; };
+		516A0CDA21DA691B00B58DB8 /* mpl_taxblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FD21D8EEBF0086CE68 /* mpl_taxblock.c */; };
+		516A0CDD21DA691B00B58DB8 /* mpl_node.h in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8321D777EC00005610 /* mpl_node.h */; };
+		516A0CDE21DA691B00B58DB8 /* mpl_node.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8421D777EC00005610 /* mpl_node.c */; };
+		516A0CDF21DA691B00B58DB8 /* mpl_tree.h in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8621D777FB00005610 /* mpl_tree.h */; };
+		516A0CE021DA691B00B58DB8 /* mpl_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8721D777FB00005610 /* mpl_tree.c */; };
+		516A0CE121DA691B00B58DB8 /* mpl_topol.h in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8C21D7882D00005610 /* mpl_topol.h */; };
+		516A0CE221DA691B00B58DB8 /* mpl_topol.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8D21D7882D00005610 /* mpl_topol.c */; };
+		516A0CE321DA691B00B58DB8 /* mpl_search.h in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80421D900110086CE68 /* mpl_search.h */; };
+		516A0CE421DA691B00B58DB8 /* mpl_search.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80521D900110086CE68 /* mpl_search.c */; };
+		516A0CE521DA691B00B58DB8 /* mpl_results.h in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80021D8F6D50086CE68 /* mpl_results.h */; };
+		516A0CE621DA691B00B58DB8 /* mpl_results.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B80121D8F6D50086CE68 /* mpl_results.c */; };
+		516A0CE921DA6D3900B58DB8 /* testmpltopol.c in Sources */ = {isa = PBXBuildFile; fileRef = 516A0CE821DA6D3900B58DB8 /* testmpltopol.c */; };
+		516A0CEE21DA74BE00B58DB8 /* libncl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 516A0CED21DA74BE00B58DB8 /* libncl.a */; settings = {ATTRIBUTES = (Weak, ); }; };
+		516A0CEF21DA74DB00B58DB8 /* libncl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 516A0CED21DA74BE00B58DB8 /* libncl.a */; settings = {ATTRIBUTES = (Weak, ); }; };
+		517CC83921D96840007D37C0 /* mpl_handle.c in Sources */ = {isa = PBXBuildFile; fileRef = 517CC83821D96840007D37C0 /* mpl_handle.c */; };
 		518C8F7D21D777BA00005610 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F7C21D777BA00005610 /* main.c */; };
 		518C8F8521D777EC00005610 /* mpl_node.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8421D777EC00005610 /* mpl_node.c */; };
 		518C8F8821D777FB00005610 /* mpl_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8721D777FB00005610 /* mpl_tree.c */; };
 		518C8F8B21D77BC600005610 /* mpl_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8A21D77BC600005610 /* mpl_utils.c */; };
 		518C8F8E21D7882D00005610 /* mpl_topol.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F8D21D7882D00005610 /* mpl_topol.c */; };
-		518C8F9321D7895400005610 /* mpl_cblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9221D7895400005610 /* mpl_cblock.c */; };
 		518C8F9821D7D1DE00005610 /* testmplnode.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9721D7D1DE00005610 /* testmplnode.c */; };
 		518C8F9B21D8049300005610 /* testmpltree.c in Sources */ = {isa = PBXBuildFile; fileRef = 518C8F9A21D8049300005610 /* testmpltree.c */; };
 		51A6B7FB21D8ED610086CE68 /* mpl_taxoninfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */; };
@@ -25,6 +49,7 @@
 		51A6B81521D90BDF0086CE68 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51A6B81321D90BDF0086CE68 /* Main.storyboard */; };
 		51A6B82121D90BDF0086CE68 /* Morphy_GUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82021D90BDF0086CE68 /* Morphy_GUITests.swift */; };
 		51A6B82C21D90BDF0086CE68 /* Morphy_GUIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */; };
+		51A6B83A21D92FD50086CE68 /* MorphyIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B83821D92FD50086CE68 /* MorphyIO.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +82,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5165A14B21DA7C5000A693D6 /* mpl_charblock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mpl_charblock.c; sourceTree = "<group>"; };
+		5165A14C21DA7C5000A693D6 /* mpl_charblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mpl_charblock.h; sourceTree = "<group>"; };
+		5165A14F21DA7DB900A693D6 /* mpl_newick_rdr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_newick_rdr.h; sourceTree = "<group>"; };
+		5165A15021DA7DB900A693D6 /* mpl_newick_rdr.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_newick_rdr.c; sourceTree = "<group>"; };
+		5165A15221DA865400A693D6 /* testmplnwkreader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmplnwkreader.h; sourceTree = "<group>"; };
+		5165A15321DA865400A693D6 /* testmplnwkreader.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmplnwkreader.c; sourceTree = "<group>"; };
+		516A0CCF21DA602600B58DB8 /* testio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testio.cpp; sourceTree = "<group>"; };
+		516A0CD021DA602600B58DB8 /* testio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testio.h; sourceTree = "<group>"; };
+		516A0CE721DA6D3900B58DB8 /* testmpltopol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmpltopol.h; sourceTree = "<group>"; };
+		516A0CE821DA6D3900B58DB8 /* testmpltopol.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmpltopol.c; sourceTree = "<group>"; };
+		516A0CED21DA74BE00B58DB8 /* libncl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libncl.a; path = ../../../../usr/local/lib/ncl/libncl.a; sourceTree = "<group>"; };
+		517CC83721D96840007D37C0 /* mpl_handle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_handle.h; sourceTree = "<group>"; };
+		517CC83821D96840007D37C0 /* mpl_handle.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_handle.c; sourceTree = "<group>"; };
+		517CC83D21DA31D2007D37C0 /* libncl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libncl.a; path = ../morphyproject/install/lib/ncl/libncl.a; sourceTree = "<group>"; };
 		518C8F7921D777BA00005610 /* Morphy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Morphy; sourceTree = BUILT_PRODUCTS_DIR; };
 		518C8F7C21D777BA00005610 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		518C8F8321D777EC00005610 /* mpl_node.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_node.h; sourceTree = "<group>"; };
@@ -67,8 +106,6 @@
 		518C8F8A21D77BC600005610 /* mpl_utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_utils.c; sourceTree = "<group>"; };
 		518C8F8C21D7882D00005610 /* mpl_topol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_topol.h; sourceTree = "<group>"; };
 		518C8F8D21D7882D00005610 /* mpl_topol.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_topol.c; sourceTree = "<group>"; };
-		518C8F9121D7895400005610 /* mpl_cblock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_cblock.h; sourceTree = "<group>"; };
-		518C8F9221D7895400005610 /* mpl_cblock.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_cblock.c; sourceTree = "<group>"; };
 		518C8F9521D7CF0900005610 /* mpltest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpltest.h; sourceTree = "<group>"; };
 		518C8F9621D7D1DE00005610 /* testmplnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmplnode.h; sourceTree = "<group>"; };
 		518C8F9721D7D1DE00005610 /* testmplnode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmplnode.c; sourceTree = "<group>"; };
@@ -95,6 +132,9 @@
 		51A6B82721D90BDF0086CE68 /* Morphy GUIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Morphy GUIUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morphy_GUIUITests.swift; sourceTree = "<group>"; };
 		51A6B82D21D90BDF0086CE68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		51A6B83721D92FD50086CE68 /* Morphy GUI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Morphy GUI-Bridging-Header.h"; sourceTree = "<group>"; };
+		51A6B83821D92FD50086CE68 /* MorphyIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MorphyIO.cpp; sourceTree = "<group>"; };
+		51A6B83921D92FD50086CE68 /* MorphyIO.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MorphyIO.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				516A0CEF21DA74DB00B58DB8 /* libncl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				516A0CEE21DA74BE00B58DB8 /* libncl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,14 +171,49 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5165A14E21DA7C6400A693D6 /* Characters */ = {
+			isa = PBXGroup;
+			children = (
+				5165A14B21DA7C5000A693D6 /* mpl_charblock.c */,
+				5165A14C21DA7C5000A693D6 /* mpl_charblock.h */,
+			);
+			path = Characters;
+			sourceTree = "<group>";
+		};
+		516A0CD221DA682600B58DB8 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				518C8F8921D77BC600005610 /* mpl_utils.h */,
+				518C8F8A21D77BC600005610 /* mpl_utils.c */,
+				517CC83721D96840007D37C0 /* mpl_handle.h */,
+				517CC83821D96840007D37C0 /* mpl_handle.c */,
+				5165A14E21DA7C6400A693D6 /* Characters */,
+				51A6B7F821D8ED150086CE68 /* Taxa */,
+				518C8F8F21D788BA00005610 /* Trees */,
+				51A6B80321D8FFF20086CE68 /* Search */,
+				51A6B7FF21D8F6AB0086CE68 /* Results */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		517CC83C21DA31D1007D37C0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				516A0CED21DA74BE00B58DB8 /* libncl.a */,
+				517CC83D21DA31D2007D37C0 /* libncl.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		518C8F7021D777BA00005610 = {
 			isa = PBXGroup;
 			children = (
-				518C8F7B21D777BA00005610 /* src */,
+				518C8F7B21D777BA00005610 /* Morphy */,
 				51A6B80C21D90BDD0086CE68 /* Morphy GUI */,
 				51A6B81F21D90BDF0086CE68 /* Morphy GUITests */,
 				51A6B82A21D90BDF0086CE68 /* Morphy GUIUITests */,
 				518C8F7A21D777BA00005610 /* Products */,
+				517CC83C21DA31D1007D37C0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -151,19 +228,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		518C8F7B21D777BA00005610 /* src */ = {
+		518C8F7B21D777BA00005610 /* Morphy */ = {
 			isa = PBXGroup;
 			children = (
-				518C8F8921D77BC600005610 /* mpl_utils.h */,
-				518C8F8A21D77BC600005610 /* mpl_utils.c */,
-				51A6B7F821D8ED150086CE68 /* Taxa */,
-				518C8F9421D7895A00005610 /* Characters */,
-				518C8F8F21D788BA00005610 /* Trees */,
-				51A6B80321D8FFF20086CE68 /* Search */,
-				51A6B7FF21D8F6AB0086CE68 /* Results */,
+				516A0CD221DA682600B58DB8 /* src */,
 				518C8F9021D788D700005610 /* Tests */,
 			);
-			path = src;
+			path = Morphy;
 			sourceTree = "<group>";
 		};
 		518C8F8F21D788BA00005610 /* Trees */ = {
@@ -175,6 +246,8 @@
 				518C8F8721D777FB00005610 /* mpl_tree.c */,
 				518C8F8C21D7882D00005610 /* mpl_topol.h */,
 				518C8F8D21D7882D00005610 /* mpl_topol.c */,
+				5165A14F21DA7DB900A693D6 /* mpl_newick_rdr.h */,
+				5165A15021DA7DB900A693D6 /* mpl_newick_rdr.c */,
 			);
 			path = Trees;
 			sourceTree = "<group>";
@@ -183,23 +256,19 @@
 			isa = PBXGroup;
 			children = (
 				518C8F9521D7CF0900005610 /* mpltest.h */,
+				516A0CCF21DA602600B58DB8 /* testio.cpp */,
+				516A0CD021DA602600B58DB8 /* testio.h */,
 				518C8F9621D7D1DE00005610 /* testmplnode.h */,
 				518C8F9721D7D1DE00005610 /* testmplnode.c */,
 				518C8F9921D8049300005610 /* testmpltree.h */,
 				518C8F9A21D8049300005610 /* testmpltree.c */,
+				516A0CE721DA6D3900B58DB8 /* testmpltopol.h */,
+				516A0CE821DA6D3900B58DB8 /* testmpltopol.c */,
+				5165A15221DA865400A693D6 /* testmplnwkreader.h */,
+				5165A15321DA865400A693D6 /* testmplnwkreader.c */,
 				518C8F7C21D777BA00005610 /* main.c */,
 			);
 			path = Tests;
-			sourceTree = "<group>";
-		};
-		518C8F9421D7895A00005610 /* Characters */ = {
-			isa = PBXGroup;
-			children = (
-				518C8F9121D7895400005610 /* mpl_cblock.h */,
-				518C8F9221D7895400005610 /* mpl_cblock.c */,
-			);
-			name = Characters;
-			path = "New Group";
 			sourceTree = "<group>";
 		};
 		51A6B7F821D8ED150086CE68 /* Taxa */ = {
@@ -240,6 +309,9 @@
 				51A6B81321D90BDF0086CE68 /* Main.storyboard */,
 				51A6B81621D90BDF0086CE68 /* Info.plist */,
 				51A6B81721D90BDF0086CE68 /* Morphy_GUI.entitlements */,
+				51A6B83821D92FD50086CE68 /* MorphyIO.cpp */,
+				51A6B83921D92FD50086CE68 /* MorphyIO.hpp */,
+				51A6B83721D92FD50086CE68 /* Morphy GUI-Bridging-Header.h */,
 			);
 			path = "Morphy GUI";
 			sourceTree = "<group>";
@@ -350,6 +422,7 @@
 					};
 					51A6B80A21D90BDD0086CE68 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1010;
 					};
 					51A6B81B21D90BDF0086CE68 = {
 						CreatedOnToolsVersion = 10.1;
@@ -415,16 +488,20 @@
 			files = (
 				51A6B7FB21D8ED610086CE68 /* mpl_taxoninfo.c in Sources */,
 				518C8F7D21D777BA00005610 /* main.c in Sources */,
+				517CC83921D96840007D37C0 /* mpl_handle.c in Sources */,
 				518C8F8B21D77BC600005610 /* mpl_utils.c in Sources */,
+				516A0CE921DA6D3900B58DB8 /* testmpltopol.c in Sources */,
 				518C8F9821D7D1DE00005610 /* testmplnode.c in Sources */,
 				51A6B80221D8F6D50086CE68 /* mpl_results.c in Sources */,
 				518C8F8521D777EC00005610 /* mpl_node.c in Sources */,
-				518C8F9321D7895400005610 /* mpl_cblock.c in Sources */,
 				518C8F8821D777FB00005610 /* mpl_tree.c in Sources */,
 				51A6B7FE21D8EEBF0086CE68 /* mpl_taxblock.c in Sources */,
 				518C8F8E21D7882D00005610 /* mpl_topol.c in Sources */,
 				518C8F9B21D8049300005610 /* testmpltree.c in Sources */,
 				51A6B80621D900110086CE68 /* mpl_search.c in Sources */,
+				5165A15121DA7DB900A693D6 /* mpl_newick_rdr.c in Sources */,
+				5165A14D21DA7C5000A693D6 /* mpl_charblock.c in Sources */,
+				5165A15421DA865400A693D6 /* testmplnwkreader.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,7 +509,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				516A0CD321DA691B00B58DB8 /* mpl_utils.h in Sources */,
+				516A0CD421DA691B00B58DB8 /* mpl_utils.c in Sources */,
+				516A0CD521DA691B00B58DB8 /* mpl_handle.h in Sources */,
+				516A0CD621DA691B00B58DB8 /* mpl_handle.c in Sources */,
+				516A0CD721DA691B00B58DB8 /* mpl_taxoninfo.h in Sources */,
+				516A0CD821DA691B00B58DB8 /* mpl_taxoninfo.c in Sources */,
+				516A0CD921DA691B00B58DB8 /* mpl_taxblock.h in Sources */,
+				516A0CDA21DA691B00B58DB8 /* mpl_taxblock.c in Sources */,
+				516A0CDD21DA691B00B58DB8 /* mpl_node.h in Sources */,
+				516A0CDE21DA691B00B58DB8 /* mpl_node.c in Sources */,
+				516A0CDF21DA691B00B58DB8 /* mpl_tree.h in Sources */,
+				516A0CE021DA691B00B58DB8 /* mpl_tree.c in Sources */,
+				516A0CE121DA691B00B58DB8 /* mpl_topol.h in Sources */,
+				516A0CE221DA691B00B58DB8 /* mpl_topol.c in Sources */,
+				516A0CE321DA691B00B58DB8 /* mpl_search.h in Sources */,
+				516A0CE421DA691B00B58DB8 /* mpl_search.c in Sources */,
+				516A0CE521DA691B00B58DB8 /* mpl_results.h in Sources */,
+				516A0CE621DA691B00B58DB8 /* mpl_results.c in Sources */,
 				51A6B81021D90BDD0086CE68 /* ViewController.swift in Sources */,
+				51A6B83A21D92FD50086CE68 /* MorphyIO.cpp in Sources */,
 				51A6B80E21D90BDD0086CE68 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -595,6 +691,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include/ncl/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/lib/ncl,
+				);
+				OTHER_LDFLAGS = "-lncl";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -603,6 +705,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include/ncl/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/lib/ncl,
+				);
+				OTHER_LDFLAGS = "-lncl";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -611,19 +719,34 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Morphy GUI/Morphy_GUI.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/ncl,
+				);
 				INFOPLIST_FILE = "Morphy GUI/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/lib/ncl,
+				);
+				OTHER_LDFLAGS = "-lncl";
 				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "Morphy GUI/Morphy GUI-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/ncl/,
+				);
 			};
 			name = Debug;
 		};
@@ -631,19 +754,34 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Morphy GUI/Morphy_GUI.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/ncl,
+				);
 				INFOPLIST_FILE = "Morphy GUI/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/lib/ncl,
+				);
+				OTHER_LDFLAGS = "-lncl";
 				PRODUCT_BUNDLE_IDENTIFIER = "brazeaulab.Morphy-GUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "Morphy GUI/Morphy GUI-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.2;
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/ncl/,
+				);
 			};
 			name = Release;
 		};

@@ -10,7 +10,6 @@
 #define mpl_node_h
 
 #include <stdlib.h>
-#include <stdio.h> // TODO: Temporary
 
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;
@@ -21,14 +20,15 @@ typedef struct _node {
     mpl_node*   right;
     mpl_node**  descs;
     long        tip;
-    long        ndescs;
-    long        capacity;
+    size_t      ndescs;
+    size_t      capacity;
     mpl_node*   anc;
     long        mem_index;
     long        po_index;
     long        copy_index;
     long        weight;
-    // NOTE: Any variables added should be reset in mpl_resent_node()
+    // NOTE: Any variables added should be reset in mpl_reset_node()
+    char*       label; // TODO: Think of how to deal with label. Likely copy.
     
 } mpl_node;
 

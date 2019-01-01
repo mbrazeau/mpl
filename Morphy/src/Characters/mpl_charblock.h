@@ -23,6 +23,6 @@ typedef struct {
     long**      data;
     mpl_data_t  type;
     
-} mpl_cblock;
+} mpl_charblock;
 
 #endif /* mpl_cblock_h */

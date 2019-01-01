@@ -16,7 +16,7 @@ typedef struct _taxblock {
     mpl_taxoninfo*  taxa;
 } mpl_taxablock;
 
-mpl_taxablock*  mpl_taxablock_new(long num_taxa);
+mpl_taxablock*  mpl_taxablock_new(const long num_taxa);
 int             mpl_taxablock_delete(mpl_taxablock** tb);
 
 #endif /* mpl_taxblock_h */

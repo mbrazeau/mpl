@@ -5,6 +5,7 @@
 //  Created by Martin Brazeau on 29/12/2018.
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
+#include <assert.h>
 
 #include "mpl_tree.h"
 #include "mpl_utils.h"
@@ -102,29 +103,42 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     }
     
     // Hook up the descendants
+//    for (i = 0; i < t->num_nodes; ++i) {
+//        // Find ancestor of i:
+//        mpl_node* n = NULL;
+//        n = &t->nodes[top->edges[i]];
+//        mpl_node_push_desc(n, &t->nodes[i]);
+//    }
     for (i = t->num_taxa; i < t->num_nodes; ++i) {
+
         j = 0;
-        for (j = 0; j < t->num_nodes - 1; ++j) {
-            if (top->edges[j] == t->nodes[i].mem_index && t->nodes[j].anc == NULL) {
+
+        for (j = 0; j < t->num_nodes; ++j) {
+            if (top->edges[j] == t->nodes[i].mem_index
+                && t->nodes[j].anc == NULL)
+            {
                 mpl_node_push_desc(&t->nodes[i], &t->nodes[j]);
             }
         }
     }
     
     // Now hook up the ancestors using the edge table:
-    for (i = 0; i < top->num_nodes; ++i) {
-        if (top->edges[i] > 0) {
-            t->nodes[i].anc = &t->nodes[top->edges[i]];
-        }
-        else {
-            t->nodes[i].anc = NULL;
-            
-            // If the node at this point has descendants, it must be the base
-            if (t->nodes[i].ndescs > 0) {
-                t->base = &t->nodes[i];
-            }
-        }
-    }
+//    for (i = 0; i < top->num_nodes; ++i) {
+//        if (top->edges[i] > 0) {
+//            t->nodes[i].anc = &t->nodes[top->edges[i]];
+//        }
+//        else {
+//            t->nodes[i].anc = NULL;
+//            
+//            // If the node at this point has descendants, it must be the base
+//            if (t->nodes[i].ndescs > 0) {
+//                t->base = &t->nodes[i];
+//            }
+//        }
+//    }
+    mpl_node* p = &t->nodes[0];
+    while (p->anc) p = p->anc;
+    t->base = p;
     
     return ret;
 }
@@ -134,6 +148,15 @@ int mpl_record_topol(mpl_topol* top, mpl_tree* t)
     mpl_tree_mark_uniquely(t);
     
     // Then copy into the topology record
+    int i = 0;
+    for (i = 0; i < t->num_nodes; ++i) {
+        if (t->nodes[i].anc != NULL) {
+            top->edges[i] = t->nodes[t->nodes[i].anc->copy_index].copy_index;
+        }
+//        else {
+//            top->edges[i] = -1;
+//        }
+    }
     
     return 0;
 }
@@ -142,19 +165,22 @@ int mpl_tree_traverse(mpl_tree* t)
 {
     // Count polytomies:
     // TODO: function here
-    int f = 0;
-    int *fptr = &f;
-    int x = 0;
-    x = (const int)(*fptr);
-    
+    int i = 0, j = 0;
     if (t->num_polys) {
         // TODO: General traverse
     }
     else {
-        int i = 0, j = 0;
+        
         mpl_node_bin_traverse(t->base, t, &i, &j);
     }
     
+    return 0;
+}
+
+int mpl_tree_push_desc(long tgt, long src, mpl_tree* t)
+{
+    assert (tgt != src);
+    mpl_node_push_desc(&t->nodes[tgt], &t->nodes[src]);
     return 0;
 }
 
@@ -178,8 +204,6 @@ static void mpl_tree_mark_uniquely(mpl_tree* t)
     mpl_node* p = NULL;
     
     mpl_tree_reset_copy_indices(t);
-    
-    t->base->copy_index = -1;
     
     for (i = 0; i < t->num_taxa; ++i) {
         p = t->nodes[i].anc;

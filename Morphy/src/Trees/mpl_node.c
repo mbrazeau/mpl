@@ -59,7 +59,8 @@ int mpl_reset_node(mpl_node* n)
     if (!n) {
         return -1;
     }
-    
+
+    // TODO: Deal with label
     n->left = NULL;
     n->right = NULL;
     memset(n->descs, 0, n->ndescs * sizeof(mpl_node*));
@@ -102,7 +103,7 @@ long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
         mpl_push_desc(tgt, src);
     }
     else {
-        mpl_extend_desc_array(tgt, (tgt->capacity + 1) * sizeof(mpl_node*));
+        mpl_extend_desc_array(tgt, (tgt->capacity + 1));
         mpl_push_desc(tgt, src);
     }
     
@@ -167,13 +168,16 @@ mpl_node* mpl_node_remove_desc(mpl_node* desc)
 
 static void mpl_extend_desc_array(mpl_node* n, const size_t nelems)
 {
+    assert(nelems > n->ndescs);
     mpl_node** res = NULL;
-    res = (mpl_node**)realloc(n->descs, nelems);
-    if (!res) {
-        exit(EXIT_FAILURE);
-    }
+    res = (mpl_node**)safe_calloc(nelems + 1, sizeof(mpl_node*));
+    memcpy(res, n->descs, (n->ndescs + 1) * sizeof(mpl_node*));
+    free(n->descs);
+    
     n->descs = res;
-    ++n->capacity;
+    
+    n->capacity = nelems;
+    
 }
 
 static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src)
@@ -194,7 +198,7 @@ static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src)
     ++tgt->ndescs;
     mpl_update_left_right_ptrs(tgt);
 
-    tgt->descs[tgt->ndescs] = NULL;
+    //tgt->descs[tgt->ndescs] = NULL;
 }
 
 static inline void mpl_update_left_right_ptrs(mpl_node* n)

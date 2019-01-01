@@ -12,6 +12,12 @@
 #include "../Results/mpl_results.h"
 
 typedef enum {
+    MPL_INPUTORDER_T,
+    MPL_RANDOM_T,
+    MPL_DISTANCE_T
+} mpl_stepwise_t;
+
+typedef enum {
     MPL_EXHAUSTIVE_T,
     MPL_BANDB_T,
     MPL_HEURISTIC_T
@@ -24,7 +30,10 @@ typedef enum {
 } mpl_bbreak_t;
 
 typedef struct _search {
-    
+    mpl_search_t    search_type;
+    mpl_bbreak_t    bbreak_type;
+    long            hold;
+    long            num_reps;
 } mpl_search;
 
 void            mpl_do_stepwise(void);

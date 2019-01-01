@@ -17,7 +17,10 @@ int mpl_taxoninfo_set_name(mpl_taxoninfo* ti, const char* n)
     }
     
     // Delete previous name as it will be overwritten
-    mplfree(ti->name);
+    if (ti->name) {
+        free(ti->name);
+        ti->name = NULL;
+    }
     
     size_t len = 0;
     
@@ -30,7 +33,7 @@ int mpl_taxoninfo_set_name(mpl_taxoninfo* ti, const char* n)
     return 0;
 }
 
-int mpl_taxoninfo_get_name(char* dest, mpl_taxoninfo* ti)
+int mpl_taxoninfo_get_name(char* dest, const mpl_taxoninfo* ti)
 {
     int ret = 0;
     
@@ -53,7 +56,7 @@ int mpl_taxoninfo_get_name(char* dest, mpl_taxoninfo* ti)
     return ret;
 }
 
-int mpl_taxoninfo_set_index(mpl_taxoninfo* ti, long index)
+int mpl_taxoninfo_set_index(mpl_taxoninfo* ti, const long index)
 {
     if (!ti) {
         return -1;
@@ -64,7 +67,7 @@ int mpl_taxoninfo_set_index(mpl_taxoninfo* ti, long index)
     return 0;
 }
 
-long mpl_taxoninfo_get_index(mpl_taxoninfo* ti)
+long mpl_taxoninfo_get_index(const mpl_taxoninfo* ti)
 {
     if (ti) {
         return ti->index;

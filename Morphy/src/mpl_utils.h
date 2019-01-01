@@ -11,8 +11,6 @@
 
 #include <stdlib.h>
 
-#define mplfree(x) {if(x) {free(x); x  =  NULL;}}
-
 void* safe_calloc(unsigned long nelems, size_t size);
 
 #endif /* mpl_utils_h */

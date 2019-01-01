@@ -10,9 +10,16 @@ import Cocoa
 
 class ViewController: NSViewController {
 
+    
+    @IBOutlet weak var mainTextBuffer: NSTextView!;
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        mainTextBuffer.isEditable = false;
+        mainTextBuffer.font = NSFont(name: "Courier", size: 12);
+        mainTextBuffer.string += "Morphy\n\n";
+        //mainTextBuffer.string  = "\t+--------------------------------------+";
         // Do any additional setup after loading the view.
     }
 
@@ -22,6 +29,9 @@ class ViewController: NSViewController {
         }
     }
 
+    @IBAction func printMessageToBuffer(message: NSString) {
+        
+    }
 
 }
 

@@ -10,6 +10,7 @@
 #include "mpltest.h"
 #include "testmplnode.h"
 #include "testmpltree.h"
+#include "testmplnwkreader.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -27,6 +28,11 @@ int main(int argc, const char * argv[]) {
     
     // Test mpl_tree.c
     fails += test_tree_assembly_from_topology();
+    fails += test_binary_postorder();
+    
+    // Test mpl_newick_rdr
+    fails += test_newick_reader();
+    fails += test_newick_reader_bigger_tree();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {
