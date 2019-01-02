@@ -18,7 +18,7 @@
 
 static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_newick_rdr* rdr);
 static long mpl_newick_traverse
-(char** ncur, long* index, long nd, long* edgetab, mpl_newick_rdr* rdr);
+(char** ncur, long* index, long* edgetab, mpl_newick_rdr* rdr);
 
 int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
 {
@@ -54,13 +54,11 @@ int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr)
     
     long i = 0;
     i = top->num_taxa-1;
-    //long p = 2 * top->num_taxa - 2;
-    long p = top->num_taxa;
-    long end =
-    mpl_newick_traverse((char**)&nwkstr, &i, p, top->edges, rdr);
+    long end = 0;
+    end = mpl_newick_traverse((char**)&nwkstr, &i, top->edges, rdr);
     top->edges[end+1] = -1;
-//    rdr->tree->base = &rdr->tree->nodes[end];
-//    mpl_record_topol(top, rdr->tree);
+
+    
     return ret;
 }
 
@@ -101,27 +99,22 @@ static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_ne
 }
 
 static long mpl_newick_traverse
-(char** ncur, long* index, long parent, long* edgetab, mpl_newick_rdr* rdr)
+(char** ncur, long* index, long* edgetab, mpl_newick_rdr* rdr)
 {
     
     //long nd = *index-1; // Current node
     long desc = 0;
-    long anc = -1;
-    long s = 0;
     long nd;
-    
-    long loopcount = 0;
+
     nd = *index;
     
     do {
         if (**ncur == '(') {
             ++(*ncur);
             ++(*index);
-            desc = mpl_newick_traverse(ncur, index, nd, edgetab, rdr);
+            desc = mpl_newick_traverse(ncur, index, edgetab, rdr);
             edgetab[desc] = nd;
         }
-        
-        ++loopcount;
         
         if (**ncur == ',') {
             ++(*ncur);
