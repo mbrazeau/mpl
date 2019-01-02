@@ -64,7 +64,8 @@ int mpl_reset_node(mpl_node* n)
     n->left = NULL;
     n->right = NULL;
     memset(n->descs, 0, n->ndescs * sizeof(mpl_node*));
-    n->descs = 0;
+    n->ndescs = 0;
+    // Don't touch n->capacity unless freeing the node
     n->anc = NULL;
     n->po_index = 0;
     n->copy_index = 0;
