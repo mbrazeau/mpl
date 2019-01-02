@@ -33,6 +33,7 @@ int main(int argc, const char * argv[]) {
     // Test mpl_newick_rdr
     fails += test_newick_reader();
     fails += test_newick_reader_bigger_tree();
+    fails += test_newick_mult_large_newick_reads();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

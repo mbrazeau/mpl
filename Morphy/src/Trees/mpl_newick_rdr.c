@@ -17,8 +17,8 @@
 #include "mpl_utils.h"
 
 static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_newick_rdr* rdr);
-static char* mpl_newick_traverse
-(char** ncur, long* index, long* place, long* edgetab, mpl_newick_rdr* rdr);
+static long mpl_newick_traverse
+(char** ncur, long* index, long nd, long* edgetab, mpl_newick_rdr* rdr);
 
 int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
 {
@@ -29,11 +29,6 @@ int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
         ret = 0;
         rdr->taxnamemax = MPLTAXNAMEMAX;
         if (!(rdr->namebuffer = (char*)safe_calloc(MPLTAXNAMEMAX, sizeof(char)))) {
-            ret = -2;
-        }
-        if (!(rdr->tree = mpl_new_tree(num_taxa))) {
-            free(rdr->namebuffer);
-            rdr->namebuffer = 0;
             ret = -2;
         }
     }
@@ -58,12 +53,12 @@ int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr)
     }
     
     long i = 0;
-    i = top->num_taxa;
+    i = top->num_taxa-1;
     //long p = 2 * top->num_taxa - 2;
     long p = top->num_taxa;
-    //long end =
-    mpl_newick_traverse((char**)&nwkstr, &i, &p, top->edges, rdr);
-    //top->edges[end] = -1;
+    long end =
+    mpl_newick_traverse((char**)&nwkstr, &i, p, top->edges, rdr);
+    top->edges[end+1] = -1;
 //    rdr->tree->base = &rdr->tree->nodes[end];
 //    mpl_record_topol(top, rdr->tree);
     return ret;
@@ -105,60 +100,54 @@ static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_ne
     return 0;
 }
 
-static char* mpl_newick_traverse
-(char** ncur, long* index, long* place, long* edgetab, mpl_newick_rdr* rdr)
+static long mpl_newick_traverse
+(char** ncur, long* index, long parent, long* edgetab, mpl_newick_rdr* rdr)
 {
     
-    char *n = *ncur;
-    long k = *index-1; // Control node
-    long nd = *index-1; // Current node
-    long rc = 0;
+    //long nd = *index-1; // Current node
+    long desc = 0;
     long anc = -1;
-    _Bool didret = 0;
+    long s = 0;
+    long nd;
     
-    size_t i = 0;
+    long loopcount = 0;
+    nd = *index;
     
-    for (i = 0; n[i] != '\0' && n[i] != ';'; ++i) {
-        
-        if (n[i] == ' ') continue;
-        
-        if (n[i] == '(') {
-            // Get a new node
-            ++nd;
-            ++k;
-            rc = 0;
-            edgetab[nd] = anc;
-            anc = nd;
-            didret = 0;
+    do {
+        if (**ncur == '(') {
+            ++(*ncur);
+            ++(*index);
+            desc = mpl_newick_traverse(ncur, index, nd, edgetab, rdr);
+            edgetab[desc] = nd;
         }
         
-        if (n[i] == ')') {
-            didret = 1;
-            ++rc;
-            --k;
+        ++loopcount;
+        
+        if (**ncur == ',') {
+            ++(*ncur);
         }
         
-        if (n[i] == ',') {
-            if (didret == 1) {
-                anc = k;
-            }
-            // Do nothing
-            // continue;
-        }
-        
-        if (isalnum(n[i])) {
+        if (isalnum(**ncur)) {
             
             // Get the index of the tip label
             // Assign current node index at edgetab[indexoftip]
-            if (didret) {
-                edgetab[n[i]-'0'-1] = anc;
+            size_t j = 0;
+            while (isalnum(**ncur) && j < MPLTAXNAMEMAX) {
+                rdr->namebuffer[j] = **ncur;
+                ++(*ncur);
+                ++j;
             }
-            else {
-                edgetab[n[i]-'0'-1] = nd;
-            }
+            rdr->namebuffer[j] = '\0';
+            char *end = &rdr->namebuffer[j];
+            long ind = 0;
+            ind = strtol(rdr->namebuffer, &end, 10);
+            
+            edgetab[ind-1] = nd;
         }
-
-    }
+        
+    } while (**ncur != ')' && **ncur != ';');
     
-    return *ncur;
+    ++(*ncur);
+    
+    return nd;
 }
