@@ -37,5 +37,6 @@ int         mpl_tree_read_topol(mpl_tree* t, mpl_topol* top);
 int         mpl_record_topol(mpl_topol* top, mpl_tree* t);
 int         mpl_tree_traverse(mpl_tree* t);
 int         mpl_tree_push_desc(long tgt, long src, mpl_tree* t);
+int         mpl_tree_reset(mpl_tree* t);
 
 #endif /* mpl_tree_h */

@@ -117,20 +117,6 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
         }
     }
     
-    // Now hook up the ancestors using the edge table:
-//    for (i = 0; i < top->num_nodes; ++i) {
-//        if (top->edges[i] > 0) {
-//            t->nodes[i].anc = &t->nodes[top->edges[i]];
-//        }
-//        else {
-//            t->nodes[i].anc = NULL;
-//            
-//            // If the node at this point has descendants, it must be the base
-//            if (t->nodes[i].ndescs > 0) {
-//                t->base = &t->nodes[i];
-//            }
-//        }
-//    }
     mpl_node* p = &t->nodes[0];
     while (p->anc) p = p->anc;
     t->base = p;
@@ -176,6 +162,26 @@ int mpl_tree_push_desc(long tgt, long src, mpl_tree* t)
 {
     assert (tgt != src);
     mpl_node_push_desc(&t->nodes[tgt], &t->nodes[src]);
+    return 0;
+}
+
+int mpl_tree_reset(mpl_tree* t)
+{
+    int i = 0;
+    
+    for (i = 0; i < t->num_nodes; ++i) {
+        mpl_reset_node(&t->nodes[i]);
+        t->postord_all = NULL;
+        if (i < t->num_taxa) {
+            t->postord_intern = NULL;
+        }
+    }
+    
+    t->root = NULL;
+    t->tree_size = 0;
+    t->base = NULL;
+    t->num_polys = 0;
+    
     return 0;
 }
 
