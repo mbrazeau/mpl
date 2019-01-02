@@ -129,7 +129,7 @@ int test_newick_mult_large_newick_reads (void)
     mpl_tree* t = mpl_new_tree(numtaxa);
 
     int i = 0;
-    for (i = 2; i < nstr; ++i) {
+    for (i = 0; i < nstr; ++i) {
         mpl_topol_reset(numtaxa, &top);
         err = mpl_newick_read(nwkstrs[i], &top, &nwkrdr);
         
@@ -148,6 +148,8 @@ int test_newick_mult_large_newick_reads (void)
         printf("Result: ");
         mpl_node_bin_traverse_temp(t->base);
         printf("\n");
+        
+        mpl_tree_reset(t);
 
     }
     
