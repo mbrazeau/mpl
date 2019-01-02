@@ -133,25 +133,9 @@ static char* mpl_newick_traverse
         }
         
         if (n[i] == ')') {
-            // Return index to calling node calling node will always be
-            // current - 1 (control node)
-            // something = nd;
-//            if (edgetab[nd-rc] > -1) {
-//                edgetab[nd] = edgetab[nd-rc];
-//            }
-//            else {
-//                edgetab[nd] = nd-rc;
-//            }
             didret = 1;
             ++rc;
             --k;
-        }
-        
-        if (isalnum(n[i])) {
-            
-            // Get the index of the tip label
-            // Assign current node index at edgetab[indexoftip]
-            edgetab[n[i]-'0'-1] = nd;
         }
         
         if (n[i] == ',') {
@@ -161,56 +145,20 @@ static char* mpl_newick_traverse
             // Do nothing
             // continue;
         }
+        
+        if (isalnum(n[i])) {
+            
+            // Get the index of the tip label
+            // Assign current node index at edgetab[indexoftip]
+            if (didret) {
+                edgetab[n[i]-'0'-1] = anc;
+            }
+            else {
+                edgetab[n[i]-'0'-1] = nd;
+            }
+        }
+
     }
     
-    
-//    long pos = *index;
-//    long desc = 0;
-//    long lcount = 0;
-//
-//    long node = *place;
-//
-//
-//
-//    while (**ncur == ' ') ++(*ncur);
-//    do {
-//
-//        if (**ncur == '(') {
-//            if (lcount == 0) {
-//                lcount = 1;
-//                ++(*place);
-//            }
-//
-////            printf("(");
-//            ++(*ncur);
-//            *ncur = mpl_newick_traverse(ncur, index, place, edgetab, rdr);
-//            //edgetab[desc] = pos;
-////            printf("Pos after ret: %li, ", pos);
-////            printf("Index after ret: %li", *index);
-//        }
-//
-//        while (**ncur == ' ') ++(*ncur);
-//
-//        if (isalnum(**ncur)) {
-//            // Read token
-////            printf("%c", **ncur);
-//            //edgetab[**ncur-'0'-1] = pos;
-//            printf("{%c %li}\n", **ncur-1, pos);
-//            do {
-//                ++(*ncur);
-//            } while (isalnum(**ncur));
-//        }
-//
-//        if (**ncur == ',') {
-////            printf(",");
-//            ++(*ncur);
-//        }
-//
-//    } while (**ncur != ')' && **ncur != ';');
-////    printf("%c", **ncur);
-//
-//    ++(*ncur);
-
-    //printf("Index: %li\n", *index);
     return *ncur;
 }

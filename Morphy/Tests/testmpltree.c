@@ -35,8 +35,10 @@ int test_tree_assembly_from_topology (void)
     
     int numtaxa = 5;
     int numnodes = 2 * numtaxa - 1;
-    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1};
+//    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1};
 //    long edgetable[] = {6, 8, 7, 8, 6, -1, 5, 5, 7 };
+    long edgetable[] =   {6, 8, 7, 8, 6, -1, 5, 5, 7};
+//    long edgetable[] = {7, 5, 6, 5, 7, 6, 8, 8, -1 };
     
     mpl_topol top;
     top.num_taxa = numtaxa;

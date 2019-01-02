@@ -44,9 +44,9 @@ int test_newick_reader (void)
     
     mpl_newick_read(nwkstring, &top, &nwkrdr);
     
-    printf("\n\nVerify reader tree: \n");
-    mpl_node_bin_traverse_temp(nwkrdr.tree->base);
-    printf("\n\n");
+//    printf("\n\nVerify reader tree: \n");
+//    mpl_node_bin_traverse_temp(nwkrdr.tree->base);
+//    printf("\n\n");
     
     mpl_tree* t = mpl_new_tree(numtaxa);
     
@@ -63,13 +63,13 @@ int test_newick_reader (void)
 
 int test_newick_reader_bigger_tree (void)
 {
-    theader("Test Newick reader");
+    theader("Test Newick reader on larger tree");
     
     int failn = 0;
     int err = 0;
     
-    long numtaxa = 9;
-    char* nwkstring = "((((6,4),1),5),(((8,9),3),(2,7)));";
+    long numtaxa = 6;
+    char* nwkstring = "((3,((5,6),4)),(1,2));";
     
     mpl_newick_rdr nwkrdr;
     mpl_topol top;
