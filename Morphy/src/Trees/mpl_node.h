@@ -29,6 +29,7 @@ typedef struct _node {
     long        weight;
     // NOTE: Any variables added should be reset in mpl_reset_node()
     char*       label; // TODO: Think of how to deal with label. Likely copy.
+    double      length;
     
 } mpl_node;
 

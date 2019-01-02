@@ -185,6 +185,14 @@ int mpl_tree_reset(mpl_tree* t)
     return 0;
 }
 
+double mpl_tree_get_brlen(long br, mpl_tree* t)
+{
+#ifdef DEBUG
+    assert(t);
+#endif
+    return t->nodes[br].length;
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */
