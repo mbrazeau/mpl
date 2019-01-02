@@ -17,7 +17,7 @@
 #include "mpl_utils.h"
 
 static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_newick_rdr* rdr);
-static long mpl_newick_traverse
+static char* mpl_newick_traverse
 (char** ncur, long* index, long* place, long* edgetab, mpl_newick_rdr* rdr);
 
 int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
@@ -58,12 +58,14 @@ int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr)
     }
     
     long i = 0;
-    long p = 2 * top->num_taxa - 2;
-    long q = p;
-    long end = mpl_newick_traverse((char**)&nwkstr, &i, &p, top->edges, rdr);
+    i = top->num_taxa;
+    //long p = 2 * top->num_taxa - 2;
+    long p = top->num_taxa;
+    //long end =
+    mpl_newick_traverse((char**)&nwkstr, &i, &p, top->edges, rdr);
     //top->edges[end] = -1;
-    rdr->tree->base = &rdr->tree->nodes[end];
-    mpl_record_topol(top, rdr->tree);
+//    rdr->tree->base = &rdr->tree->nodes[end];
+//    mpl_record_topol(top, rdr->tree);
     return ret;
 }
 
@@ -103,52 +105,112 @@ static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_ne
     return 0;
 }
 
-static long mpl_newick_traverse
+static char* mpl_newick_traverse
 (char** ncur, long* index, long* place, long* edgetab, mpl_newick_rdr* rdr)
 {
-    long pos = *place;
-    long desc = 0;
     
-    if (**ncur == ';') {
-        return -1;
+    char *n = *ncur;
+    long k = *index-1; // Control node
+    long nd = *index-1; // Current node
+    long rc = 0;
+    long anc = -1;
+    _Bool didret = 0;
+    
+    size_t i = 0;
+    
+    for (i = 0; n[i] != '\0' && n[i] != ';'; ++i) {
+        
+        if (n[i] == ' ') continue;
+        
+        if (n[i] == '(') {
+            // Get a new node
+            ++nd;
+            ++k;
+            rc = 0;
+            edgetab[nd] = anc;
+            anc = nd;
+            didret = 0;
+        }
+        
+        if (n[i] == ')') {
+            // Return index to calling node calling node will always be
+            // current - 1 (control node)
+            // something = nd;
+//            if (edgetab[nd-rc] > -1) {
+//                edgetab[nd] = edgetab[nd-rc];
+//            }
+//            else {
+//                edgetab[nd] = nd-rc;
+//            }
+            didret = 1;
+            ++rc;
+            --k;
+        }
+        
+        if (isalnum(n[i])) {
+            
+            // Get the index of the tip label
+            // Assign current node index at edgetab[indexoftip]
+            edgetab[n[i]-'0'-1] = nd;
+        }
+        
+        if (n[i] == ',') {
+            if (didret == 1) {
+                anc = k;
+            }
+            // Do nothing
+            // continue;
+        }
     }
     
-    while (**ncur == ' ') ++ncur;
     
-    ++(*ncur);
-    
-    do {
-        if (**ncur == '(') {
-            //++(*ncur);
-            --(*place);
-            desc = mpl_newick_traverse(ncur, index, place, edgetab, rdr);
-            printf("%li: ", desc);
-            printf("%li; ", pos);
-            //edgetab[desc] = pos;
-            mpl_tree_push_desc(pos, desc, rdr->tree);
-        }
-        
-        while (**ncur == ' ') ++(*ncur);
-        
-        if (isalnum(**ncur)) {
-            // Read token
-            printf("%c: ", **ncur-1);
-            //edgetab[**ncur-'0'-1] = pos;
-            mpl_tree_push_desc(pos, **ncur-'0'-1, rdr->tree);
-            printf("%li; ", pos);
-            do {
-                ++(*ncur);
-            } while (isalnum(**ncur));
-        }
-        
-        if (**ncur == ',') {
-            ++(*index);
-            ++(*ncur);
-        }
-        
-    } while (**ncur != ')' && **ncur != ';');
-    
-    ++(*ncur);
-    
-    return pos;
+//    long pos = *index;
+//    long desc = 0;
+//    long lcount = 0;
+//
+//    long node = *place;
+//
+//
+//
+//    while (**ncur == ' ') ++(*ncur);
+//    do {
+//
+//        if (**ncur == '(') {
+//            if (lcount == 0) {
+//                lcount = 1;
+//                ++(*place);
+//            }
+//
+////            printf("(");
+//            ++(*ncur);
+//            *ncur = mpl_newick_traverse(ncur, index, place, edgetab, rdr);
+//            //edgetab[desc] = pos;
+////            printf("Pos after ret: %li, ", pos);
+////            printf("Index after ret: %li", *index);
+//        }
+//
+//        while (**ncur == ' ') ++(*ncur);
+//
+//        if (isalnum(**ncur)) {
+//            // Read token
+////            printf("%c", **ncur);
+//            //edgetab[**ncur-'0'-1] = pos;
+//            printf("{%c %li}\n", **ncur-1, pos);
+//            do {
+//                ++(*ncur);
+//            } while (isalnum(**ncur));
+//        }
+//
+//        if (**ncur == ',') {
+////            printf(",");
+//            ++(*ncur);
+//        }
+//
+//    } while (**ncur != ')' && **ncur != ';');
+////    printf("%c", **ncur);
+//
+//    ++(*ncur);
+
+    //printf("Index: %li\n", *index);
+    return *ncur;
 }

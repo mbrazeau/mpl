@@ -103,12 +103,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     }
     
     // Hook up the descendants
-//    for (i = 0; i < t->num_nodes; ++i) {
-//        // Find ancestor of i:
-//        mpl_node* n = NULL;
-//        n = &t->nodes[top->edges[i]];
-//        mpl_node_push_desc(n, &t->nodes[i]);
-//    }
+
     for (i = t->num_taxa; i < t->num_nodes; ++i) {
 
         j = 0;
