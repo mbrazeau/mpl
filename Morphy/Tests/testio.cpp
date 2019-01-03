@@ -6,12 +6,12 @@
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
 
-#include "testio.hpp"
+#include "testio.h"
 #include "ncl.h"
 
-void* file_open(int argc, const char* argv[])
+void* mpl_test_file_open(int argnum, const char* argv[])
 {
-    NxsReader *reader = new NxsReader();
+    MultiFormatReader *reader = new MultiFormatReader();
     
     NxsTaxaBlock        *taxa       = new NxsTaxaBlock;
     NxsAssumptionsBlock *assumpts   = new NxsAssumptionsBlock(taxa);
@@ -25,7 +25,25 @@ void* file_open(int argc, const char* argv[])
     reader->Add(trees);
     reader->Add(data);
     
-    reader->ReadFilepath(argv[1]);
+    reader->ReadFilepath(argv[argnum], MultiFormatReader::NEXUS_FORMAT);
     
     return (void*)reader;
+}
+
+void rdr_get_taxon(char* labeldest, unsigned int taxnum, void* inrdr)
+{
+    MultiFormatReader* nxsrdr = (MultiFormatReader*)inrdr;
+    NxsTaxaBlock *taxa = nxsrdr->GetTaxaBlock(0);
+    NxsString label;
+    label = taxa->GetTaxonLabel(taxnum);
+    size_t len = label.length();
+    label.copy(labeldest, len);
+    labeldest[len] = '\0';
+}
+
+int rdr_get_ntax(void* inrdr)
+{
+    MultiFormatReader* nxsrdr = (MultiFormatReader*)inrdr;
+    
+    return nxsrdr->GetTaxaBlock(0)->GetNTax();
 }

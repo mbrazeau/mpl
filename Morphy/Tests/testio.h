@@ -9,14 +9,17 @@
 #ifndef testio_hpp
 #define testio_hpp
 
-#ifdef __cpluslus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef void* mplNexusReader;
     
-mplNexusReader* file_open(int argc, const char* argv[]);
-void  rdr_get_taxon(char* res, long taxon_number, mplNexusReader* nr);
+mplNexusReader mpl_test_file_open(int argnum, const char* argv[]);
+
+void        rdr_get_taxon(char* labeldest, unsigned int taxnum, void* inrdr);
+int         rdr_get_ntax(mplNexusReader nr);
+int         rdr_get_nchar(mplNexusReader nr);
 
     
 #ifdef __cplusplus
