@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 
+
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;
 
@@ -37,6 +38,7 @@ mpl_node*   mpl_new_node(void);
 int         mpl_delete_node(mpl_node** n);
 int         mpl_reset_node(mpl_node* n);
 void        mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j);
+void        mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j);
 long        mpl_node_push_desc(mpl_node* tgt, mpl_node* src);
 mpl_node*   mpl_node_pop_desc(mpl_node* n);
 mpl_node*   mpl_node_remove_desc(mpl_node* desc);

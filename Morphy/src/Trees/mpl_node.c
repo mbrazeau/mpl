@@ -9,6 +9,9 @@
 #include <string.h>
 #include <assert.h>
 
+// TODO: TEMPORARY:
+#include <stdio.h>
+
 #include "mpl_node.h"
 #include "mpl_tree.h"
 #include "mpl_utils.h"
@@ -39,9 +42,9 @@ mpl_node* mpl_new_node(void)
 
 int mpl_delete_node(mpl_node** n)
 {
-    if (!n) {
-        return -1;
-    }
+#ifdef DEBUG
+    assert(n);
+#endif
     
     if ((*n)->descs) {
         free ((*n)->descs);
@@ -56,9 +59,9 @@ int mpl_delete_node(mpl_node** n)
 
 int mpl_reset_node(mpl_node* n)
 {
-    if (!n) {
-        return -1;
-    }
+#ifdef DEBUG
+    assert(n);
+#endif
 
     // TODO: Deal with label
     n->left = NULL;
@@ -76,6 +79,9 @@ int mpl_reset_node(mpl_node* n)
 
 void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
 {
+#ifdef DEBUG
+    assert(n && t && i && j);
+#endif
     if (n->tip) {
         t->postord_all[*i] = n;
         (*i)++;
@@ -88,6 +94,47 @@ void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     t->postord_all[*i] = t->postord_intern[*j] = n;
     (*i)++;
     (*j)++;
+}
+
+void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
+{
+#ifdef DEBUG
+    assert(n && t && i && j);
+    int _countcheck = 0;
+#endif
+    mpl_node** p = NULL;
+    
+    if (n->tip) {
+        printf("%li", n->tip);
+        t->postord_all[*i] = n;
+        (*i)++;
+        //printf(")");
+        return;
+    }
+    
+    printf("(");
+    
+    p = &n->descs[0];
+    do {
+        mpl_node_poly_traverse(*p, t, i, j);
+        ++p;
+#ifdef DEBUG
+        if (*p) {
+            printf(",");
+        }
+
+        ++_countcheck;
+#endif
+    } while (*p);
+#ifdef DEBUG
+    assert(_countcheck == n->ndescs);
+#endif
+    
+    t->postord_all[*i] = t->postord_intern[*j] = n;
+    (*i)++;
+    (*j)++;
+    
+    printf(")");
 }
 
 long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
@@ -107,6 +154,8 @@ long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
         mpl_extend_desc_array(tgt, (tgt->capacity + 1));
         mpl_push_desc(tgt, src);
     }
+    
+    assert(tgt->ndescs <= tgt->capacity);
     
     return tgt->ndescs;
 }
