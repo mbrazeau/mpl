@@ -23,7 +23,6 @@ static long mpl_newick_traverse
 int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
 {
     int ret = -1;
-    int i = 0;
     
     if (rdr) {
         ret = 0;
