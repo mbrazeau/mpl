@@ -52,6 +52,9 @@ mpl_tree* mpl_new_tree(long num_taxa)
 
 int mpl_delete_tree(mpl_tree** t)
 {
+#ifdef DEBUG
+    assert(t);
+#endif
     
     if (t == NULL) {
         return -1;
@@ -93,6 +96,9 @@ int mpl_delete_tree(mpl_tree** t)
 
 int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
 {
+#ifdef DEBUG
+    assert(t && top);
+#endif
     int ret = 0;
     long i = 0;
     long j = 0;
@@ -115,6 +121,11 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
                 mpl_node_push_desc(&t->nodes[i], &t->nodes[j]);
             }
         }
+        
+        // If the node is polychotomous, indicate this on the tree
+        if (t->nodes[i].ndescs > 2) {
+            t->num_polys += t->nodes[i].ndescs;
+        }
     }
     
     mpl_node* p = &t->nodes[0];
@@ -126,6 +137,10 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
 
 int mpl_record_topol(mpl_topol* top, mpl_tree* t)
 {
+#ifdef DEBUG
+    assert(t);
+#endif
+    
     mpl_tree_mark_uniquely(t);
     
     // Then copy into the topology record
@@ -144,16 +159,22 @@ int mpl_record_topol(mpl_topol* top, mpl_tree* t)
 
 int mpl_tree_traverse(mpl_tree* t)
 {
+#ifdef DEBUG
+    assert(t);
+#endif
     // Count polytomies:
     // TODO: function here
     int i = 0, j = 0;
     if (t->num_polys) {
-        // TODO: General traverse
+        mpl_node_poly_traverse(t->base, t, &i, &j);
     }
     else {
         
         mpl_node_bin_traverse(t->base, t, &i, &j);
     }
+    
+    // Set the size as indicated by the number of nodes in the tree
+    t->tree_size = i;
     
     return 0;
 }
@@ -167,6 +188,10 @@ int mpl_tree_push_desc(long tgt, long src, mpl_tree* t)
 
 int mpl_tree_reset(mpl_tree* t)
 {
+#ifdef DEBUG
+    assert(t);
+#endif
+    
     int i = 0;
     
     for (i = 0; i < t->num_nodes; ++i) {
@@ -199,6 +224,10 @@ double mpl_tree_get_brlen(long br, mpl_tree* t)
 
 static inline void mpl_tree_reset_copy_indices(mpl_tree* t)
 {
+#ifdef DEBUG
+    assert(t);
+#endif
+    
     int i = 0;
     
     for (i = 0; i < t->num_nodes; ++i) {
