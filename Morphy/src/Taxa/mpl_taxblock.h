@@ -13,10 +13,12 @@
 
 typedef struct _taxblock {
     long            num_taxa;
+    long            max_taxa;
     mpl_taxoninfo*  taxa;
 } mpl_taxablock;
 
-mpl_taxablock*  mpl_taxablock_new(const long num_taxa);
+mpl_taxablock*  mpl_taxablock_new(const long max_taxa);
 int             mpl_taxablock_delete(mpl_taxablock** tb);
+int             mpl_taxablock_add_taxon(const char* label, mpl_taxablock* tb);
 
 #endif /* mpl_taxblock_h */
