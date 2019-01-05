@@ -73,7 +73,7 @@ int mpl_taxablock_add_taxon(const char* label, mpl_taxablock* tb)
     }
     
     mpl_taxoninfo_set_name(&tb->taxa[tb->num_taxa], label);
-    
+    mpl_taxoninfo_set_index(&tb->taxa[tb->num_taxa], tb->num_taxa);
     ++tb->num_taxa;
     
      assert(tb->num_taxa <= tb->max_taxa);
