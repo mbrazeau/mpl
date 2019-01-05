@@ -105,24 +105,17 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     mpl_node** p = NULL;
     
     if (n->tip) {
-        printf("%li", n->tip);
         t->postord_all[*i] = n;
         (*i)++;
         //printf(")");
         return;
     }
     
-    printf("(");
-    
     p = &n->descs[0];
     do {
         mpl_node_poly_traverse(*p, t, i, j);
         ++p;
 #ifdef DEBUG
-        if (*p) {
-            printf(",");
-        }
-
         ++_countcheck;
 #endif
     } while (*p);
@@ -133,8 +126,6 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     t->postord_all[*i] = t->postord_intern[*j] = n;
     (*i)++;
     (*j)++;
-    
-    printf(")");
 }
 
 long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
