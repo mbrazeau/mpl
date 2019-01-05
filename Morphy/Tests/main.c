@@ -7,16 +7,23 @@
 //
 
 #include <stdio.h>
+#include "testmplutils.h"
 #include "mpltest.h"
 #include "testmplnode.h"
 #include "testmpltree.h"
 #include "testmplnwkreader.h"
+#include "testtaxblock.h"
+#include "testmpltopol.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
     printf("Hello, World!\n");
     
     int fails = 0;
+    
+    // Test mpl_utils.c
+    fails += test_mpl_string_append();
+    fails += test_appending_integers();
     
     // Test mpl_node.c
     fails += test_node_new_delete();
@@ -29,11 +36,21 @@ int main(int argc, const char * argv[]) {
     // Test mpl_tree.c
     fails += test_tree_assembly_from_topology();
     fails += test_binary_postorder();
+    fails += test_worst_case_polytomy();
+    fails += test_newick_writing();
     
-    // Test mpl_newick_rdr
+    // Test mpl_topol.c
+    fails += test_rebasing_topology();
+    fails += test_rebasing_large_topology();
+    
+    // Test mpl_newick_rdr.c
     fails += test_newick_reader();
     fails += test_newick_reader_bigger_tree();
     fails += test_newick_mult_large_newick_reads();
+    fails += test_polytomous_postorder();
+    
+    // Test mpl_taxablock.c
+    fails += test_taxa_block_basic(argc, argv);
     
     printf("\n\nTest summary:\n\n");
     if (fails) {
