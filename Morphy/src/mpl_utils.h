@@ -11,6 +11,13 @@
 
 #include <stdlib.h>
 
-void* safe_calloc(unsigned long nelems, size_t size);
+typedef void* mpl_str;
 
+void* safe_calloc(unsigned long nelems, const size_t size);
+mpl_str* mpl_str_new(const long capacity);
+void mpl_str_delete(mpl_str** old);
+int mpl_str_append(const char c, mpl_str* s);
+int mpl_str_append_int(long i, mpl_str* s);
+int mpl_str_clear(mpl_str* s);
+char* mpl_str_c(mpl_str* s);
 #endif /* mpl_utils_h */
