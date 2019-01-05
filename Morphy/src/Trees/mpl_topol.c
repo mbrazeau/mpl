@@ -91,7 +91,7 @@ int mpl_topol_rebase(const long newb, mpl_topol* top)
      * tip that corresponds to the virtual root or starting point of the tree.
      * It is essential to call this function on any topology that has been
      * rerooted (for instance, during branch-swapping) but is not rooted. This
-     * allows comparison of topologies.
+     * allows comparison of unrooted topologies.
      */
     assert(newb < top->num_nodes);
     // TODO: Could move this to a separate manipulator environment
@@ -99,7 +99,7 @@ int mpl_topol_rebase(const long newb, mpl_topol* top)
     long i   = 0;
     long j   = 0;
     long an  = 0;
-    int old = 0;
+    long old = 0;
     long stanc = 0;
     long oldnb = 0;
     
