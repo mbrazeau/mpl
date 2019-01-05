@@ -9,16 +9,8 @@
 //#include "mpl_handle.h"
 #include <stdlib.h>
 
-#include "Taxa/mpl_taxblock.h"
-#include "Search/mpl_search.h"
-#include "Results/mpl_results.h"
+#include "mpl_defs.h"
 #include "mpl_utils.h"
-
-typedef struct _handle {
-    mpl_taxablock*  taxablock;
-    mpl_search*     search;
-    mpl_results*    results;
-} mpl_handle;
 
 mpl_handle* mpl_handle_new(void)
 {
@@ -28,3 +20,5 @@ mpl_handle* mpl_handle_new(void)
     
     return newhandl;
 }
+
+
