@@ -12,9 +12,11 @@
 #include "mpl_taxoninfo.h"
 
 typedef struct _taxblock {
+    
     long            num_taxa;
     long            max_taxa;
     mpl_taxoninfo*  taxa;
+    
 } mpl_taxablock;
 
 mpl_taxablock*  mpl_taxablock_new(const long max_taxa);
