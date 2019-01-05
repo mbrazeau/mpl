@@ -12,5 +12,10 @@
 typedef void* mpl_handle;
 
 mpl_handle* mpl_handle_new(void);
+// TODO: Use error codes
+long        mpl_handle_get_ntax(void);
+int         mpl_handle_set_ntax(long ntax);
+
+
 
 #endif /* mpl_handle_h */
