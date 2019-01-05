@@ -8,7 +8,7 @@
 
 #ifndef testmpltopol_h
 #define testmpltopol_h
-
-#include <stdio.h>
+int test_rebasing_topology (void);
+int test_rebasing_large_topology (void);
 
 #endif /* testmpltopol_h */
