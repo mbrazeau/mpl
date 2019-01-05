@@ -10,12 +10,16 @@
 #define mpl_taxoninfo_h
 
 #include <string.h>
+#include <stdbool.h>
 
 #define MPLTAXNAMEMAX 100
 
 typedef struct _taxoninfo {
+    
     long index;
+    bool isincluded;
     char* name;
+    
 } mpl_taxoninfo;
 
 //mpl_taxoninfo* mpl_taxoninfo_new(void);
