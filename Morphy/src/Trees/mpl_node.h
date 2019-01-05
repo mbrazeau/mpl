@@ -10,7 +10,7 @@
 #define mpl_node_h
 
 #include <stdlib.h>
-
+#include "mpl_utils.h"
 
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;
@@ -29,7 +29,7 @@ typedef struct _node {
     long        copy_index;
     long        weight;
     // NOTE: Any variables added should be reset in mpl_reset_node()
-    char*       label; // TODO: Think of how to deal with label. Likely copy.
+    char*       label; // Only points, no memory allocated by mpl_node.h functions
     double      length;
     
 } mpl_node;
@@ -43,5 +43,6 @@ long        mpl_node_push_desc(mpl_node* tgt, mpl_node* src);
 mpl_node*   mpl_node_pop_desc(mpl_node* n);
 mpl_node*   mpl_node_remove_desc(mpl_node* desc);
 long        mpl_node_insert_desc(mpl_node* n, mpl_node* desc, size_t at);
+void        mpl_node_write_newick(mpl_str* nwk, mpl_node* n);
 
 #endif /* mpl_node_h */

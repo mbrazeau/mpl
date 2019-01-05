@@ -107,7 +107,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     if (top->num_nodes != t->num_nodes) {
         return -1;
     }
-    
+
     // Hook up the descendants
 
     for (i = t->num_taxa; i < t->num_nodes; ++i) {
@@ -128,6 +128,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
         }
     }
     
+    // TODO: Make this more general and safer
     mpl_node* p = &t->nodes[0];
     while (p->anc) p = p->anc;
     t->base = p;
@@ -196,10 +197,10 @@ int mpl_tree_reset(mpl_tree* t)
     
     for (i = 0; i < t->num_nodes; ++i) {
         mpl_reset_node(&t->nodes[i]);
-        t->postord_all = NULL;
-        if (i < t->num_taxa) {
-            t->postord_intern = NULL;
-        }
+//        t->postord_all[i] = NULL;
+//        if (i < t->num_taxa) {
+//            t->postord_intern[i] = NULL;
+//        }
     }
     
     t->root = NULL;
@@ -216,6 +217,32 @@ double mpl_tree_get_brlen(long br, mpl_tree* t)
     assert(t);
 #endif
     return t->nodes[br].length;
+}
+
+int mpl_tree_write_newick(char** dest, mpl_tree* t)
+{
+    mpl_str* nwk = NULL;
+    
+    if (!(nwk = mpl_str_new(t->num_taxa + t->num_nodes))) {
+        return -1;
+    }
+    
+    if (t->root != NULL) {
+        // TODO: Append rooted signifier
+    }
+    else {
+        // TODO: Append unrooted signifier
+    }
+    
+    mpl_node_write_newick(nwk, t->base);
+    
+    // TODO: Make safer:
+    *dest = mpl_str_c(nwk);
+    
+    // NOTE: Dirty trick:
+    free(nwk); // Hands off pointer to allocated memory to *dest
+    
+    return 0;
 }
 
 /*

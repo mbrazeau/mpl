@@ -11,10 +11,10 @@
 
 // TODO: TEMPORARY:
 #include <stdio.h>
-
+#include "mpl_utils.h"
 #include "mpl_node.h"
 #include "mpl_tree.h"
-#include "mpl_utils.h"
+
 
 /* Private function prototypes */
 
@@ -210,6 +210,44 @@ mpl_node* mpl_node_remove_desc(mpl_node* desc)
     }
     
     return ret;
+}
+
+void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
+{
+#ifdef DEBUG
+    assert(n && nwk);
+    int _countcheck = 0;
+#endif
+    mpl_node** p = NULL;
+    
+    if (n->tip) {
+//        printf("%li", n->tip);
+        mpl_str_append_int(n->tip, nwk);
+        return;
+    }
+    
+//    printf("(");
+    mpl_str_append('(', nwk);
+    
+    p = &n->descs[0];
+    do {
+        mpl_node_write_newick(nwk, *p);
+        ++p;
+#ifdef DEBUG
+        if (*p) {
+//            printf(",");
+            mpl_str_append(',', nwk);
+        }
+        
+        ++_countcheck;
+#endif
+    } while (*p);
+#ifdef DEBUG
+    assert(_countcheck == n->ndescs);
+#endif
+    
+//    printf(")");
+    mpl_str_append(')', nwk);
 }
 
 /*
