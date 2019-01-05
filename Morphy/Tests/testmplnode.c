@@ -9,22 +9,7 @@
 #include "mpltest.h"
 #include "testmplnode.h"
 #include "../src/Trees/mpl_node.h"
-
-// TODO: Remove/replace:
-static void mpl_node_bin_traverse_temp(mpl_node* n)
-{
-    if (n->tip) {
-        printf("%li", n->tip);
-        return;
-    }
-    
-    printf("(");
-    mpl_node_bin_traverse_temp(n->left);
-    printf(",");
-    mpl_node_bin_traverse_temp(n->right);
-    printf(")");
-}
-
+#include "../src/Trees/mpl_tree.h"
 
 int test_node_new_delete (void)
 {
@@ -308,11 +293,50 @@ int test_basic_bin_traversal (void)
         mpl_node_push_desc(ndptrs[0], ndptrs[i]);
     }
     
-    mpl_node_bin_traverse_temp(ndptrs[0]);
+    int j=0, k=0;
     
+    mpl_tree* t = mpl_new_tree(3);
+    
+    mpl_node_bin_traverse(ndptrs[0], t, &j, &k);
+
+    if (t->postord_intern[0] != ndptrs[0]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (t->postord_all[0] != ndptrs[1]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (t->postord_all[1] != ndptrs[2]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (t->postord_all[2] != ndptrs[0]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // Do cleanup
     for (i = 0; i < nnodes; ++i) {
         mpl_delete_node(&ndptrs[i]);
     }
     
+    free(ndptrs);
+    mpl_delete_tree(&t);
     return failn;
 }
