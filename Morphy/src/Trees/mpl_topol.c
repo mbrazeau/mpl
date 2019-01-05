@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "mpl_topol.h"
 #include "../mpl_utils.h"
 
@@ -82,6 +83,69 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
     }
         
     return -1;
+}
+
+int mpl_topol_rebase(const long newb, mpl_topol* top)
+{
+    /* This function effectively re-roots the topology vector on the first
+     * tip that corresponds to the virtual root or starting point of the tree.
+     * It is essential to call this function on any topology that has been
+     * rerooted (for instance, during branch-swapping) but is not rooted. This
+     * allows comparison of topologies.
+     */
+    assert(newb < top->num_nodes);
+    // TODO: Could move this to a separate manipulator environment
+    // to avoid allocating/deallocating memory all of the time
+    long i   = 0;
+    long j   = 0;
+    long an  = 0;
+    int old = 0;
+    long stanc = 0;
+    long oldnb = 0;
+    
+    // Start ancestor is the current ancestor of the new base neighbor:
+    stanc = top->edges[newb];
+    
+    // Find the current base of the tree:
+    old = stanc;
+    j = old;
+    while (j != -1) {
+        old = j;
+        j = top->edges[j];
+    }
+    
+    // Move "down" the edge list swapping ancestors to descendants
+    i = top->edges[newb];
+    j = newb;
+    while (i != old) {
+        // Store the ancestor of the current index:
+        an = top->edges[i];
+        
+        // Make the previous index the ancestor of the current:
+        top->edges[i] = j;
+        
+        // Store current index for the next iteration
+        j = i;
+        
+        // Move to the old ancestor of the current node
+        i = an;
+    }
+    
+    // Find the neighbor of old that is not the new base
+    for (i = 0; i < top->num_nodes; ++i) {
+        if (top->edges[i] == old && i != newb) {
+            oldnb = i;
+        }
+    }
+    
+    // Clean up the old root:
+    top->edges[oldnb] = j;  // Parent of the old base neighbor is the
+                            // penultimate node visited
+    top->edges[newb] = old; // Parent of the new base is the original root
+    top->edges[stanc] = old; // Parent of the old ancestor of the root is now
+                             // the original root node
+    
+    return 0;
 }
 
 int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
