@@ -241,6 +241,15 @@ void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
     mpl_str_append(')', nwk);
 }
 
+inline mpl_node* mpl_node_get_sib(mpl_node* n)
+{
+    if (n->anc) {
+        return n->anc->left == n ? n->anc->right : n->anc->left;
+    }
+    
+    return NULL;
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */

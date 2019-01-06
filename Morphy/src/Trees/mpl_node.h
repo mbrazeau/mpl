@@ -34,7 +34,7 @@ typedef struct _node {
     
 } mpl_node;
 
-#define mpl_node_get_sib(n) ((n)->anc->left == n) ? (n)->anc->right : (n)->anc->left
+//#define mpl_node_get_sib(n) ((n)->anc->left == n) ? (n)->anc->right : (n)->anc->left
 
 mpl_node*   mpl_new_node(void);
 int         mpl_delete_node(mpl_node** n);
@@ -46,6 +46,6 @@ mpl_node*   mpl_node_pop_desc(mpl_node* n);
 mpl_node*   mpl_node_remove_desc(mpl_node* desc);
 long        mpl_node_insert_desc(mpl_node* n, mpl_node* desc, size_t at);
 void        mpl_node_write_newick(mpl_str* nwk, mpl_node* n);
-//mpl_node*   mpl_node_get_sib(mpl_node* n);
+mpl_node*   mpl_node_get_sib(mpl_node* n);
 
 #endif /* mpl_node_h */
