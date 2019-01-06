@@ -256,7 +256,7 @@ int mpl_tree_write_newick(char** dest, mpl_tree* t)
     }
     
     mpl_node_write_newick(nwk, t->base);
-    
+    mpl_str_append(';', nwk);
     // TODO: Make safer:
     *dest = mpl_str_c(nwk);
     
