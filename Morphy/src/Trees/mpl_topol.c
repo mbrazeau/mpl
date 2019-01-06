@@ -26,6 +26,8 @@ mpl_topol*  mpl_topol_new(long num_taxa)
     
     mpl_topol* newtop = NULL;
     
+    newtop = (mpl_topol*)safe_calloc(1, sizeof(mpl_topol));
+    
     if (newtop) {
         if (mpl_initialise_topology(num_taxa, newtop)) {
             // If this fails, then delete new topology and exit.
@@ -164,6 +166,23 @@ int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
     return -1;
 }
 
+int mpl_topol_compare(mpl_topol* t1, mpl_topol* t2)
+{
+    int i = 0;
+    long int max = 0;
+    if (t1->num_nodes != t2->num_nodes) {
+        return -1;
+    }
+    
+    max = t1->num_nodes;
+    for (i = 0; i < max; ++i) {
+        if (t1->edges[i] != t2->edges[i]) {
+            return i+1;
+        }
+    }
+    
+    return 0;
+}
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */
