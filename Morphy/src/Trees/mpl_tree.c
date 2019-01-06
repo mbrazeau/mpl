@@ -102,6 +102,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     int ret = 0;
     long i = 0;
     long j = 0;
+    long k = 0;
     
     // Verify the inputs:
     if (top->num_nodes != t->num_nodes) {
@@ -110,21 +111,41 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
 
     // Hook up the descendants
 
-    for (i = t->num_taxa; i < t->num_nodes; ++i) {
-
-        j = 0;
-
-        for (j = 0; j < t->num_nodes; ++j) {
-            if (top->edges[j] == t->nodes[i].mem_index
-                && t->nodes[j].anc == NULL)
-            {
-                mpl_node_push_desc(&t->nodes[i], &t->nodes[j]);
+    if (top->edges[top->num_nodes] < 0) {
+        for (i = t->num_taxa; i < t->num_nodes; ++i) {
+            
+            j = 0;
+            
+            for (j = 0; j < t->num_nodes; ++j) {
+                if (top->edges[j] == t->nodes[i].mem_index
+                    && t->nodes[j].anc == NULL)
+                {
+                    mpl_node_push_desc(&t->nodes[i], &t->nodes[j]);
+                }
+            }
+            
+            // If the node is polychotomous, indicate this on the tree
+            if (t->nodes[i].ndescs > 2) {
+                t->num_polys += t->nodes[i].ndescs;
             }
         }
-        
-        // If the node is polychotomous, indicate this on the tree
-        if (t->nodes[i].ndescs > 2) {
-            t->num_polys += t->nodes[i].ndescs;
+    }
+    else {
+        // Build the nodes in order:
+        // For each internal node in edges
+        for (i = t->num_taxa; i < t->num_nodes; ++i) {
+            // Get any node from the order list which has node i as parent
+            for (j = 0; j < top->num_nodes; ++j) {
+                long a = top->edges[top->num_nodes + j];
+                if (top->edges[a] == i) {
+                    mpl_node_push_desc(&t->nodes[i], &t->nodes[a]);
+                }
+            }
+            
+            // If the node is polychotomous, indicate this on the tree
+            if (t->nodes[i].ndescs > 2) {
+                t->num_polys += t->nodes[i].ndescs;
+            }
         }
     }
     

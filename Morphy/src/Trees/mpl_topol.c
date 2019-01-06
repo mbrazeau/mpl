@@ -74,7 +74,10 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
             mpl_initialise_topology(num_taxa, top);
         }
         
-        for (i = 0; i < top->num_nodes; ++i) {
+        top->num_taxa = num_taxa;
+        top->num_nodes = 2 * num_taxa - 1;
+        
+        for (i = 0; i < 2 * top->num_nodes; ++i) {
             top->edges[i] = -1;
         }
         
@@ -181,7 +184,7 @@ static int mpl_initialise_topology(long num_taxa, mpl_topol* top)
         top->edges = NULL;
     }
     
-    top->edges = (long*)safe_calloc(top->num_nodes, sizeof(long));
+    top->edges = (long*)safe_calloc(2 * top->num_nodes, sizeof(long));
     if (!top->edges) {
         ret = -1;
     }

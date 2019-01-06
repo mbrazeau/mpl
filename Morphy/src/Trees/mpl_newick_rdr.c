@@ -16,9 +16,10 @@
 #include "mpl_newick_rdr.h"
 #include "mpl_utils.h"
 
-static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_newick_rdr* rdr);
+static int mpl_newick_verify
+(const char* newick_str, const long num_taxa, mpl_newick_rdr* rdr);
 static long mpl_newick_traverse
-(char** ncur, long* index, long* edgetab, mpl_newick_rdr* rdr);
+(char** ncur, long* index, long* order, mpl_topol *top, mpl_newick_rdr* rdr);
 
 int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
 {
@@ -52,9 +53,10 @@ int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr)
     }
     
     long i = 0;
+    long o = 0;
     i = top->num_taxa-1;
     long end = 0;
-    end = mpl_newick_traverse((char**)&nwkstr, &i, top->edges, rdr);
+    end = mpl_newick_traverse((char**)&nwkstr, &i, &o, top, rdr);
     top->edges[end+1] = -1;
 
     
@@ -98,7 +100,7 @@ static int mpl_newick_verify(const char* newick_str, const long num_taxa, mpl_ne
 }
 
 static long mpl_newick_traverse
-(char** ncur, long* index, long* edgetab, mpl_newick_rdr* rdr)
+(char** ncur, long* index, long* order, mpl_topol* top, mpl_newick_rdr* rdr)
 {
     
     //long nd = *index-1; // Current node
@@ -111,8 +113,10 @@ static long mpl_newick_traverse
         if (**ncur == '(') {
             ++(*ncur);
             ++(*index);
-            desc = mpl_newick_traverse(ncur, index, edgetab, rdr);
-            edgetab[desc] = nd;
+            top->edges[top->num_nodes + *order] = *index;
+            ++(*order);
+            desc = mpl_newick_traverse(ncur, index, order, top, rdr);
+            top->edges[desc] = nd;
         }
         
         if (**ncur == ',') {
@@ -134,7 +138,9 @@ static long mpl_newick_traverse
             long ind = 0;
             ind = strtol(rdr->namebuffer, &end, 10);
             
-            edgetab[ind-1] = nd;
+            top->edges[ind-1] = nd;
+            top->edges[top->num_nodes + *order] = ind-1;
+            ++(*order);
         }
         
     } while (**ncur != ')' && **ncur != ';');
