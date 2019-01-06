@@ -109,6 +109,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
         return -1;
     }
 
+    mpl_tree_reset(t);
     // Hook up the descendants
 
     if (top->edges[top->num_nodes] < 0) {
@@ -131,12 +132,26 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
         }
     }
     else {
+        
+        // TODO: It may be possible to build any topology using this second
+        // branch if some standards are applied to how topologies are recorded.
+        
         // Build the nodes in order:
         // For each internal node in edges
         for (i = t->num_taxa; i < t->num_nodes; ++i) {
             // Get any node from the order list which has node i as parent
             for (j = 0; j < top->num_nodes; ++j) {
                 long a = top->edges[top->num_nodes + j];
+               
+                // TODO: Consider another way to deal with this.
+                // The current issue is that a topology that uses fewer than
+                // top->num_nodes spaces will cause a crash or errors
+                // Ultimately, it may be possible to avoid having to do this
+                // a the top level of the loop, for instance by setting and
+                // using the topology size
+                if (a == -1)
+                    continue;
+                
                 if (top->edges[a] == i) {
                     mpl_node_push_desc(&t->nodes[i], &t->nodes[a]);
                 }
