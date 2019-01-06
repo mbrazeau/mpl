@@ -301,3 +301,76 @@ int test_topology_comparison_after_rebase (void)
     
     return failn;
 }
+
+int test_negative_topology_comparison (void)
+{
+    theader("Test simple topology comparison");
+    
+    int failn = 0;
+    
+    int ntax = 5;
+    char* nwk1 = "((1,3),((2,4),5));";
+    char* nwk2 = "((5,1),(3,(2,4)));";
+    
+    mpl_topol* tp1 = mpl_topol_new(ntax);
+    mpl_topol* tp2 = mpl_topol_new(ntax);
+    
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    
+    mpl_newick_read(nwk1, tp1, &rdr);
+    mpl_newick_read(nwk2, tp2, &rdr);
+    
+    // Perform a simple check based on direct inputs
+    
+    int res = 0;
+    
+    res = mpl_topol_compare(tp1, tp2);
+    
+    if (!res) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // Now build a tree from each and compare the outputs.
+    
+    mpl_tree* t = NULL;
+    t = mpl_new_tree(ntax);
+    
+    mpl_topol* tp3 = mpl_topol_new(ntax);
+    mpl_topol* tp4 = mpl_topol_new(ntax);
+    
+    mpl_tree_read_topol(t, tp1);
+    mpl_record_topol(tp3, t);
+    
+    mpl_tree_read_topol(t, tp2);
+    mpl_record_topol(tp4, t);
+    
+    
+    res = 0;
+    res = mpl_topol_compare(tp3, tp4);
+    
+    if (!res) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_delete_tree(&t);
+    mpl_topol_delete(&tp1);
+    mpl_topol_delete(&tp2);
+    mpl_topol_delete(&tp3);
+    mpl_topol_delete(&tp4);
+    
+    if (rdr.namebuffer) {
+        free(rdr.namebuffer);
+        rdr.namebuffer = NULL;
+    }
+    
+    return failn;
+}
