@@ -32,6 +32,7 @@ int main(int argc, const char * argv[]) {
     fails += test_pop_desc();
     fails += test_remove_descendant();
     fails += test_basic_bin_traversal();
+    fails += test_node_get_sibling();
     
     // Test mpl_tree.c
     fails += test_tree_assembly_from_topology();
@@ -44,6 +45,7 @@ int main(int argc, const char * argv[]) {
     fails += test_rebasing_large_topology();
     fails += test_topology_comparison();
     fails += test_topology_comparison_after_rebase();
+    fails += test_negative_topology_comparison();
     
     // Test mpl_newick_rdr.c
     fails += test_newick_reader();

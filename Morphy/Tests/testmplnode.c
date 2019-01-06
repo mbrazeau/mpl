@@ -10,6 +10,8 @@
 #include "testmplnode.h"
 #include "../src/Trees/mpl_node.h"
 #include "../src/Trees/mpl_tree.h"
+#include "../src/Trees/mpl_topol.h"
+#include "../src/Trees/mpl_newick_rdr.h"
 
 int test_node_new_delete (void)
 {
@@ -338,5 +340,60 @@ int test_basic_bin_traversal (void)
     
     free(ndptrs);
     mpl_delete_tree(&t);
+    return failn;
+}
+
+int test_node_get_sibling (void)
+{
+    theader("Test getting sibling");
+    
+    int failn = 0;
+    
+    long numtaxa = 5;
+    char* nwkstring = "((1,5),((2,4),3));";
+    
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(numtaxa, &rdr);
+    
+    mpl_topol* top = mpl_topol_new(numtaxa);
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    mpl_newick_read(nwkstring, top, &rdr);
+    
+    mpl_tree_read_topol(t, top);
+    
+    mpl_node* sib1 = NULL;
+    mpl_node* sib2 = NULL;
+    mpl_node* n = &t->nodes[0];
+    
+    sib1 = mpl_node_get_sib(n);
+    sib2 = mpl_node_get_sib(&t->nodes[0]);
+    
+    if (sib1 != sib2) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (sib1 != &t->nodes[4]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    sib1 = mpl_node_get_sib(&t->nodes[1]);
+    
+    if (sib1 != &t->nodes[3]) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
     return failn;
 }
