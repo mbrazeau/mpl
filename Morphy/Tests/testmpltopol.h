@@ -10,5 +10,7 @@
 #define testmpltopol_h
 int test_rebasing_topology (void);
 int test_rebasing_large_topology (void);
+int test_topology_comparison (void);
+int test_topology_comparison_after_rebase (void);
 
 #endif /* testmpltopol_h */

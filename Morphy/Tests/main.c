@@ -42,6 +42,8 @@ int main(int argc, const char * argv[]) {
     // Test mpl_topol.c
     fails += test_rebasing_topology();
     fails += test_rebasing_large_topology();
+    fails += test_topology_comparison();
+    fails += test_topology_comparison_after_rebase();
     
     // Test mpl_newick_rdr.c
     fails += test_newick_reader();

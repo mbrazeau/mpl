@@ -6,25 +6,14 @@
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
 
+#include <string.h>
+
 #include "mpltest.h"
 #include "testmplnwkreader.h"
 #include "../src/Trees/mpl_tree.h"
 #include "../src/Trees/mpl_topol.h"
 #include "../src/Trees/mpl_newick_rdr.h"
 
-static void mpl_node_bin_traverse_temp(mpl_node* n)
-{
-    if (n->tip) {
-        printf("%li", n->tip);
-        return;
-    }
-    
-    printf("(");
-    mpl_node_bin_traverse_temp(n->left);
-    printf(",");
-    mpl_node_bin_traverse_temp(n->right);
-    printf(")");
-}
 
 int test_newick_reader (void)
 {
@@ -52,9 +41,21 @@ int test_newick_reader (void)
     
     mpl_tree_read_topol(t, &top);
     
+    printf("Target: %s\n", nwkstring);
+    char* nwkop = NULL;
+    mpl_tree_write_newick(&nwkop, t);
+    printf("Result: %s", nwkop);
     printf("\n");
     
-    mpl_node_bin_traverse_temp(t->base);
+    if (strcmp(nwkop, nwkstring)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    free(nwkop);
     
     free(nwkrdr.namebuffer);
     
@@ -96,8 +97,21 @@ int test_newick_reader_bigger_tree (void)
     mpl_tree_read_topol(t, &top);
     
     printf("Target: %s\n", nwkstring);
-    printf("Result: ");
-    mpl_node_bin_traverse_temp(t->base);
+    char* nwkop = NULL;
+    mpl_tree_write_newick(&nwkop, t);
+    printf("Result: %s", nwkop);
+    printf("\n");
+    
+    if (strcmp(nwkop, nwkstring)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    free(nwkop);
+    
     printf("\n");
     free(nwkrdr.namebuffer);
     
@@ -130,6 +144,7 @@ int test_newick_mult_large_newick_reads (void)
 
     int i = 0;
     for (i = 0; i < nstr; ++i) {
+        char* nwkop = NULL;
         mpl_topol_reset(numtaxa, &top);
         err = mpl_newick_read(nwkstrs[i], &top, &nwkrdr);
         
@@ -145,12 +160,20 @@ int test_newick_mult_large_newick_reads (void)
         mpl_tree_read_topol(t, &top);
         
         printf("Target: %s\n", nwkstrs[i]);
-        printf("Result: ");
-        mpl_node_bin_traverse_temp(t->base);
+        mpl_tree_write_newick(&nwkop, t);
+        printf("Result: %s", nwkop);
         printf("\n");
         
+        if (strcmp(nwkop, nwkstrs[i])) {
+            ++failn;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+        
+        free(nwkop);
         mpl_tree_reset(t);
-
     }
     
     free(nwkrdr.namebuffer);

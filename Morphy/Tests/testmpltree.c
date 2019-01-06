@@ -5,6 +5,8 @@
 //  Created by Martin Brazeau on 29/12/2018.
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
+#include <string.h>
+
 #include "mpltest.h"
 #include "testutils.h"
 #include "testmplnode.h"
@@ -37,10 +39,10 @@ int test_tree_assembly_from_topology (void)
     
     int numtaxa = 5;
     int numnodes = 2 * numtaxa - 1;
-//    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1};
-//    long edgetable[] = {6, 8, 7, 8, 6, -1, 5, 5, 7 };
-    long edgetable[] =   {6, 8, 7, 8, 6, -1, 5, 5, 7};
-//    long edgetable[] = {7, 5, 6, 5, 7, 6, 8, 8, -1 };
+//    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1, -1};
+//    long edgetable[] = {6, 8, 7, 8, 6, -1, 5, 5, 7, -1 };
+    long edgetable[] =   {6, 8, 7, 8, 6, -1, 5, 5, 7, -1};
+//    long edgetable[] = {7, 5, 6, 5, 7, 6, 8, 8, -1, -1};
     
     mpl_topol top;
     top.num_taxa = numtaxa;
@@ -68,7 +70,7 @@ int test_binary_postorder (void)
     
     int numtaxa = 5;
     int numnodes = 2 * numtaxa - 1;
-    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1};
+    long edgetable[] = {5, 6, 7, 6, 5, 8, 7, 8, -1, -1};
     long exp_order[] = {0, 4, 5, 2, 1, 3, 6, 7, 8};
     
     mpl_topol top;
@@ -109,7 +111,7 @@ int test_polytomous_postorder (void)
     
     int numtaxa = 5;
     int numnodes = 2 * numtaxa - 1;
-    long edgetable[] = {5, 6, 6, 6, 5, 7, 7, -1, -1};
+    long edgetable[] = {5, 6, 6, 6, 5, 7, 7, -1, -1, -1};
     
     mpl_topol top;
     top.num_taxa = numtaxa;
@@ -166,7 +168,21 @@ int test_worst_case_polytomy (void)
     mpl_tree_read_topol(t, &top);
     mpl_tree_traverse(t);
     
+    char* nwkprint = NULL;
+    mpl_tree_write_newick(&nwkprint, t);
+    printf("Result: %s\n", nwkprint);
+    
+    int res = 0;
+    if ((res = strcmp(newick, nwkprint))) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
     mpl_delete_tree(&t);
+    free(nwkprint);
     
     return failn;
 }
@@ -201,6 +217,19 @@ int test_newick_writing (void)
     
     printf("%s", nwkout);
     printf("\n");
+    
+    char* nwkprint = NULL;
+    mpl_tree_write_newick(&nwkprint, t);
+    printf("Result: %s\n", nwkprint);
+    
+    int res = 0;
+    if ((res = strcmp(nwkstring, nwkprint))) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
     
     free(nwkrdr.namebuffer);
     
