@@ -14,5 +14,6 @@ int test_binary_postorder (void);
 int test_polytomous_postorder (void);
 int test_worst_case_polytomy (void);
 int test_newick_writing (void);
-
+int test_tree_rebasing (void);
+int test_tree_rebasing_bigger_tree (void);
 #endif /* testmpltree_h */

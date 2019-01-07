@@ -134,7 +134,7 @@ long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
     assert(tgt);
     assert(src);
     assert(tgt != src);
-    assert(src->anc == NULL);
+//    assert(src->anc == NULL);
 #endif
     
     if (tgt->ndescs < tgt->capacity) {
@@ -203,6 +203,16 @@ mpl_node* mpl_node_remove_desc(mpl_node* desc)
     return ret;
 }
 
+void mpl_node_clear_descs(mpl_node* n)
+{
+    n->left  = NULL;
+    n->right = NULL;
+    
+    memset(n->descs, 0, n->capacity * sizeof(mpl_node*));
+    
+    n->ndescs = 0;
+}
+
 void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
 {
 #ifdef DEBUG
@@ -224,12 +234,12 @@ void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
     do {
         mpl_node_write_newick(nwk, *p);
         ++p;
-#ifdef DEBUG
+
         if (*p) {
 //            printf(",");
             mpl_str_append(',', nwk);
         }
-        
+#ifdef DEBUG
         ++_countcheck;
 #endif
     } while (*p);
@@ -248,6 +258,30 @@ inline mpl_node* mpl_node_get_sib(mpl_node* n)
     }
     
     return NULL;
+}
+
+int mpl_node_swap_anc_child(mpl_node* child, mpl_node *n)
+{
+    assert(child->anc);
+    
+    if (child->anc->anc) {
+        
+        mpl_node*  p = n->anc;
+        mpl_node** q = n->descs;
+        
+        while (*q && *q != child) {
+            ++q;
+        }
+        
+        *q = p;
+        n->anc = child;
+        
+        mpl_update_left_right_ptrs(n);
+        
+        return 0;
+    }
+    
+    return -1;
 }
 
 /*
@@ -273,7 +307,7 @@ static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src)
 #ifdef DEBUG
     assert(tgt);
     assert(src);
-    assert(src->anc == NULL);
+//    assert(src->anc == NULL);
     assert(tgt->capacity > tgt->ndescs);
     int _i = 0;
     while (tgt->descs[_i] != src && tgt->descs[_i]) ++_i;
@@ -291,7 +325,7 @@ static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src)
 
 static inline void mpl_update_left_right_ptrs(mpl_node* n)
 {
-    n->left = n->descs[0];
+    n->left  = n->descs[0];
     n->right = n->descs[n->ndescs-1];
 }
 

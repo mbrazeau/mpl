@@ -45,7 +45,9 @@ long        mpl_node_push_desc(mpl_node* tgt, mpl_node* src);
 mpl_node*   mpl_node_pop_desc(mpl_node* n);
 mpl_node*   mpl_node_remove_desc(mpl_node* desc);
 long        mpl_node_insert_desc(mpl_node* n, mpl_node* desc, size_t at);
+void        mpl_node_clear_descs(mpl_node* n);
 void        mpl_node_write_newick(mpl_str* nwk, mpl_node* n);
 mpl_node*   mpl_node_get_sib(mpl_node* n);
+int         mpl_node_swap_anc_child(mpl_node* child, mpl_node *n);
 
 #endif /* mpl_node_h */

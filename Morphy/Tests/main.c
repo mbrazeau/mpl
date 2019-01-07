@@ -33,12 +33,15 @@ int main(int argc, const char * argv[]) {
     fails += test_remove_descendant();
     fails += test_basic_bin_traversal();
     fails += test_node_get_sibling();
+    fails += test_swap_parent_child();
     
     // Test mpl_tree.c
     fails += test_tree_assembly_from_topology();
     fails += test_binary_postorder();
     fails += test_worst_case_polytomy();
     fails += test_newick_writing();
+    fails += test_tree_rebasing();
+    fails += test_tree_rebasing_bigger_tree();
     
     // Test mpl_topol.c
     fails += test_rebasing_topology();

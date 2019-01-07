@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		510DB32821E371230089CCCF /* mpl_bbreak.c in Sources */ = {isa = PBXBuildFile; fileRef = 510DB32721E371230089CCCF /* mpl_bbreak.c */; };
 		51430BC321E113DA00663D54 /* mpl_matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 51430BC221E113DA00663D54 /* mpl_matrix.c */; };
 		51430BC621E1149000663D54 /* mpl_charinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 51430BC521E1149000663D54 /* mpl_charinfo.c */; };
 		5165A15121DA7DB900A693D6 /* mpl_newick_rdr.c in Sources */ = {isa = PBXBuildFile; fileRef = 5165A15021DA7DB900A693D6 /* mpl_newick_rdr.c */; };
@@ -68,6 +69,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		510DB32621E371230089CCCF /* mpl_bbreak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_bbreak.h; sourceTree = "<group>"; };
+		510DB32721E371230089CCCF /* mpl_bbreak.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_bbreak.c; sourceTree = "<group>"; };
 		51430BC121E113DA00663D54 /* mpl_matrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_matrix.h; sourceTree = "<group>"; };
 		51430BC221E113DA00663D54 /* mpl_matrix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_matrix.c; sourceTree = "<group>"; };
 		51430BC421E1149000663D54 /* mpl_charinfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_charinfo.h; sourceTree = "<group>"; };
@@ -301,6 +304,8 @@
 			children = (
 				51A6B80421D900110086CE68 /* mpl_search.h */,
 				51A6B80521D900110086CE68 /* mpl_search.c */,
+				510DB32621E371230089CCCF /* mpl_bbreak.h */,
+				510DB32721E371230089CCCF /* mpl_bbreak.c */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -511,6 +516,7 @@
 				5165A15121DA7DB900A693D6 /* mpl_newick_rdr.c in Sources */,
 				5165A15421DA865400A693D6 /* testmplnwkreader.c in Sources */,
 				51430BC321E113DA00663D54 /* mpl_matrix.c in Sources */,
+				510DB32821E371230089CCCF /* mpl_bbreak.c in Sources */,
 				51430BC621E1149000663D54 /* mpl_charinfo.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

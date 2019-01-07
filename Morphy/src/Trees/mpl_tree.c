@@ -281,6 +281,84 @@ int mpl_tree_write_newick(char** dest, mpl_tree* t)
     return 0;
 }
 
+int mpl_tree_rebase(long tgt, mpl_tree* t)
+{
+    if (t->nodes[tgt].anc == t->base) {
+        return 1;
+    }
+    
+    mpl_node *n = NULL;
+    mpl_node *p = NULL;
+    mpl_node *q = NULL;
+//    mpl_node *r = NULL;
+    
+    mpl_node* n1 = &t->nodes[tgt];
+    mpl_node* n2 = t->nodes[tgt].anc;
+    
+    n = n1->anc;
+    p = n1;
+    
+    while (n) {
+        q = n->anc;
+        mpl_node_swap_anc_child(p, n);
+        p = n;
+        n = q;
+    }
+    
+    // The old root has now been moved inside the tree with a dangling pointer.
+    // This can now be extracted from the tree and moved back to where the
+    // base of the tree should be.
+    
+    // TODO: BEGIN This is not safe for a polytomous node. All descendants of r
+    // need to be pushed to the ancestor of r.
+    mpl_node** r = NULL;
+    q = t->base->left;
+    
+    if (!q) {
+        r = t->base->descs;
+        while (!*r) {
+            ++r;
+        }
+        q = *r;
+    }
+    assert(q);
+    // TODO: END TODO
+    
+    // Now hook up the old descendants of the base to the ancestor of the base
+    q->anc = t->base->anc;
+    r = q->anc->descs;
+    
+    while(*r != t->base) {
+        ++r;
+    }
+    *r = q;
+    
+    // Reset the base to the right place.
+    mpl_node_clear_descs(t->base);
+    mpl_node_push_desc(t->base, n1);
+//    t->base->descs[0] = n1;
+//    t->base->left = n1;
+    mpl_node_push_desc(t->base, n2);
+//    n1->anc = t->base;
+//    t->base->descs[1] = n2;
+//    t->base->right = n2;
+//    n2->anc = t->base;
+    
+    return 0;
+}
+
+int mpl_root_tree(long tgt, mpl_tree* t)
+{
+    t->root = t->base;
+    return mpl_tree_rebase(tgt, t);
+}
+
+int mpl_unroot_tree(mpl_tree* t)
+{
+    t->root = NULL;
+    return 0;
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */

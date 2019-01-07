@@ -395,5 +395,50 @@ int test_node_get_sibling (void)
         ppass;
     }
     
+    if (mpl_node_get_sib(mpl_node_get_sib(sib1)) != sib1) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    return failn;
+}
+
+int test_swap_parent_child (void)
+{
+    theader("Test swapping parent and child nodes");
+    
+    int failn = 0;
+    
+    long nnodes = 4;
+    mpl_node* n, *l, *r, *p;
+    p = n = r = l = NULL;
+    
+    mpl_node** ndptrs = (mpl_node**)safe_calloc(nnodes, sizeof(mpl_node*));
+    
+    int i = 0;
+    for (i = 0; i < nnodes; ++i) {
+        ndptrs[i] = mpl_new_node();
+        ndptrs[i]->mem_index = i;
+        if (i > 0) {
+            ndptrs[i]->tip = i;
+        }
+    }
+    
+    n = ndptrs[0];
+    p = ndptrs[1];
+    l = ndptrs[2];
+    r = ndptrs[3];
+    
+    mpl_node_push_desc(n, l);
+    mpl_node_push_desc(n, r);
+    mpl_node_push_desc(p, n);
+    
+    mpl_node_swap_anc_child(l, n);
+    
+    // TODO: Make this an actual test!
+    
     return failn;
 }

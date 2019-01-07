@@ -235,3 +235,85 @@ int test_newick_writing (void)
     
     return failn;
 }
+
+int test_tree_rebasing (void)
+{
+    theader("Test rebasing of tree");
+    
+    int failn = 0;
+    
+    long numtaxa = 5;
+    char* nwkstring = "((1,5),((2,4),3));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    char* nwk = NULL;
+    mpl_tree_write_newick(&nwk, t);
+    printf("Original: %s\n", nwk);
+    free(nwk);
+    nwk = NULL;
+    
+    mpl_tree_rebase(0, t);
+    
+    nwk = NULL;
+    mpl_tree_write_newick(&nwk, t);
+    printf("Rebased:  %s\n", nwk);
+    free(nwk);
+    nwk = NULL;
+    
+    return failn;
+}
+
+int test_tree_rebasing_bigger_tree (void)
+{
+    theader("Test rebasing of 10-taxon tree");
+    
+    int failn = 0;
+    
+    long numtaxa = 10;
+    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    char* nwk = NULL;
+    mpl_tree_write_newick(&nwk, t);
+    printf("Original: %s\n", nwk);
+    free(nwk);
+    nwk = NULL;
+    
+    mpl_tree_rebase(9, t);
+    
+    nwk = NULL;
+    mpl_tree_write_newick(&nwk, t);
+    printf("Rebased:  %s\n", nwk);
+    free(nwk);
+    nwk = NULL;
+    
+    return failn;
+}
