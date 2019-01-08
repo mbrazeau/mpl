@@ -36,9 +36,9 @@ typedef struct _search {
     long            num_reps;
 } mpl_search;
 
-void            mpl_do_stepwise(void);
-void            mpl_do_bbreak(void);
-void            mpl_do_heuristic(void);
+//void            mpl_do_stepwise(void);
+//void            mpl_do_bbreak(void);
+//void            mpl_do_heuristic(void);
 mpl_results*    mpl_do_search(void);
 
 #endif /* mpl_search_h */
