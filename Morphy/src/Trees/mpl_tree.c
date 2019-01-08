@@ -332,6 +332,8 @@ int mpl_tree_rebase(long tgt, mpl_tree* t)
         ++r;
     }
     *r = q;
+    q->anc->left = q->anc->descs[0];
+    q->anc->right = q->anc->descs[q->anc->ndescs-1];
     
     // Reset the base to the right place.
     mpl_node_clear_descs(t->base);
