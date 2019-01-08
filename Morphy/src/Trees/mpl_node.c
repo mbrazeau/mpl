@@ -18,7 +18,7 @@
 
 /* Private function prototypes */
 
-static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src);
+static inline void mpl_push_to_desc_array(mpl_node* tgt, mpl_node* src);
 static void mpl_extend_desc_array(mpl_node* n, const size_t nelems);
 static inline void mpl_update_left_right_ptrs(mpl_node* n);
 static inline mpl_node** mpl_node_find_desc_ptr(const mpl_node* tgt);
@@ -139,11 +139,11 @@ long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
     
     if (tgt->ndescs < tgt->capacity) {
         
-        mpl_push_desc(tgt, src);
+        mpl_push_to_desc_array(tgt, src);
     }
     else {
         mpl_extend_desc_array(tgt, (tgt->capacity + 1));
-        mpl_push_desc(tgt, src);
+        mpl_push_to_desc_array(tgt, src);
     }
     
     assert(tgt->ndescs <= tgt->capacity);
@@ -230,22 +230,29 @@ void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
 //    printf("(");
     mpl_str_append('(', nwk);
     
-    p = &n->descs[0];
-    do {
-        mpl_node_write_newick(nwk, *p);
-        ++p;
-
-        if (*p) {
-//            printf(",");
-            mpl_str_append(',', nwk);
-        }
+    if (n->ndescs > 2) {
+        p = &n->descs[0];
+        do {
+            mpl_node_write_newick(nwk, *p);
+            ++p;
+            
+            if (*p) {
+                //            printf(",");
+                mpl_str_append(',', nwk);
+            }
 #ifdef DEBUG
-        ++_countcheck;
+            ++_countcheck;
 #endif
-    } while (*p);
+        } while (*p);
 #ifdef DEBUG
-    assert(_countcheck == n->ndescs);
+        assert(_countcheck == n->ndescs);
 #endif
+    }
+    else {
+        mpl_node_write_newick(nwk, n->left);
+        mpl_str_append(',', nwk);
+        mpl_node_write_newick(nwk, n->right);
+    }
     
 //    printf(")");
     mpl_str_append(')', nwk);
@@ -284,6 +291,96 @@ int mpl_node_swap_anc_child(mpl_node* child, mpl_node *n)
     return -1;
 }
 
+void mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc)
+{
+    mpl_node** ancp = NULL;
+    ancp = mpl_node_find_desc_ptr(olddesc);
+    *ancp = newdesc;
+    newdesc->anc = olddesc->anc;
+    olddesc->anc = NULL;
+    mpl_update_left_right_ptrs(newdesc->anc);
+}
+
+
+/**
+ Disconnects a node from its incident branch on a tree. Assumes the entire tree
+ is binary.
+
+ @param n a pointer to a node.
+ @return a pointer to the base of the clipped node.
+ */
+inline mpl_node* mpl_node_bin_clip(mpl_node* n)
+{
+    mpl_node* p = n->anc;
+    mpl_node* s = NULL;
+    s = mpl_node_get_sib(n);
+#ifdef DEBUG
+    assert(p);
+    assert(p->ndescs < 3 && s->ndescs < 3 && n->ndescs < 3);
+#endif
+    if (p->anc->left == p) {
+        p->anc->left = s;
+    }
+    else {
+#ifdef DEBUG
+        assert(p->anc->right == p);
+#endif
+        p->anc->right = s;
+    }
+    
+    s->anc = p->anc;
+    
+    p->anc = NULL;
+    
+    // Makes the base of the node a left-handed root to mimic dummy root
+    // Situation of the whole tree.
+    p->left = n;
+    p->right = NULL;
+    
+    return p;
+}
+
+
+/**
+ Connect a node with an otherwise unconnected ancestor to an incident branch
+ to either the right or the left of the child of the target branch.
+
+ @param toleft a pointer to a node that will become the left sibling of the
+ branch being inserted. Otherwise, NULL if joining to the right.
+ @param toright a pointer to a node that will become the right sibling of the
+ branch being inserted.
+ @param n the top node of the branch being inserted.
+ */
+inline void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* n)
+{
+#ifdef DEBUG
+    assert(!(toleft && toright)); // Should not pass in both
+#endif
+    mpl_node* site = NULL;
+    
+    if (toleft) {
+        site = toleft;
+        n->anc->left = toleft;
+        n->anc->right = n;
+    } else {
+        site = toright;
+        n->anc->right = toright;
+        n->anc->left = n;
+    }
+    
+    n->anc->anc = site->anc;
+    
+    if (site->anc->left == site) {
+        site->anc->left = n->anc;
+    }
+    else {
+#ifdef DEBUG
+        assert(site->anc->right == site);
+#endif
+        site->anc->right = n->anc;
+    }
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */
@@ -302,7 +399,7 @@ static void mpl_extend_desc_array(mpl_node* n, const size_t nelems)
     
 }
 
-static inline void mpl_push_desc(mpl_node* tgt, mpl_node* src)
+static inline void mpl_push_to_desc_array(mpl_node* tgt, mpl_node* src)
 {
 #ifdef DEBUG
     assert(tgt);
