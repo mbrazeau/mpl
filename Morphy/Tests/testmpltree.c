@@ -52,6 +52,14 @@ int test_tree_assembly_from_topology (void)
     mpl_tree* t = mpl_new_tree(numtaxa);
     mpl_tree_read_topol(t, &top);
     
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
     mpl_tests_tree_traverse(t);
     printf("\n");
     
@@ -85,6 +93,14 @@ int test_binary_postorder (void)
     printf("\n");
     
     mpl_tree_traverse(t);
+    
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
     
     int i = 0;
     for (i = 0; i < numnodes-1; ++i) {
@@ -128,6 +144,14 @@ int test_polytomous_postorder (void)
     
     mpl_tree_traverse(t);
     
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
     //int i = 0;
     for (i = 0; i < numnodes-1; ++i) {
 //        if (t->postord_all[i]->mem_index != exp_order[i]) {
@@ -167,6 +191,14 @@ int test_worst_case_polytomy (void)
     mpl_newick_read(newick, &top, &nwkrdr);
     mpl_tree_read_topol(t, &top);
     mpl_tree_traverse(t);
+   
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
     
     char* nwkprint = NULL;
     mpl_tree_write_newick(&nwkprint, t);
