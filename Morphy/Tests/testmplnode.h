@@ -17,5 +17,6 @@ int test_remove_descendant (void);
 int test_basic_bin_traversal (void);
 int test_node_get_sibling (void);
 int test_swap_parent_child (void);
+int test_binary_node_clip (void);
 
 #endif /* testmplnode_h */

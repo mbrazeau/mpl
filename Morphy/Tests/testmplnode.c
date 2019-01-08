@@ -6,7 +6,10 @@
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
 
+#include <string.h>
+
 #include "mpltest.h"
+#include "testutils.h"
 #include "testmplnode.h"
 #include "../src/Trees/mpl_node.h"
 #include "../src/Trees/mpl_tree.h"
@@ -439,6 +442,118 @@ int test_swap_parent_child (void)
     mpl_node_swap_anc_child(l, n);
     
     // TODO: Make this an actual test!
+    
+    return failn;
+}
+
+int test_binary_node_clip (void)
+{
+    theader("Test binary node clipping");
+    
+    int failn = 0;
+    
+    long numtaxa = 10;
+    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    char* nwkout = NULL;
+    mpl_tree_write_newick(&nwkout, t);
+    printf("Original tree: %s\n", nwkout);
+    free(nwkout);
+    
+    // Clip
+    mpl_node* clip  = NULL;
+    mpl_node* cbase = NULL;
+    mpl_node* csite = NULL;
+    
+    clip  = t->nodes[1].anc;
+    cbase = clip->anc;
+    
+    csite = mpl_node_get_sib(clip);
+
+    mpl_node_bin_clip(clip);
+
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_tree_write_newick(&nwkout, t);
+    printf("Clipped tree:  %s\n", nwkout);
+    free(nwkout);
+    
+    // Rejoin
+    mpl_node_bin_connect(NULL, csite, clip);
+    
+    // Test for problems with the tree
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // Print
+    mpl_tree_write_newick(&nwkout, t);
+    printf("Restored tree: %s\n", nwkout);
+   
+    
+    if (strcmp(nwkstring, nwkout)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    free(nwkout);
+    
+    csite = mpl_node_get_sib(clip);
+    
+    mpl_node_bin_clip(clip);
+    
+    mpl_tree_write_newick(&nwkout, t);
+
+    // Rejoin
+    mpl_node_bin_connect(csite, NULL, clip);
+    
+    // Test for problems with the tree
+    if (mpl_tree_checker(t)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // Print
+    mpl_tree_write_newick(&nwkout, t);
+    printf("Rejoined to right: %s\n", nwkout);
+    
+    
+    if (!strcmp(nwkstring, nwkout)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
     
     return failn;
 }
