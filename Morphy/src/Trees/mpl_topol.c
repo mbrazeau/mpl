@@ -12,7 +12,6 @@
 #include "mpl_topol.h"
 #include "../mpl_utils.h"
 
-static int mpl_initialise_topology(long num_taxa, mpl_topol* top);
 
 /*
  *  PUBLIC FUNCTION DEFINITIONS
@@ -29,7 +28,7 @@ mpl_topol*  mpl_topol_new(long num_taxa)
     newtop = (mpl_topol*)safe_calloc(1, sizeof(mpl_topol));
     
     if (newtop) {
-        if (mpl_initialise_topology(num_taxa, newtop)) {
+        if (mpl_topol_init(num_taxa, newtop)) {
             // If this fails, then delete new topology and exit.
             mpl_topol_delete(&newtop);
             return newtop;
@@ -73,7 +72,7 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
         // topol_initialise to fix it. This should not end up in an
         // infinite cycle.
         if (num_taxa != top->num_taxa) {
-            mpl_initialise_topology(num_taxa, top);
+            mpl_topol_init(num_taxa, top);
         }
         
         top->num_taxa = num_taxa;
@@ -85,6 +84,8 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
         
         top->next = NULL;
         top->back = NULL;
+        
+        return 0;
     }
         
     return -1;
@@ -183,11 +184,8 @@ int mpl_topol_compare(mpl_topol* t1, mpl_topol* t2)
     
     return 0;
 }
-/*
- *  PRIVATE FUNCTION DEFINITIONS
- */
 
-static int mpl_initialise_topology(long num_taxa, mpl_topol* top)
+int mpl_topol_init(long num_taxa, mpl_topol* top)
 {
     int ret = 0;
     
@@ -213,4 +211,6 @@ static int mpl_initialise_topology(long num_taxa, mpl_topol* top)
     return ret;
 }
 
-
+/*
+ *  PRIVATE FUNCTION DEFINITIONS
+ */

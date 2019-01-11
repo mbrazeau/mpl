@@ -31,6 +31,7 @@ int         mpl_topol_reset(long num_taxa, mpl_topol* top);
 int         mpl_topol_link(mpl_topol* parent, mpl_topol* child);
 int         mpl_topol_rebase(const long newbase, mpl_topol* top);
 int         mpl_topol_compare(mpl_topol* t1, mpl_topol* t2);
+int         mpl_topol_init(long num_taxa, mpl_topol* top);
 
 
 #endif /* mpl_topol_h */
