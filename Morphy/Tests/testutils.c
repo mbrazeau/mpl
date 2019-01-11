@@ -30,7 +30,7 @@ void mpl_tests_tree_traverse(mpl_tree* t)
     mpl_test_print_bin_traverse(t->base);
 }
 
-int mpl_tree_checker(mpl_tree* t)
+int mpl_tree_checker(const mpl_tree* t)
 {
     long i = 0;
     int err = 0;
