@@ -13,7 +13,7 @@
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base);
 static void mpl_bbreak_trav_targets(mpl_node* n, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist, long* i, long* j);
 static long mpl_bbreak_get_target_list
-(const mpl_tree* t, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist);
+(const mpl_tree* t, const mpl_node* site, mpl_bbreak* bbk);
 
 
 void mpl_do_bbreak(mpl_tree* t, mpl_bbreak* bbk)
@@ -24,7 +24,7 @@ void mpl_do_bbreak(mpl_tree* t, mpl_bbreak* bbk)
 
 void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 {
-    long ntax = 0; // The number of taxa in the tree
+//    long ntax = 0; // The number of taxa in the tree
     long nnodes = 0; // The number of nodes in the tree
     long clipmax = 0;
     
@@ -64,15 +64,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         long tgtnum = 0;
         
         // Size of the long list is determined by the traversal
-        bbk->nlongtgts = mpl_bbreak_get_target_list(t, csite, bbk->tgtslong, bbk->tgtsshort);
-        // Short list is counted based on whether the subtree clipped was a tip.
-        if (clips[i]->tip) {
-            bbk->nshorttgts = bbk->nlongtgts-4;
-        }
-        else {
-            bbk->nshorttgts = bbk->nlongtgts-2;
-        }
-        assert(bbk->nshorttgts >= 0);
+        mpl_bbreak_get_target_list(t, csite, bbk);
         
         // Now, set tgtnumb based on whether we are doing SPR or TBR...
         
@@ -201,16 +193,16 @@ static void mpl_bbreak_trav_targets
 
 
 static long mpl_bbreak_get_target_list
-(const mpl_tree* t, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist)
+(const mpl_tree* t, const mpl_node* site, mpl_bbreak* bbk)
 {
     assert(t->num_polys == 0);
     
     mpl_node* start = mpl_node_get_sib(&t->nodes[0]);
     
-    long i = 0;
-    long j = 0;
-    mpl_bbreak_trav_targets(start, site, longlist, shortlist, &i, &j);
+    bbk->nshorttgts = 0;
+    bbk->nlongtgts = 0;
+    mpl_bbreak_trav_targets(start, site, bbk->tgtslong, bbk->tgtsshort, &bbk->nlongtgts, &bbk->nshorttgts);
     
-    return i; // The shortlist length is i - 4 if clip site is internal and
+    return 0; // The shortlist length is i - 4 if clip site is internal and
     // i - 2 if it's a tip.
 }
