@@ -10,6 +10,9 @@
 #define mpl_search_h
 
 #include "../Results/mpl_results.h"
+#include "../Trees/mpl_node.h"
+#include "../Trees/mpl_tree.h"
+#include "../Trees/mpl_treelist.h"
 
 typedef enum {
     MPL_INPUTORDER_T,
@@ -30,10 +33,13 @@ typedef enum {
 } mpl_bbreak_t;
 
 typedef struct _search {
+    
     mpl_search_t    search_type;
     mpl_bbreak_t    bbreak_type;
     long            hold;
     long            num_reps;
+    mpl_treelist*   treelist;
+    
 } mpl_search;
 
 //void            mpl_do_stepwise(void);

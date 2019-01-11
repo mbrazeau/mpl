@@ -12,14 +12,20 @@
 #include "mpl_search.h"
 #include "../Trees/mpl_node.h"
 #include "../Trees/mpl_tree.h"
+//#include "../Trees/mpl_topol.h"
+#include "../Trees/mpl_treelist.h"
 
 typedef struct _bbreak {
     
     mpl_bbreak_t    bbktype;
     long            num_nodes;
     mpl_node**      srcs;
-    mpl_node**      tgts;
+    long            nlongtgts;
+    mpl_node**      tgtslong;
+    long            nshorttgts;
+    mpl_node**      tgtsshort;
     unsigned long   num_rearrangs;
+    mpl_treelist*   treelist;
 
 } mpl_bbreak;
 
