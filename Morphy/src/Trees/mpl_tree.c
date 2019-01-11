@@ -14,6 +14,7 @@
 static inline void mpl_tree_reset_copy_indices(mpl_tree* t);
 static void mpl_tree_mark_uniquely(mpl_tree* t);
 
+
 /*
  *  PUBLIC FUNCTION DEFINITIONS
  */
@@ -28,11 +29,16 @@ mpl_tree* mpl_new_tree(long num_taxa)
     t->num_nodes = 2 * num_taxa - 1;
     t->tree_size = 0;
     
-    t->nodes = (mpl_node*)safe_calloc(t->num_nodes, sizeof(mpl_node));
+    t->nodes = (mpl_node*)safe_calloc(t->num_nodes + 1, sizeof(mpl_node));
 
     // Set up desc buffer as having a minimum of 3 pointers to nodes
-    for (i = 0; i < t->num_nodes; ++i) {
+    for (i = 0; i < t->num_nodes + 1; ++i) {
         t->nodes[i].descs = (mpl_node**)safe_calloc(3, sizeof(mpl_tree*));
+        // TODO: Need to find some way to test this
+        if (!t->nodes[i].descs) {
+            mpl_delete_tree(&t);
+            return NULL;
+        }
         t->nodes[i].capacity = 2;
         t->nodes[i].ndescs = 0;
         t->nodes[i].mem_index = i;
@@ -41,6 +47,9 @@ mpl_tree* mpl_new_tree(long num_taxa)
             t->nodes[i].tip = i + 1;
         }
     }
+    
+    t->nodes[t->num_nodes].tip = -1;
+    t->dummy = &t->nodes[t->num_nodes];
     
     // Allocate buffers for postorder sets:
     t->postord_all = (mpl_node**)safe_calloc(t->num_nodes, sizeof(mpl_node*));
@@ -67,7 +76,7 @@ int mpl_delete_tree(mpl_tree** t)
     int i = 0;
     
     if ((*t)->nodes != NULL) {
-        for (i = 0; i < (*t)->num_nodes; ++i) {
+        for (i = 0; i < (*t)->num_nodes + 1; ++i) {
             if ((*t)->nodes[i].descs != NULL) {
                 free ((*t)->nodes[i].descs);
                 (*t)->nodes[i].descs = NULL;
@@ -102,7 +111,7 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     int ret = 0;
     long i = 0;
     long j = 0;
-    long k = 0;
+//    long k = 0;
     
     // Verify the inputs:
     if (top->num_nodes != t->num_nodes) {
@@ -166,26 +175,36 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     
     // TODO: Make this more general and safer
     mpl_node* p = &t->nodes[0];
-    while (p->anc) p = p->anc;
+    while (p->anc != NULL) p = p->anc;
     t->base = p;
+    t->dummy->left = p;
+    p->anc = t->dummy;
     
     return ret;
 }
 
-int mpl_record_topol(mpl_topol* top, mpl_tree* t)
+int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
 {
 #ifdef DEBUG
     assert(t);
 #endif
+    
+    mpl_node* d = NULL;
+    d = mpl_tree_dummy_root(t);
     
     mpl_tree_mark_uniquely(t);
     
     // Then copy into the topology record
     int i = 0;
     for (i = 0; i < t->num_nodes; ++i) {
-        if (t->nodes[i].anc != NULL) {
-            top->edges[i] = t->nodes[t->nodes[i].anc->copy_index].copy_index;
+        if (i < t->num_taxa) {
+            top->edges[i] = t->nodes[i].anc->copy_index;
+        } else {
+            top->edges[t->nodes[i].copy_index] = t->nodes[i].anc->copy_index;
         }
+        //        if (t->nodes[i].anc != NULL && t->nodes[i].anc != d) {
+//            top->edges[i] = t->nodes[t->nodes[i].anc->copy_index].copy_index;
+//        }
 //        else {
 //            top->edges[i] = -1;
 //        }
@@ -206,7 +225,6 @@ int mpl_tree_traverse(mpl_tree* t)
         mpl_node_poly_traverse(t->base, t, &i, &j);
     }
     else {
-        
         mpl_node_bin_traverse(t->base, t, &i, &j);
     }
     
@@ -231,14 +249,14 @@ int mpl_tree_reset(mpl_tree* t)
     
     int i = 0;
     
-    for (i = 0; i < t->num_nodes; ++i) {
+    for (i = 0; i <= t->num_nodes; ++i) {
         mpl_reset_node(&t->nodes[i]);
 //        t->postord_all[i] = NULL;
 //        if (i < t->num_taxa) {
 //            t->postord_intern[i] = NULL;
 //        }
     }
-    
+
     t->root = NULL;
     t->tree_size = 0;
     t->base = NULL;
@@ -270,7 +288,7 @@ int mpl_tree_write_newick(char** dest, mpl_tree* t)
         // TODO: Append unrooted signifier
     }
     
-    mpl_node_write_newick(nwk, t->base);
+    mpl_node_write_newick(nwk, t->dummy->left);
     mpl_str_append(';', nwk);
     // TODO: Make safer:
     *dest = mpl_str_c(nwk);
@@ -297,6 +315,10 @@ int mpl_tree_rebase(long tgt, mpl_tree* t)
     
     n = n1->anc;
     p = n1;
+    
+    // Disconnect base from dummy. Otherwise, the dummy will end up inside the
+    // tree. And we don't want that!
+    t->base->anc = NULL;
     
     while (n) {
         q = n->anc;
@@ -338,13 +360,11 @@ int mpl_tree_rebase(long tgt, mpl_tree* t)
     // Reset the base to the right place.
     mpl_node_clear_descs(t->base);
     mpl_node_push_desc(t->base, n1);
-//    t->base->descs[0] = n1;
-//    t->base->left = n1;
     mpl_node_push_desc(t->base, n2);
-//    n1->anc = t->base;
-//    t->base->descs[1] = n2;
-//    t->base->right = n2;
-//    n2->anc = t->base;
+
+    // Put it back on the dummy:
+    t->base->anc = t->dummy;
+    t->dummy->left = t->base;
     
     return 0;
 }
@@ -361,6 +381,32 @@ int mpl_unroot_tree(mpl_tree* t)
     return 0;
 }
 
+inline mpl_node* mpl_tree_dummy_root(mpl_tree* t)
+{
+    return t->dummy;
+}
+
+mpl_node* mpl_tree_bin_clip(mpl_node* n, mpl_tree* t)
+{
+    assert(!t->num_polys);
+    
+    mpl_node* s = NULL;
+    mpl_node* b = NULL;
+    
+    if (t->base->right == n) {
+        s = n->anc;
+    }
+    
+    s = mpl_node_bin_clip(n);
+    
+    if (s != NULL) {
+        t->base = s;
+        s->anc = t->base;
+    }
+    
+    return s;
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */
@@ -373,7 +419,7 @@ static inline void mpl_tree_reset_copy_indices(mpl_tree* t)
     
     int i = 0;
     
-    for (i = 0; i < t->num_nodes; ++i) {
+    for (i = 0; i <= t->num_nodes; ++i) {
         t->nodes[i].copy_index = -1;
     }
 }
@@ -383,17 +429,18 @@ static void mpl_tree_mark_uniquely(mpl_tree* t)
     int i = 0;
     long index = t->num_taxa;
     mpl_node* p = NULL;
-    
+    mpl_node* d = mpl_tree_dummy_root(t);
     mpl_tree_reset_copy_indices(t);
     
     for (i = 0; i < t->num_taxa; ++i) {
         p = t->nodes[i].anc;
-        if (p) {
+        if (p->anc != d) {
             while (0 > p->copy_index) {
                 p->copy_index = index;
                 ++index;
                 p = p->anc;
-                if (!p) break;
+                if (p == d) break; // If the ancestor is the dummy,
+                                        // you are at the bottom of the tree.
             }
         }
     }

@@ -21,6 +21,7 @@ typedef struct _tree {
     mpl_node**  postord_all;
     mpl_node**  postord_intern;
     mpl_node*   base;
+    mpl_node*   dummy;
     mpl_node*   root;
     long        num_polys;
     
@@ -34,7 +35,7 @@ typedef struct _tree {
 mpl_tree*   mpl_new_tree(long num_taxa);
 int         mpl_delete_tree(mpl_tree** t);
 int         mpl_tree_read_topol(mpl_tree* t, mpl_topol* top);
-int         mpl_record_topol(mpl_topol* top, mpl_tree* t);
+int         mpl_tree_record_topol(mpl_topol* top, mpl_tree* t);
 int         mpl_tree_traverse(mpl_tree* t);
 int         mpl_tree_push_desc(long tgt, long src, mpl_tree* t);
 int         mpl_tree_reset(mpl_tree* t);
@@ -43,5 +44,6 @@ int         mpl_tree_write_newick(char** dest, mpl_tree* t);
 int         mpl_tree_rebase(long tgt, mpl_tree* t);
 int         mpl_root_tree(long tgt, mpl_tree* t);
 int         mpl_unroot_tree(mpl_tree* t);
+mpl_node*   mpl_tree_dummy_root(mpl_tree* t);
 
 #endif /* mpl_tree_h */
