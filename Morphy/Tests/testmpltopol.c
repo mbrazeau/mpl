@@ -63,7 +63,7 @@ int test_rebasing_topology (void)
     
     mpl_tree_read_topol(t, &top);
     
-    mpl_record_topol(&top2, t);
+    mpl_tree_record_topol(&top2, t);
     
     mpl_topol_rebase(0, &top2);
 
@@ -109,7 +109,7 @@ int test_rebasing_large_topology (void)
     
     mpl_tree_read_topol(t, &top);
     
-    mpl_record_topol(&top2, t);
+    mpl_tree_record_topol(&top2, t);
     
     mpl_topol_rebase(7, &top2);
     
@@ -192,10 +192,10 @@ int test_topology_comparison (void)
     mpl_topol* tp4 = mpl_topol_new(ntax);
     
     mpl_tree_read_topol(t, tp1);
-    mpl_record_topol(tp3, t);
+    mpl_tree_record_topol(tp3, t);
     
     mpl_tree_read_topol(t, tp2);
-    mpl_record_topol(tp4, t);
+    mpl_tree_record_topol(tp4, t);
     
     
     res = 0;
@@ -269,10 +269,10 @@ int test_topology_comparison_after_rebase (void)
     mpl_topol* tp4 = mpl_topol_new(ntax);
     
     mpl_tree_read_topol(t, tp1);
-    mpl_record_topol(tp3, t);
+    mpl_tree_record_topol(tp3, t);
     
     mpl_tree_read_topol(t, tp2);
-    mpl_record_topol(tp4, t);
+    mpl_tree_record_topol(tp4, t);
     
     mpl_topol_rebase(0, tp3);
     mpl_topol_rebase(0, tp4);
@@ -344,10 +344,10 @@ int test_negative_topology_comparison (void)
     mpl_topol* tp4 = mpl_topol_new(ntax);
     
     mpl_tree_read_topol(t, tp1);
-    mpl_record_topol(tp3, t);
+    mpl_tree_record_topol(tp3, t);
     
     mpl_tree_read_topol(t, tp2);
-    mpl_record_topol(tp4, t);
+    mpl_tree_record_topol(tp4, t);
     
     
     res = 0;
