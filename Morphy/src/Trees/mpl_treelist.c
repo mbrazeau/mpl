@@ -13,7 +13,7 @@
 
 static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
 
-mpl_treelist* mpl_treelist_new(long num_taxa, long max_trees, long increase_rate)
+mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate)
 {
     mpl_treelist* tl = NULL;
     
@@ -22,7 +22,8 @@ mpl_treelist* mpl_treelist_new(long num_taxa, long max_trees, long increase_rate
         tl->max_trees = max_trees;
         tl->increase_rate = increase_rate;
         
-        
+        // TODO: Check return from this:
+        mpl_treelist_resize(num_taxa, max_trees, tl);
     }
     
     return tl;
@@ -33,10 +34,10 @@ void mpl_treelist_delete(mpl_treelist** tl)
     // TODO: Implement
 }
 
-long mpl_add_tree(mpl_tree* t, mpl_treelist* tl)
+long mpl_treelist_add_tree(mpl_tree* t, mpl_treelist* tl)
 {
     
-    if (!(tl->num_trees <= tl->max_trees)) {
+    if (!(tl->num_trees < tl->max_trees)) {
         if (tl->increase_rate == 0) {
             return -1;
         }
@@ -60,7 +61,14 @@ long mpl_add_tree(mpl_tree* t, mpl_treelist* tl)
     return 0;
 }
 
-mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl);
+mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
+{
+    if (tnum < tl->num_trees) {
+        return &tl->trees[tnum];
+    }
+    
+    return NULL;
+}
 
 /*
  *  PRIVATE FUNCTION DEFINITIONS
@@ -79,6 +87,10 @@ static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         
         extlist = (mpl_topol*)realloc(tl->trees, (tl->max_trees + extension) * sizeof(mpl_topol));
         
+        if (extlist != NULL) {
+            tl->trees = extlist;
+        }
+        
         i = tl->max_trees;
         tl->max_trees += extension;
     }
@@ -86,6 +98,9 @@ static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
     for ( ; i < tl->max_trees; ++i) {
         // TODO: This needs an opposite destructor function for if the process
         // fails. Also check returns from topol_init.
+        // TODO: Make sure this isn't leaking memory by cutting off last topology
+        // in the list
+        tl->trees[i].edges = NULL;
         mpl_topol_init(num_taxa, &tl->trees[i]);
     }
 }
