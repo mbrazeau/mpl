@@ -80,20 +80,35 @@ int mpl_reset_node(mpl_node* n)
 void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
 {
 #ifdef DEBUG
-    assert(n && t && i && j);
+//    assert(n && t && i && j);
 #endif
-    if (n->tip) {
-        t->postord_all[*i] = n;
-        (*i)++;
-        return;
+//    if (n->tip) {
+//        t->postord_all[*i] = n;
+//        (*i)++;
+//        return;
+//    }
+//
+//    mpl_node_bin_traverse(n->left, t, i, j);
+//    mpl_node_bin_traverse(n->right, t, i, j);
+//
+//    t->postord_all[*i] = t->postord_intern[*j] = n;
+//    (*i)++;
+//    (*j)++;
+    
+    if (n) {
+        mpl_node_bin_traverse(n->left, t, i, j);
+        mpl_node_bin_traverse(n->right, t, i, j);
+        
+        if (n->tip) {
+            t->postord_all[*i] = n;
+            (*i)++;
+        }
+        else {
+            t->postord_all[*i] = t->postord_intern[*j] = n;
+            (*i)++;
+            (*j)++;
+        }
     }
-    
-    mpl_node_bin_traverse(n->left, t, i, j);
-    mpl_node_bin_traverse(n->right, t, i, j);
-    
-    t->postord_all[*i] = t->postord_intern[*j] = n;
-    (*i)++;
-    (*j)++;
 }
 
 void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
@@ -396,7 +411,6 @@ static void mpl_extend_desc_array(mpl_node* n, const size_t nelems)
     n->descs = res;
     
     n->capacity = nelems;
-    
 }
 
 static inline void mpl_push_to_desc_array(mpl_node* tgt, mpl_node* src)
@@ -417,7 +431,7 @@ static inline void mpl_push_to_desc_array(mpl_node* tgt, mpl_node* src)
     ++tgt->ndescs;
     mpl_update_left_right_ptrs(tgt);
 
-    //tgt->descs[tgt->ndescs] = NULL;
+    tgt->descs[tgt->ndescs] = NULL;
 }
 
 static inline void mpl_update_left_right_ptrs(mpl_node* n)
