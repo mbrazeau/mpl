@@ -12,5 +12,6 @@
 int test_newick_reader (void);
 int test_newick_reader_bigger_tree (void);
 int test_newick_mult_large_newick_reads (void);
+int test_newick_bulk_reads (void);
 
 #endif /* testmplnwkreader_h */

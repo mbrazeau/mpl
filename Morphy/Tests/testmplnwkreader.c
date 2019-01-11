@@ -181,3 +181,75 @@ int test_newick_mult_large_newick_reads (void)
     return failn;
 }
 
+int test_newick_bulk_reads (void)
+{
+    theader("Test bulk reading newicks");
+    
+    int failn = 0;
+    int err = 0;
+    
+    long numtaxa = 10;
+    long nstr = 12;
+    char* nwkstrs[] = {
+        "((((1,((2,7),(5,9))),(4,8)),6),(3,10));",
+        "((1,3),(((((((2,10),6),8),9),7),5),4));",
+        "(((1,(((2,4),3),((7,9),8))),(5,10)),6);",
+        "(((((((1,8),(3,4)),(2,6)),9),7),5),10);",
+        "((((((1,(4,6)),10),5),9),((2,8),7)),3);",
+        "((((8,4),(((5,9),(2,7)),1)),6),(10,3));", // Same as 0
+        "((((((((1,2),3),(8,10)),9),7),4),6),5);",
+        "(((((1,5),(((2,10),3),4)),9),6),(7,8));",
+        "((((((1,6),(3,(4,8))),7),10),(2,5)),9);",
+        "(((((1,2),10),(3,(5,((7,8),9)))),4),6);",
+        "(1,(((2,(((3,6),((5,10),7)),4)),9),8));",
+        "((((((1,10),5),((4,6),7)),2),9),(3,8));"
+    };
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    //    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    int i = 0;
+    for (i = 0; i < nstr; ++i) {
+        char* nwkop = NULL;
+        mpl_topol_reset(numtaxa, &top);
+        err = mpl_newick_read(nwkstrs[i], &top, &nwkrdr);
+        
+        if (err) {
+            ++failn;
+            err = 0;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+        
+        mpl_tree_read_topol(t, &top);
+        
+        printf("Target: %s\n", nwkstrs[i]);
+        mpl_tree_write_newick(&nwkop, t);
+        printf("Result: %s", nwkop);
+        printf("\n");
+        
+        if (strcmp(nwkop, nwkstrs[i])) {
+            ++failn;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+        
+        free(nwkop);
+        mpl_tree_reset(t);
+    }
+    
+    free(nwkrdr.namebuffer);
+    mpl_delete_tree(&t);
+    return failn;
+}
