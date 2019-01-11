@@ -12,6 +12,7 @@
 #include "testmplnode.h"
 #include "testmpltree.h"
 #include "testmplnwkreader.h"
+#include "testmpltreelist.h"
 #include "testtaxblock.h"
 #include "testmpltopol.h"
 
@@ -34,6 +35,7 @@ int main(int argc, const char * argv[]) {
     fails += test_basic_bin_traversal();
     fails += test_node_get_sibling();
     fails += test_swap_parent_child();
+    fails += test_binary_node_clip();
     
     // Test mpl_tree.c
     fails += test_tree_assembly_from_topology();
@@ -54,10 +56,17 @@ int main(int argc, const char * argv[]) {
     fails += test_newick_reader();
     fails += test_newick_reader_bigger_tree();
     fails += test_newick_mult_large_newick_reads();
+    fails += test_newick_bulk_reads();
     fails += test_polytomous_postorder();
+    
+    // Test mpl_treelist.c
+    fails += test_basic_treelist();
+    fails += test_dynamic_treelist();
     
     // Test mpl_taxablock.c
     fails += test_taxa_block_basic(argc, argv);
+    
+    
     
     printf("\n\nTest summary:\n\n");
     if (fails) {
