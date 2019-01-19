@@ -24,4 +24,5 @@ typedef struct _charinfo {
     
 } mpl_charinfo;
 
+void mpl_charinfo_set_defaults(mpl_charinfo* ci);
 #endif /* mpl_charinfo_h */
