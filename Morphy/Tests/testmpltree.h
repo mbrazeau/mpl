@@ -16,4 +16,6 @@ int test_worst_case_polytomy (void);
 int test_newick_writing (void);
 int test_tree_rebasing (void);
 int test_tree_rebasing_bigger_tree (void);
+int test_perform_all_rerootings_small (void);
+int test_perform_all_rerootings_large (void);
 #endif /* testmpltree_h */

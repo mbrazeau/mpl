@@ -349,3 +349,121 @@ int test_tree_rebasing_bigger_tree (void)
     
     return failn;
 }
+
+int test_perform_all_rerootings_small (void)
+{
+    theader("Test perform all rerootings on a small tree");
+    
+    int failn = 0;
+    
+    const long numtaxa = 5;
+    const long numnodes = 2 * numtaxa - 1;
+    char* nwkstring = "((1,5),((2,4),3));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_node* sites[numnodes];
+    sites[0] = t->base->left;
+    sites[1] = t->base->right->left;
+    sites[2] = t->base->right->right;
+    
+    int i = 0;
+    int numsites = 3;
+    char* nwk = NULL;
+    
+    for (i = 0; i < numsites; ++i) {
+        
+        mpl_tree_rebase(sites[i]->mem_index, t);
+        
+        if (!sites[i]->tip) {
+            sites[numsites] = sites[i]->left;
+            ++numsites;
+            sites[numsites] = sites[i]->right;
+            ++numsites;
+        }
+        
+        mpl_tree_write_newick(&nwk, t);
+        printf("Rerooting: %i: %s\n", i+1, nwk);
+        free(nwk);
+        nwk = NULL;
+    }
+    
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
+
+int test_perform_all_rerootings_large (void)
+{
+    theader("Test perform all rerootings on a larger tree");
+    
+    int failn = 0;
+    
+    const long numtaxa = 10;
+    const long numnodes = 2 * numtaxa - 1;
+    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(numtaxa, &top);
+    
+    mpl_newick_rdr_init(numtaxa, &nwkrdr);
+    
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    
+    mpl_tree* t = mpl_new_tree(numtaxa);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_node* sites[numnodes];
+    mpl_node** s, **sn;
+    s = sn = sites;
+    sites[0] = t->base->left;
+    sites[1] = t->base->right->left;
+    sites[2] = t->base->right->right;
+    
+    sn = &sites[3];
+    
+    // And do it with pointers (probably faster?):
+    int i = 0;
+//    int numsites = 3;
+    char* nwk = NULL;
+    
+    for (s = sites; s < sn ; ++s) {
+        ++i;
+        mpl_tree_rebase((*s)->mem_index, t);
+        
+        if (!(*s)->tip) {
+            *sn = (*s)->left;
+            ++sn;
+            *sn = (*s)->right;
+            ++sn;
+//            sites[numsites++] = sites[i]->left;
+//            sites[numsites++] = sites[i]->right;
+        }
+        
+        mpl_tree_write_newick(&nwk, t);
+        printf("Rerooting: %i: %s\n", i, nwk);
+        free(nwk);
+        nwk = NULL;
+    }
+    
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
