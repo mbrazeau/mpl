@@ -9,9 +9,9 @@
 #ifndef mpl_defs_h
 #define mpl_defs_h
 
-#include "Taxa/mpl_taxblock.h"
-#include "Search/mpl_search.h"
-#include "Results/mpl_results.h"
+//#include "Taxa/mpl_taxblock.h"
+//#include "Search/mpl_search.h"
+//#include "Results/mpl_results.h"
 
 #if defined(__GNUC__)
 #define MPL_POPCOUNTLL(c, v) (c = __builtin_popcountl(v))
@@ -32,15 +32,24 @@ typedef enum {
     MPL_NOMEM           = -2,
     MPL_OUTOFBOUNDS     = -3,
     MPL_UNEXPNULLPTR    = -4,
-    MPL_NOTIMPLEMENTED  = -5
+    MPL_NOTIMPLEMENTED  = -5,
+    MPL_NODIMENSIONS    = -6,  // Input matrix has no known dimensions
+    MPL_ILLEGOVERWRITE  = -7,  // Attempt to inexplicitly overwrite data
+    MPL_BADPARAM        = -8
     
 } MPL_RETURN;
+
+typedef struct _taxablock   mpl_taxablock;
+typedef struct _search      mpl_search;
+typedef struct _results     mpl_results;
+typedef struct _matrix      mpl_matrix;
 
 typedef struct _handle {
     
     mpl_taxablock*  taxablock;
     mpl_search*     search;
     mpl_results*    results;
+    mpl_matrix*     matrix;
     
 } mpl_handle;
 
