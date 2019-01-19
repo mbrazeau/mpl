@@ -15,6 +15,9 @@ static void mpl_bbreak_trav_targets(mpl_node* n, const mpl_node* site, mpl_node*
 static long mpl_bbreak_get_target_list
 (const mpl_tree* t, const mpl_node* site, mpl_bbreak* bbk);
 
+/*
+ *  PUBLIC FUNCTION DEFINITIONS
+ */
 
 void mpl_do_bbreak(mpl_tree* t, mpl_bbreak* bbk)
 {
@@ -98,23 +101,30 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     }
 }
 
+/*
+ *  PRIVATE FUNCTION DEFINITIONS
+ */
+
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
 {
-    if (tgtnbr == base) {
+    if (tgtnbr->anc == base) {
         return 1;
     }
     
-    mpl_node *n     = NULL;
-    mpl_node *p     = NULL;
-    mpl_node *q     = NULL;
-    mpl_node *r     = NULL;
-    mpl_node** rp   = NULL;
+    mpl_node*   n   = NULL;
+    mpl_node*   p   = NULL;
+    mpl_node*   q   = NULL;
+    mpl_node*   r   = NULL;
+    mpl_node**  rp  = NULL;
     
     mpl_node* n1 = tgtnbr;
     mpl_node* n2 = tgtnbr->anc;
+    mpl_node* banc = base->anc;
     
     n = n1->anc;
     p = n1;
+    
+    base->anc = NULL;
     
     while (n) {
         // TODO: This can be simplified without pointers to pointers by using
@@ -134,31 +144,32 @@ static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
         n = q;
     }
     
-    r   = NULL;
+//    r   = NULL;
     rp  = NULL;
+    q = base->left;
     
-    if (base->left == NULL) {
-        r = n->right;
+    if (q == NULL) {
+        q = base->right;
     }
-    else {
-        r = n->left;
-    }
+    
 #ifdef DEBUG
-    assert(r);
+    assert(q);
 #endif
     
-    if (base->anc->right == base) {
-        rp = &base->anc->right;
+    q->anc = base->anc;
+    
+    // Find the pointer to the base:
+    if (q->anc->right == base) {
+        rp = &q->anc->right;
     }
     else {
-        rp = &base->anc->right;
+        rp = &q->anc->left;
 #ifdef DEBUG
-        assert((*rp)->left == base);
+//        assert((*rp)->left == base);
 #endif
     }
     
-    r->anc = base->anc;
-    *rp = r;
+    *rp = q;
     
     base->left = n1;
     n1->anc = base;
@@ -166,6 +177,7 @@ static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
     base->right = n2;
     n2->anc = base;
     
+    base->anc = banc;
     return 0;
 }
 
@@ -203,6 +215,16 @@ static long mpl_bbreak_get_target_list
     bbk->nlongtgts = 0;
     mpl_bbreak_trav_targets(start, site, bbk->tgtslong, bbk->tgtsshort, &bbk->nlongtgts, &bbk->nshorttgts);
     
-    return 0; // The shortlist length is i - 4 if clip site is internal and
-    // i - 2 if it's a tip.
+    return 0; 
 }
+
+/*
+ *  TEST INTERFACE FUNCTION DEFINITIONS
+ */
+
+#ifdef DEBUG
+int mpl_test_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
+{
+    return mpl_bbreak_tbr_reroot(tgtnbr, base);
+}
+#endif
