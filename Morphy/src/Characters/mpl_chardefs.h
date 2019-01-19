@@ -29,24 +29,39 @@ typedef enum {
     
 } mpl_parsim_t;
 
-typedef unsigned long   mpl_discr;
+typedef enum {
+    
+    GAP_INAPPLIC,
+    GAP_MISSING,
+    GAP_NEWSTATE,
+    
+    GAP_MAX,
+    
+} mpl_gap_t;
 
-#define NA      ((mpl_discr)1UL)
-#define MISSING ((mpl_discr)~0UL)
-#define UNKNOWN ((mpl_discr)~NA)
-
+typedef unsigned long mpl_discr;
 #define MAXSTATES (CHAR_BIT * sizeof(mpl_discr) - 1UL)  // -1 for the NA reserved token
 
-#define DEFAULT_MISSING '?'
-#define DEFAULT_UNKNOWN '+'
-#define DEFAULT_GAP     '-'
+#define NA       ((mpl_discr)1UL) // Bitwise representation of the inapplicable symbol
+#define ISAPPLIC ((mpl_discr)~NA) // Bitmask for states that are applicable
+#define MISSING  ((mpl_discr)UINT_MAX) // Bitmask for missing data (all state)
+#define UNKNOWN  ((mpl_discr)~NA) // Bitmask for missing data that's know to be logically applicable
+#define GAPPUSH  1 // Shift value for the position of the gap
+
+#define DEFAULT_MISSING_SYMB '?'
+#define DEFAULT_UNKNOWN_SYMB '+'
+#define DEFAULT_GAP_SYMB     '-'
+#define DEFAULT_DATA_T       MPL_DISCR_T
+#define DEFAULT_PARSIM_T     MPL_FITCH_T
+#define DEFAULT_GAP_T        GAP_INAPPLIC
 
 #define VALID_NEXMAT_PUNC   "{}();"
 #define VALID_XREAD_MATPUNC "[];"
-#define VALID_WILDCAR       "-?"
-#define VALID_STATESYMB   "+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define VALID_MPL_MATPUNC   "{}[]();"
+#define VALID_WILDCARD      "-?"
+#define VALID_STATESYMB     "+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #define VALID_WS            "\n\t "
-#define VALIDSYMB   VALID_NEXMAT_PUNC VALID_XREAD_MATPUNC VALID_WILDCAR \
+#define VALIDSYMB   VALID_NEXMAT_PUNC VALID_XREAD_MATPUNC VALID_WILDCARD \
 VALID_STATESYMB VALID_WS
 
 #endif /* mpl_chardegs_h */
