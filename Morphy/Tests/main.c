@@ -15,6 +15,8 @@
 #include "testmpltreelist.h"
 #include "testtaxblock.h"
 #include "testmpltopol.h"
+#include "testmplbbreak.h"
+#include "testmplmatrix.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -44,6 +46,8 @@ int main(int argc, const char * argv[]) {
     fails += test_newick_writing();
     fails += test_tree_rebasing();
     fails += test_tree_rebasing_bigger_tree();
+    fails += test_perform_all_rerootings_small();
+    fails += test_perform_all_rerootings_large();
     
     // Test mpl_topol.c
     fails += test_rebasing_topology();
@@ -66,7 +70,14 @@ int main(int argc, const char * argv[]) {
     // Test mpl_taxablock.c
     fails += test_taxa_block_basic(argc, argv);
     
+    // Test mpl_bbreak.c
+    fails += test_bbreak_reroot_all_for_subtree();
     
+    // Test mpl_matrix.c
+    fails += test_basic_matrix();
+    fails += test_skip_closure();
+    fails += test_skip_whitespace();
+    fails += test_get_char_pointer_from_matrix();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {
