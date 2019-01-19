@@ -336,6 +336,8 @@ int mpl_tree_rebase(long tgt, mpl_tree* t)
     mpl_node** r = NULL;
     q = t->base->left;
     
+    // If q doesn't point to anything, find a descendant in the base's desc's
+    // array that does.
     if (!q) {
         r = t->base->descs;
         while (!*r) {
@@ -348,8 +350,9 @@ int mpl_tree_rebase(long tgt, mpl_tree* t)
     
     // Now hook up the old descendants of the base to the ancestor of the base
     q->anc = t->base->anc;
-    r = q->anc->descs;
     
+    // Find the pointer to the base
+    r = q->anc->descs;
     while(*r != t->base) {
         ++r;
     }
