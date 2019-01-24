@@ -25,6 +25,9 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
     >> (sizeof(unsigned long) - 1) * CHAR_BIT;
 #endif
 
+#define MPL_RAND_MAX 2147483646
+#define MPL_DEFAULT_RSEED 1
+
 typedef enum {
     
     MPL_SUCCESS         =  0,
@@ -39,19 +42,44 @@ typedef enum {
     
 } MPL_RETURN;
 
-typedef struct _taxablock   mpl_taxablock;
-typedef struct _search      mpl_search;
-typedef struct _results     mpl_results;
-typedef struct _matrix      mpl_matrix;
+typedef enum {
+    
+    MPL_DISCR_T     = 0,
+    MPL_CONTIN_T    = 1,
+    MPL_MODEL_T     = 2,
+    
+    MPL_DATA_T_MAX
+    
+} mpl_data_t;
 
-typedef struct _handle {
+typedef enum {
     
-    mpl_taxablock*  taxablock;
-    mpl_search*     search;
-    mpl_results*    results;
-    mpl_matrix*     matrix;
+    MPL_FITCH_T     = 0,
+    MPL_WAGNER_T    = 1,
+    // TODO: Other parsimony types
     
-} mpl_handle;
+    MPL_PARSIM_T_MAX
+    
+} mpl_parsim_t;
+
+typedef enum {
+    
+    OPTIM_PARSIM        = 0,
+    OPTIM_LIKELIHOOD    = 1, // Ambitious... I know... - MDB
+    
+    OPTIM_MAX
+    
+} mpl_optim_t;
+
+typedef enum {
+    
+    GAP_INAPPLIC    = 0,
+    GAP_MISSING     = 1,
+    GAP_NEWSTATE    = 2,
+    
+    GAP_MAX,
+    
+} mpl_gap_t;
 
 
 #endif /* mpl_defs_h */
