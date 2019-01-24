@@ -12,32 +12,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-typedef enum {
-    
-    MPL_DISCR_T,
-    MPL_CONTIN_T,
-    MPL_MODEL_T
-    
-} mpl_data_t;
-
-typedef enum {
-    
-    MPL_NOTPARSIM,
-    MPL_FITCH_T,
-    MPL_WAGNER_T,
-    // TODO: Other parsimony types
-    
-} mpl_parsim_t;
-
-typedef enum {
-    
-    GAP_INAPPLIC,
-    GAP_MISSING,
-    GAP_NEWSTATE,
-    
-    GAP_MAX,
-    
-} mpl_gap_t;
+#include "../mpl_defs.h"
 
 typedef unsigned long mpl_discr;
 #define MAXSTATES (CHAR_BIT * sizeof(mpl_discr) - 1UL)  // -1 for the NA reserved token
@@ -54,6 +29,7 @@ typedef unsigned long mpl_discr;
 #define DEFAULT_DATA_T       MPL_DISCR_T
 #define DEFAULT_PARSIM_T     MPL_FITCH_T
 #define DEFAULT_GAP_T        GAP_INAPPLIC
+#define DEFAULT_WEIGHT       1.0000000000
 
 #define VALID_NEXMAT_PUNC   "{}();"
 #define VALID_XREAD_MATPUNC "[];"
@@ -63,5 +39,7 @@ typedef unsigned long mpl_discr;
 #define VALID_WS            "\n\t "
 #define VALIDSYMB   VALID_NEXMAT_PUNC VALID_XREAD_MATPUNC VALID_WILDCARD \
 VALID_STATESYMB VALID_WS
+
+
 
 #endif /* mpl_chardegs_h */
