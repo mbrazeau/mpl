@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
+
+#include "mpl_defs.h"
 
 typedef struct _mpl_string {
     size_t len;
@@ -17,7 +20,7 @@ typedef struct _mpl_string {
     char* str;
 } mpl_str;
 
-void* safe_calloc(unsigned long nelems, const size_t size)
+void* safe_calloc(const unsigned long nelems, const size_t size)
 {
     void* ret = NULL;
     
@@ -134,6 +137,29 @@ char* mpl_str_c(mpl_str* s)
     // with a function that receives copied data via a pointer.
     return s->str;
 }
+
+int mpl_rng_seed = MPL_DEFAULT_RSEED;
+
+int mpl_rng(void)
+{
+    return (mpl_rng_seed = (397204094 * mpl_rng_seed) % ((int)pow(2, 31) - 1));
+}
+
+int mpl_rng_set_seed(const int seed)
+{
+    assert(seed != MPL_RAND_MAX);
+    
+    mpl_rng_seed = seed;
+    
+    return 0;
+}
+
+int mpl_rng_get_seed(void)
+{
+    return mpl_rng_seed;
+}
+
+
 
 
 /*
