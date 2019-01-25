@@ -107,7 +107,7 @@ int test_dynamic_treelist (void)
     
     long ntax = 10;
     long numtrees = 12;
-    long extension_rate = 1;
+//    long extension_rate = 1;
     char* newicks[] = {
         "((((1,((2,7),(5,9))),(4,8)),6),(3,10));",
         "((1,3),(((((((2,10),6),8),9),7),5),4));",
