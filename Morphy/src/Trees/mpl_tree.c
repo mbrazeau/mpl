@@ -394,7 +394,7 @@ mpl_node* mpl_tree_bin_clip(mpl_node* n, mpl_tree* t)
     assert(!t->num_polys);
     
     mpl_node* s = NULL;
-    mpl_node* b = NULL;
+//    mpl_node* b = NULL;
     
     if (t->base->right == n) {
         s = n->anc;
