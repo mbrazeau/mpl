@@ -34,8 +34,8 @@ typedef unsigned long mpl_discr;
 #define VALID_NEXMAT_PUNC   "{}();"
 #define VALID_XREAD_MATPUNC "[];"
 #define VALID_MPL_MATPUNC   "{}[]();"
-#define VALID_WILDCARD      "-?"
-#define VALID_STATESYMB     "+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define VALID_WILDCARD      "-?+"
+#define VALID_STATESYMB     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #define VALID_WS            "\n\t "
 #define VALIDSYMB   VALID_NEXMAT_PUNC VALID_XREAD_MATPUNC VALID_WILDCARD \
 VALID_STATESYMB VALID_WS
