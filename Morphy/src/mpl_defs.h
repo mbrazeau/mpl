@@ -38,7 +38,11 @@ typedef enum {
     MPL_NOTIMPLEMENTED  = -5,
     MPL_NODIMENSIONS    = -6,  // Input matrix has no known dimensions
     MPL_ILLEGOVERWRITE  = -7,  // Attempt to inexplicitly overwrite data
-    MPL_BADPARAM        = -8
+    MPL_BADPARAM        = -8,
+    MPL_NOSEMICOLON     = -9,
+    MPL_PARENTHMSM      = -10,
+    MPL_BADDIMENSIONS   = -11,
+    MPL_BADSYMBOL       = -12
     
 } MPL_RETURN;
 
@@ -80,6 +84,17 @@ typedef enum {
     GAP_MAX,
     
 } mpl_gap_t;
+
+typedef enum
+{
+    MPL_AST_SIMPLE,
+    MPL_AST_RANDOM,
+    MPL_AST_ASIS,
+    MPL_AST_CLOSEST,
+    
+    MPL_AST_MAX
+    
+} mpl_stepw_t;
 
 
 #endif /* mpl_defs_h */
