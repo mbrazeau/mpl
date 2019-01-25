@@ -16,13 +16,26 @@
 typedef struct _charinfo {
     
     int             num_states;
-    int             num_gaps;
+    long            num_gaps;
     mpl_data_t      datatype;
     mpl_parsim_t    parsimtype;
     bool            isincluded;
     bool            isparsinform;
+    double          weight;
     
 } mpl_charinfo;
 
 void mpl_charinfo_set_defaults(mpl_charinfo* ci);
+void mpl_charinfo_set_data_t(const mpl_data_t datype, mpl_charinfo* ci);
+mpl_data_t mpl_charinfo_get_data_t(mpl_charinfo* ci);
+void mpl_charinfo_set_parsim_t(const mpl_parsim_t ptype, mpl_charinfo* ci);
+mpl_parsim_t mpl_charinfo_get_parsim_t(const mpl_charinfo* ci);
+void mpl_charinfo_add_state_count(const int n, mpl_charinfo* ci);
+void mpl_charinfo_set_statecount(const int n, mpl_charinfo* ci);
+void mpl_charinfo_include(mpl_charinfo* ci);
+void mpl_charinfo_exclude(mpl_charinfo* ci);
+bool mpl_charinfo_isincluded(mpl_charinfo* ci);
+void mpl_charinfo_set_weight(double wt, mpl_charinfo* ci);
+double mpl_charinfo_get_weight(mpl_charinfo* ci);
+
 #endif /* mpl_charinfo_h */
