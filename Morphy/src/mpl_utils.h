@@ -13,7 +13,10 @@
 
 typedef void* mpl_str;
 
+#define safe_free(ptr) __safe_free((void*)&ptr)
+
 void* safe_calloc(const unsigned long nelems, const size_t size);
+void __safe_free(void** p);
 mpl_str* mpl_str_new(const long capacity);
 void mpl_str_delete(mpl_str** old);
 int mpl_str_append(const char c, mpl_str* s);

@@ -38,6 +38,16 @@ void* safe_calloc(const unsigned long nelems, const size_t size)
     return ret;
 }
 
+void __safe_free(void** p)
+{
+    if (p != NULL) {
+        if (*p != NULL) {
+            free(*p);
+        }
+        *p = NULL;
+    }
+}
+
 /*
  * PUBLIC STRING FUNCTIONS
  */
