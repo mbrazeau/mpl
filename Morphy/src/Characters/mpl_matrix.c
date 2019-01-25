@@ -9,24 +9,34 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 
+#include "../mpl_defs.h"
 #include "../mpl_utils.h"
 #include "mpl_matrix.h"
-
+#include "mpl_charbuf.h"
+#include "mpl_parsim.h"
 
 static void mpl_set_matrix_defaults(mpl_matrix* m);
+static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m);
+static void mpl_matrix_setup_parsimony(mpl_matrix* m);
+static void mpl_matrix_write_discr_parsim_to_buffer(mpl_parsdat* pd, mpl_matrix* m);
+static void mpl_count_chartypes(mpl_matrix* m);
+static void mpl_count_inapplics_by_parstype(mpl_matrix* m);
 static char mpl_get_opposite_bracket(const char bracket);
+static char* mpl_matrix_get_rawdat_ptr(const long row, const long col, const mpl_matrix* m);
+static long mpl_matrix_count_gaps_in_column(const long col, const mpl_matrix* m);
 static char* mpl_skip_closure(const char *closure, const char openc, const char closec);
 static char* mpl_skip_whitespace(char *c);
-static inline mpl_discr mpl_convert_gapsymb(mpl_matrix* m);
-static mpl_discr mpl_char2bitset(const char c, mpl_matrix* m);
+static inline mpl_discr mpl_convert_gapsymb(const mpl_gap_t gaptype);
+static mpl_discr mpl_char2bitset(const char c, const bool isNAtype, mpl_matrix* m);
+static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* m);
 
-
-
-/*
- *  PUBLIC FUNCTION DEFINITIONS
- */
-
+/*******************************************************************************
+ *                                                                             *
+ *  PUBLIC FUNCTION DEFINITIONS                                                *
+ *                                                                             *
+ ******************************************************************************/
 
 /**
  Allocate a new instance of a data matrix. Typically, the program will require
@@ -60,21 +70,13 @@ void mpl_matrix_delete(mpl_matrix** m)
     
     if (mi != NULL) {
         
-        if (mi->charinfo != NULL) {
-            free(mi->charinfo);
-            mi->charinfo = NULL;
-        }
-        
-        if (mi->symbols != NULL) {
-            free(mi->symbols);
-            mi->symbols = NULL;
-        }
-        
+        safe_free(mi->charinfo);
+        safe_free(mi->symbols);
         // NOTE: This assumes the raw data are copied.
-        if (mi->rawdata != NULL) {
-            free(mi->rawdata);
-            mi->rawdata = NULL;
-        }
+        safe_free(mi->rawdata);
+        safe_free(mi->weights);
+        safe_free(mi->weightptrs);
+        safe_free(mi->parsets);
         
         free(mi);
     }
@@ -154,8 +156,12 @@ long mpl_matrix_get_ncols(mpl_matrix* m)
     return m->num_cols;
 }
 
-MPL_RETURN mpl_matrix_attach_rawdata(char* rawdat, mpl_matrix* m)
+MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
 {
+    MPL_RETURN ret = MPL_SUCCESS;
+    long matlen = 1;
+    char* matcopy = NULL;
+    
     if (m->num_cols == 0 || m->num_rows == 0) {
         // There are no dimensions supplied, so the program cannot verify the
         // input matrix
@@ -166,22 +172,331 @@ MPL_RETURN mpl_matrix_attach_rawdata(char* rawdat, mpl_matrix* m)
         return MPL_ILLEGOVERWRITE;
     }
     
-    // Allocate a string to copy the raw data into?
-    m->rawdata = rawdat;
+    matlen += strlen(rawdat);
+    matcopy = safe_calloc(matlen, sizeof(char));
+    strcpy(matcopy, rawdat);
+    m->rawdata = matcopy;
+    
+    // Verify after copying because the verification function needs to use some
+    // information in the matrix. This could be changed if some optimisation
+    // is needed for larger datasets, but that seems unlikely.
+    ret = mpl_matrix_verify_data(m);
+    
+    if (ret != MPL_SUCCESS) {
+        safe_free(m->rawdata);
+    }
+    
+    return ret;
+}
+
+MPL_RETURN mpl_matrix_set_parsim_t(const long ind, const mpl_parsim_t ptype, mpl_matrix* m)
+{
+    if (ind >= m->num_cols) {
+        return MPL_OUTOFBOUNDS;
+    }
+    
+    m->charinfo[ind].parsimtype = ptype;
     
     return MPL_SUCCESS;
 }
 
-/*
- *  PRIVATE FUNCTION DEFINITIONS
- */
+MPL_RETURN mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* m)
+{
+    if (ind >= m->num_cols) {
+        return MPL_OUTOFBOUNDS;
+    }
+    
+    *r = m->charinfo[ind].parsimtype;
+    
+    return MPL_SUCCESS;
+}
+
+MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
+{
+    int i = 0;
+    
+    mpl_count_chartypes(m);
+    // Set up the databuffers needed: discrete, continuous, and "model"-based
+    // For each type, set up enough memory to handle the characters
+    for (i = 0; i < m->ndatypes; ++i) {
+        // TODO: create a return from this and check it
+        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
+    }
+    
+    if (m->optimality == OPTIM_PARSIM) {
+        mpl_matrix_setup_parsimony(m);
+        mpl_parsim_assign_stateset_ptrs(&m->cbufs[MPL_DISCR_T]);
+    }
+    else {
+        return MPL_NOTIMPLEMENTED;
+    }
+    
+    return MPL_SUCCESS;
+}
+
+
+/*******************************************************************************
+ *                                                                             *
+ *  PRIVATE FUNCTION DEFINITIONS                                               *
+ *                                                                             *
+ ******************************************************************************/
 
 static void mpl_set_matrix_defaults(mpl_matrix* m)
 {
+    m->optimality   = OPTIM_PARSIM;
     m->missingsymb  = DEFAULT_MISSING_SYMB;
     m->gapsymb      = DEFAULT_GAP_SYMB;
     m->unknownsymb  = DEFAULT_UNKNOWN_SYMB;
     m->gaphandl     = GAP_INAPPLIC;
+    m->nsymb        = 0;
+    
+    safe_free(m->symbols);
+    
+    m->symbols      = (char*)safe_calloc(1 + strlen(VALID_STATESYMB), sizeof(char));
+    strcpy(m->symbols, VALID_STATESYMB);
+}
+
+static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
+{
+    MPL_RETURN ret = MPL_SUCCESS;
+    
+    char* c = NULL;
+    
+    // Check for a terminal semicolon by finding the
+    c = m->rawdata;
+    while (*c) {
+        ++c;
+    }
+    --c;
+    if (*c != ';') {
+        return MPL_NOSEMICOLON;
+    }
+    
+    // Check dimensions: should be able to get the terminal semicolon by using
+    // the matrix dimensions.
+    c = NULL;
+    c = mpl_matrix_get_rawdat_ptr(m->num_rows, m->num_rows, m);
+    if (*c != ';') {
+        return MPL_BADDIMENSIONS;
+    }
+
+    // Check symbols are valid
+    c = m->rawdata;
+    while (*c != ';') {
+        if (!strchr(VALIDSYMB, *c)) {
+            printf("ERROR: symbol %c not recognized.\n", *c);
+            return MPL_BADSYMBOL;
+        }
+        ++c;
+    }
+    
+    // TODO: Finish verification checks. These aren't vital, as external
+    // libraries will be used to handle file i/o, but Morphy's state
+    // conversion stuff is idiosyncratic enough that extra checks are worthwhile
+    // Check all open parentheses have a close
+    // Check no multistates with inapplicable
+    
+    return ret;
+}
+
+static void mpl_matrix_delete_parsets(mpl_matrix* m)
+{
+    // TODO: This function is doing some stuff that should belong to
+    // mpl_parsim.c
+
+    int i = 0;
+    
+    if (m->parsets != NULL) {
+        
+        for (i = 0; i < m->nparsets; ++i) {
+            if (m->parsets[i].indexbuf != NULL) {
+                free(m->parsets[i].indexbuf);
+                m->parsets[i].indexbuf = NULL;
+            }
+        }
+        
+        free(m->parsets);
+        m->parsets = NULL;
+    }
+}
+
+static void mpl_matrix_setup_parsimony(mpl_matrix* m)
+{
+    int i = 0;
+    int j = 0;
+    long numstd = 0;
+    long numna = 0;
+    int joint_pars_types = 0;
+    long current_range = 0;
+    
+    // Each parsimony type will have a certain number of columns with inapplicable
+    // values. This then can be used to determine the number of columns in the
+    // inapplicable parsimony type
+//    mpl_count_inapplics_by_parstype(m);
+    
+    if (m->gaphandl == GAP_INAPPLIC) {
+        // Determine each column's inapplicable data count and assign whether
+        // the column should be counted as having non-trivial NAs
+        mpl_count_inapplics_by_parstype(m);
+    }
+    
+    // This determines the ranges for std type characters and inapplicable-type
+    // characters in the main buffer.
+    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
+        
+        if (m->parstypes[i] > 0) {
+            ++joint_pars_types;
+        }
+        if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
+            ++joint_pars_types;
+        }
+        
+        numstd += m->parstypes[i] - m->nasbytype[i];
+        assert(numstd >= 0);
+        numna += m->nasbytype[i];
+    }
+    
+    // Clear any prior parsimony sets:
+    mpl_matrix_delete_parsets(m);
+    // Set up the parsimony sets
+    m->nparsets = joint_pars_types;
+    m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));
+    // TODO: CHECK RETURN MORE SAFELY?
+    assert(m->parsets != NULL);
+    
+    // Set and size the standard parsimony sets
+    for (i = 0; i < m->nparsimtypes; ++i) {
+        // Check how many standard characters in this type
+        if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
+            
+            mpl_parsim_set_type(GAP_MISSING, (mpl_parsim_t)i, &m->parsets[j]);
+            
+            // The range for this type is the current range index + size of the
+            // type block
+            mpl_parsim_set_range
+            (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
+            
+            // Update current range
+            current_range += (m->parstypes[i] - m->nasbytype[i]);
+            ++j;
+        }
+    }
+    
+    // Set and size the inapplic parsimony sets
+    for (i = 0; i < m->nparsimtypes; ++i) {
+        // Check how many standard characters in this type
+        if (m->nasbytype[i] > 0) {
+            
+            mpl_parsim_set_type(GAP_INAPPLIC, (mpl_parsim_t)i, &m->parsets[j]);
+            
+            // The range for this type is the current range index + size of the
+            // type block
+            mpl_parsim_set_range
+            (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
+            
+            // Update current range
+            current_range += m->nasbytype[i];
+            ++j;
+        }
+    }
+    
+    // Write the data into the buffers as appropriate
+    for (i = 0; i < m->nparsets; ++i) {
+        // Write into buffer
+        mpl_matrix_write_discr_parsim_to_buffer(&m->parsets[i], m);
+    }
+}
+
+static void mpl_matrix_convert_into_discrbuffer
+(mpl_discr* di, const long coln, mpl_matrix* m)
+{
+    long i = 0;
+    char* cp = NULL;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        cp = mpl_matrix_get_rawdat_ptr(i, coln, m);
+        di[i] = mpl_rawcharptr2bitset(cp, coln, m);
+    }
+}
+
+static void mpl_matrix_write_discr_parsim_to_buffer
+(mpl_parsdat* pd, mpl_matrix* m)
+{
+    long i = 0;
+    
+    mpl_discr* colbuf = NULL;
+    colbuf = (mpl_discr*)safe_calloc(m->num_rows, sizeof(mpl_discr));
+    
+    // Loop over all characters in the matrix and check that the character's
+    // description matches this parsimony data type. Check if it is the
+    // same optimality type (e.g. Fitch, Wagner...) and if it has the same
+    // method of treating gaps.
+    for (i = 0; i < m->num_cols; ++i) {
+
+        // If column is the same parsimony type as the pardat struct:
+        if (m->charinfo[i].parsimtype == pd->parstype) {
+            // And if they have the same value for treating gaps:
+            if (pd->isNAtype == true && m->charinfo[i].num_gaps > 2) {
+                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
+                mpl_parsim_add_data_column_to_buffer
+                (colbuf, &m->cbufs[MPL_DISCR_T], pd);
+            }
+            else if (pd->isNAtype == false && m->charinfo[i].num_gaps < 3){
+                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
+                mpl_parsim_add_data_column_to_buffer
+                (colbuf, &m->cbufs[MPL_DISCR_T], pd);
+            }
+        }
+    }
+    
+    free(colbuf);
+}
+
+/**
+ For each character info struct in the charinfo block of the matrix, a count is
+ accumulated for each time a particular data type is visited.
+ 
+ @param m A pointer to an instance of a matrix struct.
+ */
+static void mpl_count_chartypes(mpl_matrix* m)
+{
+    long i = 0;
+    
+    // Reset the buffers before counting
+    memset(m->datypes, 0, MPL_DATA_T_MAX * sizeof(int));
+    memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(int));
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        // datatype and parsimtype are enumerated types, the datypes array and
+        // parstypes arrays in the matrix struct can store a count at each
+        // position corresponding to the datatype of the charinfo cell.
+        ++m->datypes[m->charinfo[i].datatype];
+        // Count the number of data types
+        if (m->datypes[m->charinfo[i].datatype] == 1) {
+            ++m->ndatypes;
+        }
+        ++m->parstypes[m->charinfo[i].parsimtype];
+        if (m->parstypes[m->charinfo[i].datatype] == 1) {
+            ++m->nparsimtypes;
+        }
+    }
+}
+
+static void mpl_count_inapplics_by_parstype(mpl_matrix* m)
+{
+    long i = 0;
+    
+    memset(m->nasbytype, 0, MPL_PARSIM_T_MAX * sizeof(int));
+    
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        
+        m->charinfo[i].num_gaps = mpl_matrix_count_gaps_in_column((const long)i, (const mpl_matrix*)m);
+        
+        if (m->charinfo[i].num_gaps > 2) {
+            ++m->nasbytype[m->charinfo[i].datatype];
+        }
+    }
 }
 
 static char mpl_get_opposite_bracket(const char bracket)
@@ -214,7 +529,7 @@ static char mpl_get_opposite_bracket(const char bracket)
     return r;
 }
 
-char* mpl_matrix_get_rawdat_ptr(const long row, const long col, mpl_matrix* m)
+char* mpl_matrix_get_rawdat_ptr(const long row, const long col, const mpl_matrix* m)
 {
     long  i = 0;
     long  tgt = row * m->num_cols + col;
@@ -253,6 +568,24 @@ char* mpl_matrix_get_rawdat_ptr(const long row, const long col, mpl_matrix* m)
     return ret;
 }
 
+static long mpl_matrix_count_gaps_in_column(const long col, const mpl_matrix* m)
+{
+    long ngaps = 0;
+    
+    long i = 0;
+    char c = 0;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        c = 0;
+        c = *mpl_matrix_get_rawdat_ptr(i, col, m);
+        if (c == m->gapsymb) {
+            ++ngaps;
+        }
+    }
+    
+    return ngaps;
+}
+
 static char* mpl_skip_closure
 (const char *closure, const char openc, const char closec)
 {
@@ -280,16 +613,17 @@ static char* mpl_skip_whitespace(char *c)
     return c;
 }
 
-static inline mpl_discr mpl_convert_gapsymb(mpl_matrix* m)
+static inline mpl_discr mpl_convert_gapsymb(const mpl_gap_t gaptype)
 {
-    if (m->gaphandl == GAP_MISSING) {
+    if (gaptype == GAP_MISSING) {
         return MISSING;
     }
     
     return NA;
 }
 
-static mpl_discr mpl_char2bitset(const char c, mpl_matrix* m)
+static mpl_discr mpl_char2bitset
+(const char c, const bool isNAtype, mpl_matrix* m)
 {
     int i = 0;
     
@@ -313,7 +647,18 @@ static mpl_discr mpl_char2bitset(const char c, mpl_matrix* m)
             return MISSING;
         }
         else if (c == m->gapsymb) {
-            return mpl_convert_gapsymb(m);
+            if (isNAtype) {
+                return mpl_convert_gapsymb(GAP_INAPPLIC);
+            }
+            else {
+                if (m->gaphandl == GAP_INAPPLIC) {
+                    // This means it's a trivial gap for the Brazeau,
+                    // Guillerme, Smith algorithm, so treat as missing
+                    return mpl_convert_gapsymb(GAP_MISSING);
+                } else {
+                    return mpl_convert_gapsymb(m->gaphandl);
+                }
+            }
         }
         else if (c == m->unknownsymb) {
             return UNKNOWN;
@@ -323,6 +668,32 @@ static mpl_discr mpl_char2bitset(const char c, mpl_matrix* m)
     
     return 0;
 }
+
+static mpl_discr mpl_rawcharptr2bitset
+(char* cp, const long colnum, mpl_matrix* m)
+{
+    mpl_discr res = 0;
+    bool isNAtype = false;
+    
+    if (m->gaphandl == GAP_INAPPLIC && m->charinfo[colnum].num_gaps > 2) {
+        isNAtype = true;
+    }
+    
+    if (strchr(VALID_MPL_MATPUNC, *cp)) {
+        
+        char cl = mpl_get_opposite_bracket(*cp);
+        while (*cp != cl) {
+            ++cp;
+            res |= mpl_char2bitset(*cp, isNAtype, m);
+        }
+    }
+    else {
+        res = mpl_char2bitset(*cp, isNAtype, m);
+    }
+    
+    return res;
+}
+
 
 /*
  *  TEST INTERFACE FUNCTION DEFINITIONS
@@ -334,6 +705,16 @@ char*
 mpl_test_matrix_get_rawdat_ptr(const long row, const long col, mpl_matrix* m)
 {
     return mpl_matrix_get_rawdat_ptr(row, col, m);
+}
+
+void mpl_test_matrix_setup_parsimony(mpl_matrix* m)
+{
+    mpl_matrix_setup_parsimony(m);
+}
+
+long mpl_test_matrix_count_gaps_in_column(const long col, const mpl_matrix* m)
+{
+    return mpl_matrix_count_gaps_in_column(col, m);
 }
 
 char* mpl_test_skip_closure
