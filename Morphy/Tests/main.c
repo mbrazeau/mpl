@@ -78,6 +78,8 @@ int main(int argc, const char * argv[]) {
     fails += test_skip_closure();
     fails += test_skip_whitespace();
     fails += test_get_char_pointer_from_matrix();
+    fails += test_counting_gaps_in_matrix_columns();
+    fails += test_parsimony_data_setup();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {
