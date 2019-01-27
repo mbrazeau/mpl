@@ -315,6 +315,13 @@ int mpl_node_swap_anc_child(mpl_node* child, mpl_node *n)
     return -1;
 }
 
+void mpl_node_rotate(mpl_node* n)
+{
+    mpl_node* t = n->right;
+    n->right = n->left;
+    n->left = t;
+}
+
 void mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc)
 {
     mpl_node** ancp = NULL;
