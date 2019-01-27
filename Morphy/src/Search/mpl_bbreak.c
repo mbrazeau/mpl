@@ -7,6 +7,7 @@
 //
 
 #include <assert.h>
+#include <string.h>
 
 #include "mpl_bbreak.h"
 
@@ -18,6 +19,38 @@ static long mpl_bbreak_get_target_list
 /*
  *  PUBLIC FUNCTION DEFINITIONS
  */
+
+
+int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
+{
+    int ret = 0;
+    
+    // TODO: Set size based on inputs from s
+    bbk->num_rearrangs = 0;
+    bbk->bbktype = s->bbreak_type;
+    bbk->treelist = s->treelist;
+    
+    // Set up all the node buffers:
+    
+    bbk->srcs = (mpl_node**)safe_calloc(bbk->num_nodes, sizeof(mpl_node*));
+    bbk->tgtslong = (mpl_node**)safe_calloc(bbk->num_nodes, sizeof(mpl_node*));
+    bbk->tgtsshort = (mpl_node**)safe_calloc(bbk->num_nodes, sizeof(mpl_node*));
+    
+    return ret;
+}
+
+void mpl_bbreak_reset(mpl_bbreak* bbk)
+{
+    bbk->bbktype = DEFAUL_BBREAK;
+    bbk->num_nodes = 0;
+    safe_free(bbk->srcs);
+    bbk->nlongtgts = 0;
+    safe_free(bbk->tgtslong);
+    bbk->nshorttgts = 0;
+    safe_free(bbk->tgtsshort);
+    bbk->num_rearrangs = 0;
+    bbk->treelist = NULL;
+}
 
 void mpl_do_bbreak(mpl_tree* t, mpl_bbreak* bbk)
 {
@@ -31,13 +64,18 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long nnodes = 0; // The number of nodes in the tree
     long clipmax = 0;
     
+    mpl_node* left;
+    mpl_node* right;
+    mpl_node* csite;
+    
     mpl_node** clips = NULL;
-    mpl_node* srcs = *bbk->srcs;
-    mpl_node* src = srcs;
+    mpl_node** srcs = bbk->srcs;
+    mpl_node** src = srcs;
     long i = 0;
     long j = 0;
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
+    
     clips = t->postord_all; // The postorder list of nodes in the tree
     nnodes = t->tree_size;
     clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
@@ -45,59 +83,103 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     for (i = 1; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
         
         // Clip the tree at i
-        mpl_node* left = NULL;
-        mpl_node* right = NULL;
-        mpl_node* csite = NULL;
+        left = NULL;
+        right = NULL;
+        csite = NULL;
         
         csite = mpl_node_get_sib(clips[i]);
         
         if (clips[i]->anc->left == clips[i]) {
             right = csite;
+            left = NULL; // Simply precautionary
         }
         else {
             left = csite;
+            right = NULL;
         }
+        
         mpl_node_bin_clip(clips[i]);
+        *src = clips[i];
+        srcs = bbk->srcs;
+        
+        // << Reoptimise the subtrees as quickly as possible >>
         
         // <<< Check the cost >>> of reinserting the node at this clip
         // If the result is no difference on the length of the
         // tree, this branch is zero-length and can be skipped
         
+        // Set up the src pointers
+        if ((*src)->tip == 0) {
+            *srcs = clips[i]->left;
+            ++srcs;
+            if (clips[i]->right->tip == 0) {
+                *srcs = clips[i]->right->left;
+                ++srcs;
+                *srcs = clips[i]->right->right;
+                ++srcs;
+            }
+        }
+        else {
+            *srcs = clips[i];
+            ++srcs;
+        }
+        
         // Get all the target sites:
         long tgtnum = 0;
-        
+
         // Size of the long list is determined by the traversal
         mpl_bbreak_get_target_list(t, csite, bbk);
-        
+
         // Now, set tgtnumb based on whether we are doing SPR or TBR...
-        
-        for (j = 0; j < tgtnum; ++j ){
+//        tgtnum = bbk->nlongtgts;
+        // For each rerooting site
+        for (src = bbk->srcs; src < srcs; ++src) {
             
-            // For each rerooting site
-            while (src != srcs) {
+            // Re-root the tree
+            mpl_bbreak_tbr_reroot(*src, clips[i]);
+            
+            // Get any additional nodes needed for unique rerootings
+            if ((*src)->tip == 0) {
+                *srcs = (*src)->left;
+                ++srcs;
+                *srcs = (*src)->right;
+                ++srcs;
+            }
+            
+            if (*src == *bbk->srcs) {
+                tgtnum = bbk->nshorttgts;
+            }
+            else {// Try all target sites
+                // For SPR: If this is the first re-rooting, move to all sites
+                // on the short list. Otherwise, don't move anywhere
+                if (bbk->bbktype == MPL_SPR_T) {
+                    tgtnum = 1;
+                }
+                else {
+                    tgtnum = bbk->nlongtgts;
+                }
+            }
+            
+            for (j = 0; j < tgtnum; ++j ){
                 
-                // Re-root the tree
-                
-                // Try all target sites
+                ++bbk->num_rearrangs;
                 // for each target site <<< check the length >>> of the tree {
                 
                 //  Sort storage or discarding of try based on length
-                mpl_treelist_add_tree(t, bbk->treelist);
+                //                mpl_treelist_add_tree(t, bbk->treelist);
                 
                 //  Put the src tree back in its original spot
                 
-                ++src;
             }
-            
+        }
+        
+        // Reset to the old spot
+        if (src != bbk->srcs) {
+            mpl_bbreak_tbr_reroot(*bbk->srcs, clips[i]);
         }
        
         // Restore the tree to exactly as it was before
-        if (left != NULL) {
-            mpl_node_bin_connect(left, NULL, clips[i]);
-        }
-        else {
-            mpl_node_bin_connect(NULL, right, clips[i]);
-        }
+        mpl_node_bin_connect(left, right, clips[i]);
     }
 }
 
@@ -107,7 +189,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
 {
-    if (tgtnbr->anc == base) {
+    if (tgtnbr->anc == base || tgtnbr->tip > 0) {
         return 1;
     }
     
@@ -210,10 +292,17 @@ static long mpl_bbreak_get_target_list
     assert(t->num_polys == 0);
     
     mpl_node* start = mpl_node_get_sib(&t->nodes[0]);
+    if (start == NULL) {
+        bbk->nshorttgts = 0;
+        bbk->nlongtgts  = 1;
+        bbk->tgtslong[0] = &t->nodes[0];
+        return 1;
+    }
     
     bbk->nshorttgts = 0;
-    bbk->nlongtgts = 0;
-    mpl_bbreak_trav_targets(start, site, bbk->tgtslong, bbk->tgtsshort, &bbk->nlongtgts, &bbk->nshorttgts);
+    bbk->nlongtgts  = 0;
+    mpl_bbreak_trav_targets
+    (start, site, bbk->tgtslong, bbk->tgtsshort, &bbk->nlongtgts, &bbk->nshorttgts);
     
     return 0; 
 }
@@ -226,5 +315,10 @@ static long mpl_bbreak_get_target_list
 int mpl_test_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
 {
     return mpl_bbreak_tbr_reroot(tgtnbr, base);
+}
+
+void mpl_test_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
+{
+    mpl_branch_swap(t, bbk);
 }
 #endif
