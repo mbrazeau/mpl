@@ -14,6 +14,8 @@
 #include "../Trees/mpl_tree.h"
 #include "../Trees/mpl_treelist.h"
 
+#define DEFAUL_BBREAK MPL_TBR_T
+
 typedef enum {
     MPL_INPUTORDER_T,
     MPL_RANDOM_T,
