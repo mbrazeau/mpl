@@ -9,6 +9,8 @@
 #ifndef mpl_treelist_h
 #define mpl_treelist_h
 
+#include <stdbool.h>
+
 #include "mpl_topol.h"
 #include "mpl_tree.h"
 
@@ -23,7 +25,7 @@ typedef struct _treelist {
 
 mpl_treelist*   mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate);
 void            mpl_treelist_delete(mpl_treelist** tl);
-long            mpl_treelist_add_tree(mpl_tree* t, mpl_treelist* tl);
+long            mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_topol(long tnum, mpl_treelist* tl);
 
 

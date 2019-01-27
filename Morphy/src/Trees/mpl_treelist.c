@@ -34,8 +34,9 @@ void mpl_treelist_delete(mpl_treelist** tl)
     // TODO: Implement
 }
 
-long mpl_treelist_add_tree(mpl_tree* t, mpl_treelist* tl)
+long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
+    long i = 0;
     
     if (!(tl->num_trees < tl->max_trees)) {
         if (tl->increase_rate == 0) {
@@ -49,6 +50,14 @@ long mpl_treelist_add_tree(mpl_tree* t, mpl_treelist* tl)
     mpl_topol* top = &tl->trees[tl->num_trees];
     
     mpl_tree_record_topol(top, t);
+    
+    if (checkdupes == true) {
+        for (i = 0; i < tl->num_trees; ++i) {
+            if (!mpl_topol_compare(top, &tl->trees[i])) {
+                return 1;
+            }
+        }
+    }
     
     ++tl->num_trees;
     
