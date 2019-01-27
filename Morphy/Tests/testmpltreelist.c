@@ -55,7 +55,7 @@ int test_basic_treelist (void)
         free(nwkout);
         nwkout = NULL;
         mpl_tree_checker(t);
-        mpl_treelist_add_tree(t, tl);
+        mpl_treelist_add_tree(false, t, tl);
         mpl_topol_reset(ntax, top);
     }
     
@@ -142,7 +142,7 @@ int test_dynamic_treelist (void)
         free(nwkout);
         nwkout = NULL;
         mpl_tree_checker(t);
-        mpl_treelist_add_tree(t, tl);
+        mpl_treelist_add_tree(false, t, tl);
         mpl_topol_reset(ntax, top);
     }
     
