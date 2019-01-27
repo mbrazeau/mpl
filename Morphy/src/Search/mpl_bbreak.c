@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include <stdio.h>
+
 #include "mpl_bbreak.h"
 
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base);
@@ -19,6 +21,19 @@ static long mpl_bbreak_get_target_list
 /*
  *  PUBLIC FUNCTION DEFINITIONS
  */
+
+void mpl_temp_traver_subtr(mpl_node* n)
+{
+    if (n->tip) {
+        printf("%li", n->tip);
+        return;
+    }
+    printf("(");
+    mpl_temp_traver_subtr(n->left);
+    printf(",");
+    mpl_temp_traver_subtr(n->right);
+    printf(")");
+}
 
 
 int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
@@ -63,14 +78,17 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 //    long ntax = 0; // The number of taxa in the tree
     long nnodes = 0; // The number of nodes in the tree
     long clipmax = 0;
+    long tgtnum = 0;
     
     mpl_node* left;
     mpl_node* right;
     mpl_node* csite;
-    
+    mpl_node* rtlef = NULL;
+    mpl_node* rtrig = NULL;
     mpl_node** clips = NULL;
     mpl_node** srcs = bbk->srcs;
     mpl_node** src = srcs;
+    mpl_node** tgts;
     long i = 0;
     long j = 0;
     
@@ -110,6 +128,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
+            rtlef = clips[i]->left;
+            rtrig = clips[i]->right;
             *srcs = clips[i]->left;
             ++srcs;
             if (clips[i]->right->tip == 0) {
@@ -124,15 +144,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             ++srcs;
         }
         
-        // Get all the target sites:
-        long tgtnum = 0;
-
         // Size of the long list is determined by the traversal
         mpl_bbreak_get_target_list(t, csite, bbk);
-
-        // Now, set tgtnumb based on whether we are doing SPR or TBR...
-//        tgtnum = bbk->nlongtgts;
-        // For each rerooting site
+        
         for (src = bbk->srcs; src < srcs; ++src) {
             
             // Re-root the tree
@@ -146,21 +160,28 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 ++srcs;
             }
             
-            if (*src == *bbk->srcs) {
+            // The first time round, the subtree won't get rerooted, so only
+            // move around to sites that don't neighbor the original clipsite
+            if (src == bbk->srcs) {
                 tgtnum = bbk->nshorttgts;
+                tgts = bbk->tgtsshort;
             }
             else {// Try all target sites
                 // For SPR: If this is the first re-rooting, move to all sites
                 // on the short list. Otherwise, don't move anywhere
                 if (bbk->bbktype == MPL_SPR_T) {
                     tgtnum = 1;
+                    tgts = &csite;
                 }
                 else {
                     tgtnum = bbk->nlongtgts;
+                    tgts = bbk->tgtslong;
                 }
             }
             
             for (j = 0; j < tgtnum; ++j ){
+                
+                mpl_node_bin_connect(tgts[j], NULL, clips[i]);
                 
                 ++bbk->num_rearrangs;
                 // for each target site <<< check the length >>> of the tree {
@@ -168,14 +189,25 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 //  Sort storage or discarding of try based on length
                 //                mpl_treelist_add_tree(t, bbk->treelist);
                 
+                mpl_treelist_add_tree(false, t, bbk->treelist);
+                
                 //  Put the src tree back in its original spot
+                mpl_node_bin_clip(clips[i]);
                 
             }
         }
         
         // Reset to the old spot
-        if (src != bbk->srcs) {
-            mpl_bbreak_tbr_reroot(*bbk->srcs, clips[i]);
+        if (clips[i]->tip == 0) {
+            mpl_bbreak_tbr_reroot(rtlef, clips[i]);
+            if (clips[i]->left != rtlef) {
+                mpl_node_rotate(clips[i]);
+//                mpl_node* t = NULL;
+//                t = clips[i]->left;
+//                clips[i]->left = clips[i]->right;
+//                clips[i]->right = t;
+            }
+            mpl_bbreak_tbr_reroot(rtrig, clips[i]);
         }
        
         // Restore the tree to exactly as it was before
@@ -189,7 +221,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
 {
-    if (tgtnbr->anc == base || tgtnbr->tip > 0) {
+    if (tgtnbr->anc == base || base->tip > 0) {
         return 1;
     }
     
