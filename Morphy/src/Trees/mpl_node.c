@@ -275,11 +275,20 @@ void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
 
 inline mpl_node* mpl_node_get_sib(mpl_node* n)
 {
-    if (n->anc) {
-        return n->anc->left == n ? n->anc->right : n->anc->left;
+    mpl_node* ret = NULL;
+    
+    if (n->anc != NULL) {
+//        return n->anc->left == n ? n->anc->right : n->anc->left;
+//        n->anc->left == n ? (ret = n->anc->right) : (ret = n->anc->left);
+        if (n->anc->left == n) {
+            ret = n->anc->right;
+        }
+        else {
+            ret = n->anc->left;
+        }
     }
     
-    return NULL;
+    return ret;
 }
 
 int mpl_node_swap_anc_child(mpl_node* child, mpl_node *n)
@@ -373,7 +382,7 @@ inline void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* 
 #endif
     mpl_node* site = NULL;
     
-    if (toleft) {
+    if (toleft != NULL) {
         site = toleft;
         n->anc->left = toleft;
         n->anc->right = n;
@@ -394,6 +403,8 @@ inline void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* 
 #endif
         site->anc->right = n->anc;
     }
+    
+    site->anc = n->anc;
 }
 
 /*
