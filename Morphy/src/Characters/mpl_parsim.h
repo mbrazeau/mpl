@@ -19,6 +19,7 @@ typedef struct mpl_parsdat mpl_parsdat;
 
 typedef double  (*mpl_dnfxn)(const long left, const long right, long n, mpl_parsdat* pd);
 typedef void    (*mpl_upfxn)(const long left, const long right, long n, long anc, mpl_parsdat* pd);
+typedef void    (*mpl_branchfxn)(const long n, const long anc, mpl_parsdat* pd);
 
 typedef struct mpl_parsdat {
     long            start;
@@ -32,6 +33,8 @@ typedef struct mpl_parsdat {
     mpl_dnfxn       downfxn2;
     mpl_upfxn       upfxn1;
     mpl_upfxn       upfxn2;
+    mpl_branchfxn   tipfxn1;
+    mpl_branchfxn   rootfxn;
     // Downpass func;
     // Uppass func;
     // Tip func;
@@ -62,6 +65,12 @@ void mpl_fitch_uppass
 
 void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd);
 
+void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+
+void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+
+void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd);
+
 double mpl_fitch_na_first_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd);
 
@@ -82,5 +91,8 @@ double mpl_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_parsim_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
+
+void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
+void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
 
 #endif /* mpl_parsim_h */

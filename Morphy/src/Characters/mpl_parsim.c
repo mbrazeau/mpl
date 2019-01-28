@@ -18,7 +18,9 @@ static const mpl_parsdat Fitch_Std = {
     .downfxn1   = &mpl_fitch_downpass,
     .upfxn1     = &mpl_fitch_uppass,
     .downfxn2   = NULL,
-    .upfxn2     = NULL
+    .upfxn2     = NULL,
+    .tipfxn1    = &mpl_fitch_tip_update,
+    .rootfxn    = &mpl_fitch_root
     
 };
 
@@ -30,7 +32,9 @@ static const mpl_parsdat Fitch_NA = {
     .downfxn1   = &mpl_fitch_na_first_downpass,
     .upfxn1     = &mpl_fitch_na_first_uppass,
     .downfxn2   = &mpl_fitch_na_second_downpass,
-    .upfxn2     = &mpl_fitch_na_second_uppass
+    .upfxn2     = &mpl_fitch_na_second_uppass,
+    .tipfxn1    = &mpl_fitch_na_tip_update,
+    .rootfxn    = &mpl_fitch_na_root
     
 };
 
@@ -137,6 +141,17 @@ double mpl_fitch_downpass
 }
 
 
+void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        upset[anc][i] = dnset[n][i];
+    }
+}
+
+
 void mpl_fitch_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
@@ -163,13 +178,19 @@ void mpl_fitch_uppass
 }
 
 
-void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd)
+void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i;
     const long end = pd->end;
+    mpl_discr t;
     
     for (i = pd->start; i < end; ++i) {
-        upset[anc][i] = dnset[n][i];
+        t = dnset[tipn][i] & upset[anc][i];
+        if (t) {
+            upset[tipn][i] = t;
+        } else {
+            upset[tipn][i] = dnset[tipn][i];
+        }
     }
 }
 
@@ -212,29 +233,196 @@ mpl_fitch_na_first_downpass
     return 0.0;
 }
 
+void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        upset[anc][i] = dnset[n][i];
+        if (upset[anc][i] & ISAPPLIC) {
+            upset[anc][i] &= ISAPPLIC;
+        }
+    }
+}
 
 void mpl_fitch_na_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
+    long i;
+    const long end = pd->end;
+    mpl_discr t = 0;
     
+    for (i = pd->start; i < end; ++i) {
+        
+        if (dnset[n][i] & NA) {
+            if (dnset[n][i] & ISAPPLIC) {
+                if (upset[anc][i] == NA) {
+                    upset[n][i] = NA;
+                } else {
+                    upset[n][i] = dnset[n][i] & ISAPPLIC;
+                }
+            } else {
+                if (upset[anc][i] == NA) {
+                    upset[n][i] = NA;
+                } else {
+                    t = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
+                    if (t != 0) {
+                        upset[n][i] = t;
+                    } else {
+                        upset[n][i] = NA;
+                    }
+                }
+            }
+        }
+        else {
+            upset[n][i] = dnset[n][i];
+        }
+        
+    }
+//    j = indices[i];
+//
+//    if (npre[j] & NA) {
+//        if (npre[j] & ISAPPLIC) {
+//            if (anc[j] == NA) {
+//                nifin[j] = NA;
+//            }
+//            else {
+//                nifin[j] = npre[j] & ISAPPLIC;
+//            }
+//        }
+//        else {
+//            if (anc[j] == NA) {
+//                nifin[j] = NA;
+//            }
+//            else {
+//                if ((left[j] | right[j]) & ISAPPLIC) {
+//                    nifin[j] = ((left[j] | right[j]) & ISAPPLIC);
+//                }
+//                else {
+//                    nifin[j] = NA;
+//                }
+//            }
+//        }
+//    }
+//    else {
+//        nifin[j] = npre[j];
+//    }
+    
+}
+
+
+void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        if (dnset[tipn][i] & upset[anc][i]) {
+            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+        } else {
+            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+        }
+        
+        upset[tipn][i] = dnset[tipn][i];
+        
+        if (dnset[tipn][i] & upset[anc][i]) {
+            if (upset[anc][i] & ISAPPLIC) {
+                upset[tipn][i] &= ISAPPLIC;
+            }
+        }
+    }
 }
 
 
 double mpl_fitch_na_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
+    long i;
+    long end = pd->end;
+    mpl_discr t = 0;
     double cost = 0.0;
     
+    for (i = pd->start; i < end; ++i) {
+        if (upset[n][i] &  ISAPPLIC) {
+            // Try this with the second uppass sets
+            t = upset[left][i] & upset[right][i];
+            if (t) {
+                if (t & ISAPPLIC) {
+                    upset[n][i] = t & ISAPPLIC;
+                } else {
+                    upset[n][i] = t;
+                }
+            } else {
+                
+                upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
+                
+                if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
+                    cost += 1.0;
+                } else if (actives[left][i] && actives[right][i]) {
+                    cost += 1.0;
+                }
+            }
+        } else {
+            // Set is alread in prelim state
+            if (actives[left][i] && actives[right][i]) {
+                cost += 1.0;
+            }
+        }
+        
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+    }
+    
     return cost;
+    
+//    if (nifin[j] & ISAPPLIC) {
+//        if ((temp = (left[j] & right[j]))) {
+//            if (temp & ISAPPLIC) {
+//                npre[j] = temp & ISAPPLIC;
+//            } else {
+//                npre[j] = temp;
+//            }
+//        }
+//        else {
+//            npre[j] = (left[j] | right[j]) & ISAPPLIC;
+//
+//            if (left[j] & ISAPPLIC && right[j] & ISAPPLIC) {
+//                steps += weights[i];
+//                nset->changes[j] = true;
+//            } else if (lacts[j] && racts[j]) {
+//                steps += weights[i];
+//                nset->changes[j] = true;
+//            }
+//        }
+//    }
+//    else {
+//        npre[j] = nifin[j];
+//
+//        if (lacts[j] && racts[j]) {
+//            steps += weights[i];
+//            nset->changes[j] = true;
+//        }
+//    }
+//
+//    /* Store the states active on this subtree */
+//    stacts[j]   = (lacts[j] | racts[j]) & ISAPPLIC;
 }
 
 
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
-    
+    // TODO: Finish this
 }
 
+void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        m->parsets[i].rootfxn(n, anc, &m->parsets[i]);
+    }
+}
 
 double mpl_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
@@ -247,6 +435,15 @@ double mpl_parsim_first_downpass
     }
     
     return score;
+}
+
+
+void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
+    }
 }
 
 
@@ -268,7 +465,9 @@ double mpl_parsim_second_downpass
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-        score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+        if (m->parsets[i].isNAtype == true) {
+            score += m->parsets[i].downfxn2(left, right, n, &m->parsets[i]);
+        }
     }
     
     return score;
@@ -281,6 +480,8 @@ void mpl_parsim_second_uppass
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-        m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
+        if (m->parsets[i].isNAtype == true) {
+            m->parsets[i].upfxn2(left, right, n, anc, &m->parsets[i]);
+        }
     }
 }
