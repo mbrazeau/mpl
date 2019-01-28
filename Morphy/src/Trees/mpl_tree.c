@@ -27,7 +27,8 @@ mpl_tree* mpl_new_tree(long num_taxa)
     t = (mpl_tree*)safe_calloc(1, sizeof(mpl_tree));
     t->num_taxa = num_taxa;
     t->num_nodes = 2 * num_taxa - 1;
-    t->tree_size = 0;
+    t->size = 0;
+    t->nintern = 0;
     
     t->nodes = (mpl_node*)safe_calloc(t->num_nodes + 1, sizeof(mpl_node));
 
@@ -229,7 +230,8 @@ int mpl_tree_traverse(mpl_tree* t)
     }
     
     // Set the size as indicated by the number of nodes in the tree
-    t->tree_size = i;
+    t->size = i;
+    t->nintern = j;
     
     return 0;
 }
@@ -258,7 +260,7 @@ int mpl_tree_reset(mpl_tree* t)
     }
 
     t->root = NULL;
-    t->tree_size = 0;
+    t->size = 0;
     t->base = NULL;
     t->num_polys = 0;
     
