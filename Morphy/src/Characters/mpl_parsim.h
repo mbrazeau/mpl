@@ -35,13 +35,6 @@ typedef struct mpl_parsdat {
     mpl_upfxn       upfxn2;
     mpl_branchfxn   tipfxn1;
     mpl_branchfxn   rootfxn;
-    // Downpass func;
-    // Uppass func;
-    // Tip func;
-    // Downpass2 func;
-    // Uppass2 func;
-    // Tip2 func;
-    // Updater funcs...
 } mpl_parsdat;
 
 

@@ -39,7 +39,7 @@ static const mpl_parsdat Fitch_NA = {
 };
 
 
-static const mpl_parsdat Wagner_std = {
+static const mpl_parsdat Wagner_Std = {
 
     .parstype   = MPL_WAGNER_T,
     .isNAtype   = false,
@@ -100,7 +100,7 @@ void mpl_parsim_set_type
 //                *pd = Wagner_NA; // Doesn't exist yet
             }
             else {
-                *pd = Wagner_std; // Doesn't exist yet
+                *pd = Wagner_Std; // Doesn't exist yet
             }
             break;
         default:
@@ -233,6 +233,7 @@ mpl_fitch_na_first_downpass
     return 0.0;
 }
 
+
 void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd)
 {
     long i;
@@ -245,6 +246,7 @@ void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd)
         }
     }
 }
+
 
 void mpl_fitch_na_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
@@ -280,35 +282,6 @@ void mpl_fitch_na_first_uppass
         }
         
     }
-//    j = indices[i];
-//
-//    if (npre[j] & NA) {
-//        if (npre[j] & ISAPPLIC) {
-//            if (anc[j] == NA) {
-//                nifin[j] = NA;
-//            }
-//            else {
-//                nifin[j] = npre[j] & ISAPPLIC;
-//            }
-//        }
-//        else {
-//            if (anc[j] == NA) {
-//                nifin[j] = NA;
-//            }
-//            else {
-//                if ((left[j] | right[j]) & ISAPPLIC) {
-//                    nifin[j] = ((left[j] | right[j]) & ISAPPLIC);
-//                }
-//                else {
-//                    nifin[j] = NA;
-//                }
-//            }
-//        }
-//    }
-//    else {
-//        nifin[j] = npre[j];
-//    }
-    
 }
 
 
@@ -345,7 +318,7 @@ double mpl_fitch_na_second_downpass
     double cost = 0.0;
     
     for (i = pd->start; i < end; ++i) {
-        if (upset[n][i] &  ISAPPLIC) {
+        if (upset[n][i] & ISAPPLIC) {
             // Try this with the second uppass sets
             t = upset[left][i] & upset[right][i];
             if (t) {
@@ -359,15 +332,16 @@ double mpl_fitch_na_second_downpass
                 upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
                 
                 if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
-                    cost += 1.0;
+                    cost += weights[i];
                 } else if (actives[left][i] && actives[right][i]) {
-                    cost += 1.0;
+                    cost += weights[i];
                 }
             }
         } else {
+//            upset[n][i] = dnset[n][i];
             // Set is alread in prelim state
             if (actives[left][i] && actives[right][i]) {
-                cost += 1.0;
+                cost += weights[i];
             }
         }
         
@@ -375,38 +349,6 @@ double mpl_fitch_na_second_downpass
     }
     
     return cost;
-    
-//    if (nifin[j] & ISAPPLIC) {
-//        if ((temp = (left[j] & right[j]))) {
-//            if (temp & ISAPPLIC) {
-//                npre[j] = temp & ISAPPLIC;
-//            } else {
-//                npre[j] = temp;
-//            }
-//        }
-//        else {
-//            npre[j] = (left[j] | right[j]) & ISAPPLIC;
-//
-//            if (left[j] & ISAPPLIC && right[j] & ISAPPLIC) {
-//                steps += weights[i];
-//                nset->changes[j] = true;
-//            } else if (lacts[j] && racts[j]) {
-//                steps += weights[i];
-//                nset->changes[j] = true;
-//            }
-//        }
-//    }
-//    else {
-//        npre[j] = nifin[j];
-//
-//        if (lacts[j] && racts[j]) {
-//            steps += weights[i];
-//            nset->changes[j] = true;
-//        }
-//    }
-//
-//    /* Store the states active on this subtree */
-//    stacts[j]   = (lacts[j] | racts[j]) & ISAPPLIC;
 }
 
 
@@ -416,6 +358,7 @@ void mpl_fitch_na_second_uppass
     // TODO: Finish this
 }
 
+
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
 {
     int i = 0;
@@ -423,6 +366,7 @@ void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
         m->parsets[i].rootfxn(n, anc, &m->parsets[i]);
     }
 }
+
 
 double mpl_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
