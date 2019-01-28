@@ -38,6 +38,7 @@ void mpl_charbuf_init
     }
 }
 
+
 void mpl_charbuf_clear(mpl_charbuf* cb)
 {
     if (cb->dnset != NULL) {
@@ -136,13 +137,13 @@ static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols)
     long i = 0;
     mpl_discr** newbuf = NULL;
     
-    newbuf = (mpl_discr**)safe_calloc(nrows, sizeof(mpl_discr*));
+    newbuf = (mpl_discr**)safe_calloc(2 * nrows, sizeof(mpl_discr*));
     
     if (newbuf == NULL) {
         return NULL;
     }
     
-    for (i = 0; i < nrows; ++i) {
+    for (i = 0; i < (2 * nrows); ++i) {
         newbuf[i] = (mpl_discr*)safe_calloc(ncols, sizeof(mpl_discr));
         if (newbuf[i] == NULL) {
             mpl_charbuf_delete_discr_buffer(nrows, &newbuf);
