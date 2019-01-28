@@ -95,7 +95,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     
     clips = t->postord_all; // The postorder list of nodes in the tree
-    nnodes = t->tree_size;
+    nnodes = t->size;
     clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
     
     for (i = 1; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
