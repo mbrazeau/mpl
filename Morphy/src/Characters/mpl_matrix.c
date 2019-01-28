@@ -211,6 +211,7 @@ MPL_RETURN mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* 
     return MPL_SUCCESS;
 }
 
+
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {
     int i = 0;
@@ -347,8 +348,10 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         if (m->parstypes[i] > 0) {
             ++joint_pars_types;
         }
-        if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
-            ++joint_pars_types;
+        if (m->nasbytype[i] > 0) {
+            if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
+                ++joint_pars_types;
+            }
         }
         
         numstd += m->parstypes[i] - m->nasbytype[i];
