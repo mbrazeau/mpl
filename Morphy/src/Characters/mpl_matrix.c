@@ -92,9 +92,11 @@ void mpl_matrix_delete(mpl_matrix** m)
  @param num_rows The number of rows (terminal taxa) of the dataset.
  @param m A pointer to an instance of a matrix.
  */
-void mpl_matrix_set_nrows(long num_rows, mpl_matrix* m)
+MPL_RETURN mpl_matrix_set_nrows(long num_rows, mpl_matrix* m)
 {
     m->num_rows = num_rows;
+    
+    return MPL_SUCCESS;
 }
 
 
@@ -104,7 +106,7 @@ void mpl_matrix_set_nrows(long num_rows, mpl_matrix* m)
  @param m A pointer to an instance of a data matrix.
  @return The number of rows (terminal taxa) in the data matrix.
  */
-long mpl_matrix_get_nrows(mpl_matrix* m)
+long mpl_matrix_get_nrows(const mpl_matrix* m)
 {
     return m->num_rows;
 }
@@ -151,9 +153,41 @@ MPL_RETURN mpl_matrix_set_ncols(long num_cols, mpl_matrix* m)
     return MPL_SUCCESS;
 }
 
-long mpl_matrix_get_ncols(mpl_matrix* m)
+long mpl_matrix_get_ncols(const mpl_matrix* m)
 {
     return m->num_cols;
+}
+
+MPL_RETURN mpl_matrix_set_nnodes(const long num_nodes, mpl_matrix* m)
+{
+    m->num_nodes = num_nodes;
+    
+    return MPL_SUCCESS;
+}
+
+long mpl_matrix_get_nnodes(const mpl_matrix* m)
+{
+    return m->num_nodes;
+}
+
+MPL_RETURN  mpl_matrix_init
+(const long nrows, const long ncols, const long nnodes, mpl_matrix* m)
+{
+    MPL_RETURN ret = MPL_SUCCESS;
+    
+    if ((ret = mpl_matrix_set_nrows(nrows, m))) {
+        return ret;
+    }
+    
+    if ((ret = mpl_matrix_set_ncols(ncols, m))) {
+        return ret;
+    }
+    
+    if ((ret = mpl_matrix_set_nnodes(nnodes, m))) {
+        return ret;
+    }
+
+    return ret;
 }
 
 MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)

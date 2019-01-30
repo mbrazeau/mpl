@@ -19,6 +19,7 @@ typedef struct _matrix {
     
     long            num_cols;
     long            num_rows;
+    long            num_nodes; // The total number of nodes needed.
     mpl_optim_t     optimality;
     mpl_charinfo*   charinfo;
     int             nsymb;
@@ -43,11 +44,14 @@ typedef struct _matrix {
 
 mpl_matrix* mpl_matrix_new(void);
 void        mpl_matrix_delete(mpl_matrix** m);
-void        mpl_matrix_set_nrows(long num_rows, mpl_matrix* m);
-long        mpl_matrix_get_nrows(mpl_matrix* m);
+MPL_RETURN  mpl_matrix_set_nrows(long num_rows, mpl_matrix* m);
+long        mpl_matrix_get_nrows(const mpl_matrix* m);
 MPL_RETURN  mpl_matrix_set_ncols(long num_cols, mpl_matrix* m);
-long        mpl_matrix_get_ncols(mpl_matrix* m);
+long        mpl_matrix_get_ncols(const mpl_matrix* m);
+MPL_RETURN  mpl_matrix_set_nnodes(const long num_nodes, mpl_matrix* m);
+long        mpl_matrix_get_nnodes(const mpl_matrix* m);
 MPL_RETURN  mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m);
+MPL_RETURN  mpl_matrix_init(const long nrows, const long ncols, const long nnodes, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_detach_rawdata(mpl_matrix* m);
 MPL_RETURN  mpl_matrix_set_parsim_t(const long ind, const mpl_parsim_t ptype, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* m);
