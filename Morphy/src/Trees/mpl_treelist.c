@@ -70,6 +70,40 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
     return 0;
 }
 
+void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
+{
+    long i = 0;
+    long lcount = 0;
+    double biglen = 0.0;
+    double shortlen = 0.0;
+    long longest = 0;
+    
+    if (tl->num_trees == tl->max_trees) {
+        shortlen = tl->trees[0].score;
+        for (i = 0; i < tl->num_trees; ++i) {
+            if (tl->trees[i].score > biglen) {
+                biglen = tl->trees[i].score;
+                longest = i;
+                ++lcount;
+            }
+            else if (tl->trees[i].score < shortlen) {
+                shortlen = tl->trees[i].score;
+            }
+        }
+    }
+    
+    if (t->score > biglen && biglen != 0.0) {
+        return;
+    }
+    
+    mpl_topol* top = &tl->trees[longest];
+    mpl_tree_record_topol(top, t);
+    
+    if (tl->num_trees == 0) {
+        ++tl->num_trees;
+    }
+}
+
 mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
 {
     if (tnum < tl->num_trees) {
