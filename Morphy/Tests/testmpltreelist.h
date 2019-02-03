@@ -11,5 +11,6 @@
 
 int test_basic_treelist (void);
 int test_dynamic_treelist (void);
+int test_reject_new (void);
 
 #endif /* testmpltreelist_h */

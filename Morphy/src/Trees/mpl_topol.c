@@ -66,6 +66,7 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
         
         top->num_polys = 0;
         top->root = -1;
+        top->lock = -1;
         
         // TODO: At this point the function could check numtaxa
         // matches the old numtaxa and, if not, call back to
@@ -209,6 +210,36 @@ int mpl_topol_init(long num_taxa, mpl_topol* top)
     mpl_topol_reset(num_taxa, top);
     
     return ret;
+}
+
+
+/**
+ Copies the tree storage data from one topology record to another; copies the
+ entire edges buffer inside the topology record of src into that buffer for
+ dest. There is no change to linkages used in storing topology records in a
+ list. This function does a limited check to see if the topology dimensions are
+ the same. It will fail to copy if the two records have been sized for different
+ numbers of taxa.
+
+ @param src A pointer to the source topology record to be copied.
+ @param dest A pointer to the destination topology record to be copied into.
+ @return An integer indicating a return value: negative if failure and 0 for
+ success.
+ */
+int mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest)
+{
+    if (src->num_taxa != dest->num_taxa) {
+        return -1;
+    }
+    
+    dest->num_nodes = src->num_nodes;
+    dest->num_polys = src->num_polys;
+    dest->root      = src->root;
+    dest->lock      = src->lock;
+    dest->score     = src->score;
+    memcpy(dest->edges, src->edges, dest->num_nodes * sizeof(long));
+    
+    return 0;
 }
 
 /*

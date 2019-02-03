@@ -8,10 +8,16 @@
 
 #include <string.h>
 
+#include "testio.h"
 #include "mpltest.h"
 #include "testutils.h"
 #include "testmplmatrix.h"
 #include "../src/Characters/mpl_chardefs.h"
+#include "../src/Trees/mpl_node.h"
+#include "../src/Trees/mpl_tree.h"
+#include "../src/Trees/mpl_topol.h"
+#include "../src/Trees/mpl_newick_rdr.h"
+#include "../src/Analysis/mpl_scoretree.h"
 
 int test_basic_matrix (void)
 {
@@ -360,3 +366,120 @@ int test_parsimony_data_setup (void)
     
     return failn;
 }
+
+int test_matrix_from_io_source (int argc, const char * argv[])
+{
+    theader("Test matrix reading and processing from Nexus file");
+    
+    // Input file: Ohmdenia_Matrix.nex
+    
+    int failn = 0;
+    int err = 0;
+    
+    long ntax = 0;
+    long nchar = 0;
+    
+    mplNexusReader rdr;
+    
+    int argnum = 1; // Specify matrix you want to open
+    
+    rdr = mpl_test_file_open(argnum, argv);
+    
+    ntax = (long)rdr_get_ntax(rdr);
+    nchar = (long)rdr_get_nchar(rdr);
+    
+    if (ntax != 28) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (nchar != 95) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    char* rawmatrix = NULL;
+    char* symbols = NULL;
+    
+    rdr_get_matrix_notaxlabels(&rawmatrix, rdr);
+    rdr_get_matrix_symbols(&symbols, rdr);
+    
+    // Verify the storage:
+//    printf("Rawmatrix:\n%s\n\n", rawmatrix);
+    printf("Symbols list:\n%s\n\n", symbols);
+    
+    mpl_matrix* m = NULL;
+    m = mpl_matrix_new();
+    
+    err = mpl_matrix_init(ntax, nchar, 2 * ntax, m);
+    
+    if (err != 0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    err = 0;
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+    if (err != 0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // TODO: SYMBOLS
+    
+    // Check the length of a given tree:
+    mpl_tree *t = mpl_new_tree(ntax);
+    char* nwkstring =
+    "(1,((21,((10,8),((((14,24),(15,17)),(25,(2,6))),(7,16)))),((((27,(((19,12),11),20)),(((23,(13,(26,(18,3)))),(22,4)),5)),9),28)));";
+    
+    mpl_newick_rdr nwkrdr;
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_reset(ntax, &top);
+    mpl_newick_rdr_init(ntax, &nwkrdr);
+    mpl_newick_read(nwkstring, &top, &nwkrdr);
+    mpl_tree_read_topol(t, &top);
+    
+    double len = 0.0;
+    
+    mpl_matrix_set_gap_handle(GAP_MISSING, m);
+    
+    mpl_matrix_apply_data(m);
+    
+    mpl_init_parsimony(m);
+    
+    len = mpl_fullpass_parsimony(t);
+    
+    if (len != 229) { // DON'T CHANGE UNLESS TREE HAS BEEN UPDATED AND LENGTH CHECKED EXTERNALLY
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_delete_tree(&t);
+    mpl_matrix_delete(&m);
+    free(rawmatrix);
+    free(symbols);
+    
+    return failn;
+}
+
+// Tests needed:
+// Bad dimensions
+// Unrecognized symbol(s)
+// Load matrix; change dimensions; reload matrix

@@ -15,12 +15,14 @@ typedef struct mpl_topol {
     long        num_nodes;
     long        num_polys;
     long        root; // If rooted, then give the index, otherwise -1
+    long        lock; // If a node is locked, set its index here, otherwise -1
     
     /* Store the tree as an index-ordered "edge table", where a 0 or
      * positive integer is the memory index of the ancestor. -1 is
      * used by convention to indicate no ancestor in the tree (i.e.
      * refers to a node not included in the tree. */
     long*       edges;
+    double      score;
     mpl_topol*  next;
     mpl_topol*  back;
 } mpl_topol;
@@ -32,6 +34,7 @@ int         mpl_topol_link(mpl_topol* parent, mpl_topol* child);
 int         mpl_topol_rebase(const long newbase, mpl_topol* top);
 int         mpl_topol_compare(mpl_topol* t1, mpl_topol* t2);
 int         mpl_topol_init(long num_taxa, mpl_topol* top);
+int         mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest);
 
 
 #endif /* mpl_topol_h */

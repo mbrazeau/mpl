@@ -5,12 +5,12 @@
 //  Created by Martin Brazeau on 30/12/2018.
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
+#include "ncl.h"
+#include "MorphyIO.h"
 
-#include "MorphyIO.hpp"
-
-void* file_open(int argc, const char* argv[])
+void* morphy_gui_file_open(const char* filename)
 {
-    NxsReader *reader = new NxsReader();
+    MultiFormatReader *reader = new MultiFormatReader();
     
     NxsTaxaBlock        *taxa       = new NxsTaxaBlock;
     NxsAssumptionsBlock *assumpts   = new NxsAssumptionsBlock(taxa);
@@ -24,7 +24,25 @@ void* file_open(int argc, const char* argv[])
     reader->Add(trees);
     reader->Add(data);
     
-    reader->ReadFilepath(argv[1]);
+    reader->ReadFilepath(filename, MultiFormatReader::NEXUS_FORMAT);
     
     return (void*)reader;
+}
+
+void morphy_gui_get_taxon(char* labeldest, unsigned int taxnum, void* inrdr)
+{
+    MultiFormatReader* nxsrdr = (MultiFormatReader*)inrdr;
+    NxsTaxaBlock *taxa = nxsrdr->GetTaxaBlock(0);
+    NxsString label;
+    label = taxa->GetTaxonLabel(taxnum);
+    size_t len = label.length();
+    label.copy(labeldest, len);
+    labeldest[len] = '\0';
+}
+
+int morphy_gui_get_ntax(void* inrdr)
+{
+    MultiFormatReader* nxsrdr = (MultiFormatReader*)inrdr;
+    
+    return nxsrdr->GetTaxaBlock(0)->GetNTax();
 }

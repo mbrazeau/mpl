@@ -28,8 +28,8 @@ typedef struct _matrix {
     char            missingsymb;
     char            gapsymb;
     char            unknownsymb;
-    double*         weights; // The vector of user-defined weights
-    double**        weightptrs; // A vector of pointers to weights in the data blocks
+//    double*         weights; // The vector of user-defined weights
+//    double**        weightptrs; // A vector of pointers to weights in the data blocks
     mpl_gap_t       gaphandl;
     int             ndatypes; // Number of discrete data types (e.g. fitch, wagner)
     int             datypes[MPL_DATA_T_MAX];
@@ -55,6 +55,7 @@ MPL_RETURN  mpl_matrix_init(const long nrows, const long ncols, const long nnode
 MPL_RETURN  mpl_matrix_detach_rawdata(mpl_matrix* m);
 MPL_RETURN  mpl_matrix_set_parsim_t(const long ind, const mpl_parsim_t ptype, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* m);
-MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m);
+MPL_RETURN  mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m);
+MPL_RETURN  mpl_matrix_apply_data(mpl_matrix* m);
 
 #endif /* mpl_matrix_h */

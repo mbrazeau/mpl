@@ -17,7 +17,7 @@ int test_skip_whitespace (void);
 int test_get_char_pointer_from_matrix (void);
 int test_counting_gaps_in_matrix_columns (void);
 int test_parsimony_data_setup (void);
-
+int test_matrix_from_io_source (int argc, const char * argv[]);
 
 char* mpl_test_matrix_get_rawdat_ptr (const long row, const long col, mpl_matrix* m);
 long mpl_test_matrix_count_gaps_in_column(const long col, const mpl_matrix* m);

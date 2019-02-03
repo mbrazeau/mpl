@@ -17,6 +17,8 @@
 #include "testmpltopol.h"
 #include "testmplbbreak.h"
 #include "testmplmatrix.h"
+#include "testmplparsimony.h"
+#include "testmplstepwise.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -66,12 +68,15 @@ int main(int argc, const char * argv[]) {
     // Test mpl_treelist.c
     fails += test_basic_treelist();
     fails += test_dynamic_treelist();
+    fails += test_reject_new();
     
     // Test mpl_taxablock.c
     fails += test_taxa_block_basic(argc, argv);
     
     // Test mpl_bbreak.c
     fails += test_bbreak_reroot_all_for_subtree();
+    fails += test_bbreak_store_allswaps();
+    fails += test_bbreak_store_TBR_allswaps();
     
     // Test mpl_matrix.c
     fails += test_basic_matrix();
@@ -80,6 +85,17 @@ int main(int argc, const char * argv[]) {
     fails += test_get_char_pointer_from_matrix();
     fails += test_counting_gaps_in_matrix_columns();
     fails += test_parsimony_data_setup();
+    fails += test_matrix_from_io_source(argc, argv);
+    
+    // Test mpl_stepwise.c
+    fails += test_initial_fork();
+    fails += test_build_arbitrary_tree();
+    
+    fails += test_basic_parsimony();
+    fails += test_parsimony_on_tree();
+    fails += test_fullpass_parsimony();
+    fails += test_fullpass_with_inapplicables();
+    fails += test_fullpass_with_multiple_inapplics();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

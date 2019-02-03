@@ -199,9 +199,13 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
     int i = 0;
     for (i = 0; i < t->num_nodes; ++i) {
         if (i < t->num_taxa) {
-            top->edges[i] = t->nodes[i].anc->copy_index;
+            if (t->nodes[i].anc != NULL) {
+                top->edges[i] = t->nodes[i].anc->copy_index;
+            }
         } else {
-            top->edges[t->nodes[i].copy_index] = t->nodes[i].anc->copy_index;
+            if (t->nodes[i].anc != NULL) {
+                top->edges[t->nodes[i].copy_index] = t->nodes[i].anc->copy_index;
+            }
         }
         //        if (t->nodes[i].anc != NULL && t->nodes[i].anc != d) {
 //            top->edges[i] = t->nodes[t->nodes[i].anc->copy_index].copy_index;
@@ -210,6 +214,8 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
 //            top->edges[i] = -1;
 //        }
     }
+    
+    top->score = t->score;
     
     return 0;
 }
@@ -439,6 +445,9 @@ static void mpl_tree_mark_uniquely(mpl_tree* t)
     
     for (i = 0; i < t->num_taxa; ++i) {
         p = t->nodes[i].anc;
+        if (p == NULL) {
+            continue;
+        }
         if (p->anc != d) {
             while (0 > p->copy_index) {
                 p->copy_index = index;

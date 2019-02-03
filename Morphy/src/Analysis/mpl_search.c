@@ -8,4 +8,16 @@
 #include <assert.h>
 
 #include "mpl_search.h"
+#include "mpl_bbreak.h"
+#include "mpl_stepwise.h"
 
+
+
+mpl_results* mpl_do_search(mpl_search* s)
+{
+    
+    s->searchfxn(s);
+    
+    // TODO: For now:
+    return NULL;
+}

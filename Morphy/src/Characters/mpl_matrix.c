@@ -74,8 +74,6 @@ void mpl_matrix_delete(mpl_matrix** m)
         safe_free(mi->symbols);
         // NOTE: This assumes the raw data are copied.
         safe_free(mi->rawdata);
-        safe_free(mi->weights);
-        safe_free(mi->weightptrs);
         safe_free(mi->parsets);
         
         free(mi);
@@ -246,6 +244,15 @@ MPL_RETURN mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* 
 }
 
 
+MPL_RETURN mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m)
+{
+    // TODO: If this changes the gaptype, you need to trigger a reset of the matrix
+    m->gaphandl = gaptype;
+    
+    return MPL_SUCCESS;
+}
+
+
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {
     int i = 0;
@@ -258,6 +265,10 @@ MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
         mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
     }
     
+    // Everything after here needs to be re-done if character parameters are
+    // changed, in particular the parsimony type. This could be moved to its
+    // own function and called, for instance, when a parsimony type or weight
+    // is changed.
     if (m->optimality == OPTIM_PARSIM) {
         mpl_matrix_setup_parsimony(m);
         mpl_parsim_assign_stateset_ptrs(&m->cbufs[MPL_DISCR_T]);
@@ -476,12 +487,12 @@ static void mpl_matrix_write_discr_parsim_to_buffer
             if (pd->isNAtype == true && m->charinfo[i].num_gaps > 2) {
                 mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
                 mpl_parsim_add_data_column_to_buffer
-                (colbuf, &m->cbufs[MPL_DISCR_T], pd);
+                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
             }
             else if (pd->isNAtype == false && m->charinfo[i].num_gaps < 3){
                 mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
                 mpl_parsim_add_data_column_to_buffer
-                (colbuf, &m->cbufs[MPL_DISCR_T], pd);
+                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
             }
         }
     }

@@ -10,6 +10,7 @@
 
 #include "../mpl_utils.h"
 #include "mpl_charbuf.h"
+#include "mpl_charinfo.h"
 
 static void mpl_charbuf_init_datatype(mpl_charbuf* cb);
 static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db);
@@ -31,6 +32,7 @@ void mpl_charbuf_init
     mpl_charbuf_init_datatype(cb);
     
     cb->weights = (double*)safe_calloc(ncols, sizeof(double));
+    cb->orig_indices = (long*)safe_calloc(ncols, sizeof(long));
     // TODO: CHECK RETURN!!!
     
     for (i = 0; i < cb->char_max; ++i) {
@@ -75,14 +77,22 @@ void mpl_charbuf_clear(mpl_charbuf* cb)
         free(cb->weights);
         cb->weights = NULL;
     }
+    safe_free(cb->orig_indices);
 }
 
 void mpl_charbuf_add_data_column
-(const mpl_discr* datcol, const long colnum, mpl_charbuf* cb)
+(const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb)
 {
     assert(cb->num_chars <= cb->char_max);
     
     long i = 0;
+    
+    // Set the weight directly at this point, but also set up the pointer
+    // to the weight.
+    ci->wtptr = &cb->weights[colnum];
+    cb->weights[colnum] = ci->weight;
+    
+    cb->orig_indices[colnum] = ci->index;
     
     for (i = 0; i < cb->row_max; ++i) {
         cb->dnset[i][colnum] = datcol[i];
@@ -95,7 +105,35 @@ void mpl_charbuf_set_weight
     cb->weights[charnum] = weight;
 }
 
-///
+// TODO: These functions are not the  most efficient possible implememtation
+// for this strategy Temp buffers could be written during full-pass optimisation
+// and even then for only those characters that are being changed by the
+// state set calculations.
+void mpl_charbuf_store_discr_states(mpl_charbuf* cb)
+{
+    long i = 0;
+    for (i = 0; i < cb->num_rows; ++i) {
+        memcpy(cb->tempdn[i], cb->dnset[i], cb->char_max * sizeof(mpl_discr));
+        memcpy(cb->tempup[i], cb->upset[i], cb->char_max * sizeof(mpl_discr));
+        memcpy(cb->tempact[i], cb->actives[i], cb->char_max * sizeof(mpl_discr));
+    }
+}
+
+void mpl_charbuf_restore_discr_states(mpl_charbuf* cb)
+{
+    long i = 0;
+    for (i = 0; i < cb->num_rows; ++i) {
+        memcpy(cb->dnset[i], cb->tempdn[i], cb->char_max * sizeof(mpl_discr));
+        memcpy(cb->upset[i], cb->tempup[i], cb->char_max * sizeof(mpl_discr));
+        memcpy(cb->actives[i], cb->tempact[i], cb->char_max * sizeof(mpl_discr));
+    }
+}
+
+/*******************************************************************************
+ *                                                                             *
+ *  PRIVATE FUNCTION DEFINITIONS                                               *
+ *                                                                             *
+ ******************************************************************************/
 
 static void mpl_charbuf_init_datatype(mpl_charbuf* cb)
 {

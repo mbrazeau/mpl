@@ -13,6 +13,7 @@
 
 #include "mpl_bbreak.h"
 
+
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base);
 static void mpl_bbreak_trav_targets(mpl_node* n, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist, long* i, long* j);
 static long mpl_bbreak_get_target_list
@@ -67,10 +68,52 @@ void mpl_bbreak_reset(mpl_bbreak* bbk)
     bbk->treelist = NULL;
 }
 
-void mpl_do_bbreak(mpl_tree* t, mpl_bbreak* bbk)
+void mpl_do_bbreak(mpl_bbreak* bbk)
 {
     // Set up all the global variables.
     // Iterate over the tree list.
+    long i = 0;
+    long j = 0;
+    mpl_topol* current = NULL;
+    mpl_treelist* starttrees = NULL;
+    
+    mpl_tree* t = NULL;
+    t = mpl_new_tree(bbk->numtaxa);
+    
+    if (current == NULL) {
+        return;
+    }
+    
+    for (i = 0; i < bbk->numreps; ++i) {
+        
+        // If the buffer is empty get one or more trees by stepwise addition
+        // Otheriwse, starttrees is the bbk buffer
+        mpl_stepwise_do_search(&bbk->stepwise);
+        // Then get the trees from the stepwise struct
+        
+        for (j = 0; j < starttrees->num_trees; ++j) {
+            
+            // Add the first tree from the rep in the buffer
+            
+            // If duplicate tree; break out of this loop and go to next rep
+            
+            // For all unswapped trees in the buffer:
+            do {
+                // Rebuild the tree according to the stored topology
+                
+                // mpl_branch_swap(t, bbk);
+                
+                ++current;
+            } while (current /*does not equal the end of the array*/);
+            
+            // If no better equal or tree was found in this replicate,
+            // wipe the rep
+        }
+        
+    }
+    
+    mpl_delete_tree(&t);
+
 }
 
 void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
@@ -121,6 +164,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         srcs = bbk->srcs;
         
         // << Reoptimise the subtrees as quickly as possible >>
+        // 
         
         // <<< Check the cost >>> of reinserting the node at this clip
         // If the result is no difference on the length of the

@@ -25,8 +25,9 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
     >> (sizeof(unsigned long) - 1) * CHAR_BIT;
 #endif
 
-#define MPL_RAND_MAX 2147483646
-#define MPL_DEFAULT_RSEED 1
+#define MPL_RAND_MAX        2147483646
+#define MPL_DEFAULT_RSEED   1
+#define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
 
 typedef enum {
     

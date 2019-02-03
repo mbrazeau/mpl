@@ -10,8 +10,8 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-
-    //var morphyHandle = mpl_
+    
+    var morphyDataReader: UnsafeMutableRawPointer?
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -42,6 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if (result != nil) {
                 let path = result!.path
                 openFileName = path;
+                
+                morphyDataReader = UnsafeMutableRawPointer(morphy_gui_file_open(openFileName));
             }
             
         } else {

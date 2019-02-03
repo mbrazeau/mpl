@@ -25,6 +25,7 @@ typedef struct _tree {
     mpl_node*   dummy;
     mpl_node*   root;
     long        num_polys;
+    double      score;
     
 } mpl_tree;
 

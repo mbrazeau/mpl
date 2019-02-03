@@ -18,7 +18,7 @@ class ViewController: NSViewController {
 
         mainTextBuffer.isEditable = false;
         mainTextBuffer.font = NSFont(name: "Courier", size: 12);
-        mainTextBuffer.string += "Morphy\n\n";
+        mainTextBuffer.string += "\n Morphy\n\n";
         //mainTextBuffer.string  = "\t+--------------------------------------+";
         // Do any additional setup after loading the view.
     }
@@ -30,6 +30,12 @@ class ViewController: NSViewController {
     }
 
     @IBAction func printMessageToBuffer(message: NSString) {
+        mainTextBuffer.string += "\n\n";
+        mainTextBuffer.string += message as String;
+        mainTextBuffer.string += "\n\n";
+    }
+    
+    func printTextToBuffer(message: NSString) {
         
     }
 

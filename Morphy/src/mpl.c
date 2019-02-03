@@ -12,7 +12,7 @@
 #include "mpl_defs.h"
 #include "mpl_utils.h"
 #include "Taxa/mpl_taxblock.h"
-#include "Search/mpl_search.h"
+#include "Analysis/mpl_search.h"
 #include "Results/mpl_results.h"
 #include "Characters/mpl_matrix.h"
 //typedef struct _taxablock   mpl_taxablock;

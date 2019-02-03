@@ -20,7 +20,8 @@ static const mpl_parsdat Fitch_Std = {
     .downfxn2   = NULL,
     .upfxn2     = NULL,
     .tipfxn1    = &mpl_fitch_tip_update,
-    .rootfxn    = &mpl_fitch_root
+    .rootfxn    = &mpl_fitch_root,
+    .locfxn     = &mpl_fitch_local_check
     
 };
 
@@ -34,8 +35,8 @@ static const mpl_parsdat Fitch_NA = {
     .downfxn2   = &mpl_fitch_na_second_downpass,
     .upfxn2     = &mpl_fitch_na_second_uppass,
     .tipfxn1    = &mpl_fitch_na_tip_update,
-    .rootfxn    = &mpl_fitch_na_root
-    
+    .rootfxn    = &mpl_fitch_na_root,
+    .locfxn     = &mpl_fitch_na_local_check
 };
 
 
@@ -110,15 +111,14 @@ void mpl_parsim_set_type
 
 
 void mpl_parsim_add_data_column_to_buffer
-(mpl_discr* col, mpl_charbuf* cb, mpl_parsdat* pd)
+(mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd)
 {
-    mpl_charbuf_add_data_column(col, pd->start + pd->nchars, cb);
+    mpl_charbuf_add_data_column(col, pd->start + pd->nchars, ci, cb);
     ++pd->nchars;
 #ifdef DEBUG
     assert(pd->nchars <= pd->end);
 #endif
 }
-
 
 double mpl_fitch_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
@@ -136,6 +136,8 @@ double mpl_fitch_downpass
             cost += weights[i];
         }
     }
+    
+    pd->score += cost;
     
     return cost;
 }
@@ -192,6 +194,39 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
             upset[tipn][i] = dnset[tipn][i];
         }
     }
+}
+
+
+double mpl_fitch_local_check
+(const double lim,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    double score = 0.0;
+    
+    if (lim < 0.0) {
+        for (i = pd->start; i < end; ++i) {
+            if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+                score += weights[i];
+            }
+        }
+    }
+    else {
+        for (i = pd->start; i < end; ++i) {
+            if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+                score += weights[i];
+                if (score > lim) {
+                    return score;
+                }
+            }
+        }
+    }
+    
+    return score;
 }
 
 
@@ -348,6 +383,8 @@ double mpl_fitch_na_second_downpass
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
     }
     
+    pd->score += cost;
+    
     return cost;
 }
 
@@ -358,6 +395,60 @@ void mpl_fitch_na_second_uppass
     // TODO: Finish this
 }
 
+double mpl_fitch_na_local_check
+(const double lim,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const mpl_parsdat* pd)
+{
+    // For any characters that can be checked without direct reopt at this point
+    // calculate the length and check if it exceeds the limit. If limit is
+    // never hit, then the calling function may need to perform a full check
+    // on inapplicable characters.
+    
+    long i;
+    const long end = pd->end;
+    double score = 0.0;
+    
+    if (lim < 0.0) {
+        for (i = pd->start; i < end; ++i) {
+            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC
+                && upset[src][i] & ISAPPLIC) {
+                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
+                    score += weights[i];
+                }
+            }
+            else if (upset[tgt1][i] & upset[src][i] & NA) {
+                if (actives[tgt1][i] && actives[src][i]) {
+                    score += weights[i];
+                }
+            }
+        }
+    }
+    else {
+        for (i = pd->start; i < end; ++i) {
+            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC
+                && upset[src][i] & ISAPPLIC) {
+                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
+                    score += weights[i];
+                }
+                else if (upset[tgt1][i] & upset[src][i] & NA) {
+                    if (actives[tgt1][i] && actives[src][i]) {
+                        score += weights[i];
+                    }
+                }
+                if (score > lim) {
+                    return score;
+                }
+            }
+        }
+    }
+    
+    return score;
+}
+
+
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
 {
@@ -365,6 +456,46 @@ void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].rootfxn(n, anc, &m->parsets[i]);
     }
+}
+
+
+void mpl_parsim_reset_scores(mpl_matrix* m)
+{
+    int i = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        m->parsets[i].score = 0.0;
+    }
+}
+
+
+double mpl_parsim_get_std_scores(mpl_matrix* m)
+{
+    int i =  0;
+    double ret = 0.0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == false) {
+            ret += m->parsets[i].score;
+        }
+    }
+    
+    return ret;
+}
+
+
+double mpl_parsim_get_na_scores(mpl_matrix* m)
+{
+    int i =  0;
+    double ret = 0.0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            ret += m->parsets[i].score;
+        }
+    }
+    
+    return ret;
 }
 
 
@@ -428,4 +559,33 @@ void mpl_parsim_second_uppass
             m->parsets[i].upfxn2(left, right, n, anc, &m->parsets[i]);
         }
     }
+}
+
+double mpl_parsim_local_check
+(const double lim, const long src, const long tgt1, const long tgt2, mpl_matrix* m)
+{
+    double score = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        m->parsets[i].tryscore = 0.0;
+        score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, &m->parsets[i]);
+        m->parsets[i].tryscore = score;
+    }
+    
+    return score;
+}
+
+double mpl_parsim_get_standard_tryscore(mpl_matrix* m)
+{
+    double tryscore = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            tryscore += m->parsets[i].tryscore;
+        }
+    }
+    
+    return tryscore;
 }

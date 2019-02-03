@@ -335,13 +335,17 @@ void mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc)
 
 /**
  Disconnects a node from its incident branch on a tree. Assumes the entire tree
- is binary.
+ is binary. If the node has been locked, it will return a NULL pointer.
 
  @param n a pointer to a node.
  @return a pointer to the base of the clipped node.
  */
 inline mpl_node* mpl_node_bin_clip(mpl_node* n)
 {
+    if (n->lock == true) {
+        return NULL;
+    }
+    
     mpl_node* p = n->anc;
     mpl_node* s = NULL;
     s = mpl_node_get_sib(n);
@@ -414,9 +418,26 @@ inline void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* 
     site->anc = n->anc;
 }
 
-/*
- *  PRIVATE FUNCTION DEFINITIONS
- */
+inline void mpl_node_lock(mpl_node* n)
+{
+    n->lock = true;
+}
+
+inline void mpl_node_unlock(mpl_node* n)
+{
+    n->lock = false;
+}
+
+inline bool mpl_node_islocked(const mpl_node* n)
+{
+    return n->lock;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ *  PRIVATE FUNCTION DEFINITIONS                                               *
+ *                                                                             *
+ ******************************************************************************/
 
 static void mpl_extend_desc_array(mpl_node* n, const size_t nelems)
 {

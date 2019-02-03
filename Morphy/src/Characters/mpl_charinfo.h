@@ -15,6 +15,7 @@
 
 typedef struct _charinfo {
     
+    long            index;
     int             num_states;
     long            num_gaps;
     mpl_data_t      datatype;
@@ -22,6 +23,7 @@ typedef struct _charinfo {
     bool            isincluded;
     bool            isparsinform;
     double          weight;
+    double*         wtptr; // Points to the weight in the derived char buf.
     
 } mpl_charinfo;
 

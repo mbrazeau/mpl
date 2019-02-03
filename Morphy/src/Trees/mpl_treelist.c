@@ -79,6 +79,14 @@ mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
     return NULL;
 }
 
+
+void mpl_treelist_clear_all(mpl_treelist* tl)
+{
+    tl->num_trees = 0;
+    tl->shortest = 0.0;
+    tl->longest = 0.0;
+}
+
 /*
  *  PRIVATE FUNCTION DEFINITIONS
  */

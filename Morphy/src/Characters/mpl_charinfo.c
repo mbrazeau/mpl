@@ -14,6 +14,7 @@ void mpl_charinfo_set_defaults(mpl_charinfo* ci)
     ci->parsimtype      = DEFAULT_PARSIM_T;
     ci->isincluded      = true;
     ci->isparsinform    = false;
+    ci->weight          = DEFAULT_WEIGHT;
 }
 
 void mpl_charinfo_set_data_t(const mpl_data_t datype, mpl_charinfo* ci)

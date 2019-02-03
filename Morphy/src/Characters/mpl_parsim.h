@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 #include "../mpl_defs.h"
+#include "mpl_charinfo.h"
 #include "mpl_charbuf.h"
 
 typedef struct _matrix mpl_matrix;
@@ -20,12 +21,15 @@ typedef struct mpl_parsdat mpl_parsdat;
 typedef double  (*mpl_dnfxn)(const long left, const long right, long n, mpl_parsdat* pd);
 typedef void    (*mpl_upfxn)(const long left, const long right, long n, long anc, mpl_parsdat* pd);
 typedef void    (*mpl_branchfxn)(const long n, const long anc, mpl_parsdat* pd);
+typedef double (*mpl_locfxn)(const double lim, const long src, const long tgt1, const long tgt2, const mpl_parsdat* pd);
 
 typedef struct mpl_parsdat {
     long            start;
     long            end;
     long            nchars;
     long*           indexbuf;
+    double          score; // The score for this parsimony type.
+    double          tryscore; // Temporary score for an insertion attempt.
     mpl_charbuf*    cbuf; // The buffer to which this subset refers
     mpl_parsim_t    parstype;
     bool            isNAtype;
@@ -35,6 +39,7 @@ typedef struct mpl_parsdat {
     mpl_upfxn       upfxn2;
     mpl_branchfxn   tipfxn1;
     mpl_branchfxn   rootfxn;
+    mpl_locfxn      locfxn;
 } mpl_parsdat;
 
 
@@ -48,7 +53,7 @@ void mpl_parsim_set_type
 (const mpl_gap_t gaphandl, const mpl_parsim_t ptype, mpl_parsdat* pd);
 
 void mpl_parsim_add_data_column_to_buffer
-(mpl_discr* col, mpl_charbuf* cb, mpl_parsdat* pd);
+(mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd);
 
 double mpl_fitch_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd);
@@ -61,6 +66,9 @@ void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 
 void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+
+double mpl_fitch_local_check
+(const double lim, const long src, const long tgt1, const long tgt2, const mpl_parsdat* pd);
 
 void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd);
 
@@ -76,6 +84,11 @@ double mpl_fitch_na_second_downpass
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 
+double mpl_fitch_na_local_check(const double lim, const long src, const long tgt1, const long tgt2, const mpl_parsdat* pd);
+
+void mpl_parsim_reset_scores(mpl_matrix* m);
+double mpl_parsim_get_std_scores(mpl_matrix* m);
+double mpl_parsim_get_na_scores(mpl_matrix* m);
 double mpl_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_parsim_first_uppass
@@ -87,5 +100,6 @@ void mpl_parsim_second_uppass
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
+double mpl_parsim_get_standard_tryscore(mpl_matrix* m);
 
 #endif /* mpl_parsim_h */

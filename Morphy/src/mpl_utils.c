@@ -170,6 +170,14 @@ int mpl_rng_get_seed(void)
 }
 
 
+inline int almost_equal(const double fl1, const double fl2, const double eps)
+{
+    if ((fl1 - fl2) < -eps || (fl1 - fl2) > eps) {
+        return 1;
+    }
+    
+    return 0;
+}
 
 
 /*
