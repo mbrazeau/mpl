@@ -7,6 +7,7 @@
 //
 
 #include <string.h>
+#include <time.h>
 
 #include "mpltest.h"
 #include "testutils.h"
@@ -60,7 +61,7 @@ int test_build_arbitrary_tree (void)
     int nchar = 284;
 //    int ntax = 5;
 //    int nchar = 10;
-    int hold = 30; // Hold up to 3 trees
+    int hold = 5; // Hold up to 3 trees
     
     char* rawmatrix =
 //    "0000100011\
@@ -176,7 +177,16 @@ int test_build_arbitrary_tree (void)
     mpl_stepwise sw;
     mpl_stepwise_init(MPL_AST_ASIS, ntax, hold, &sw);
     
+    time_t timein;
+    time_t timeout;
+    time_t timeused;
+    
+    timein = (float)clock()/CLOCKS_PER_SEC;
     mpl_stepwise_do_search(&sw);
+    timeout = (float)clock()/CLOCKS_PER_SEC;
+    
+    timeused  = timeout - timein;
+    printf("\nStepwise addition completed in %li seconds\n\n", timeused);
     
     mpl_tree* t  = mpl_new_tree(ntax);
     mpl_topol* top = NULL;
