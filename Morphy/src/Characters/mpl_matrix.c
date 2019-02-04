@@ -421,7 +421,7 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
             
             // The range for this type is the current range index + size of the
             // type block
-            mpl_parsim_set_range
+            mpl_parsim_init_parsdat
             (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
             
             // Update current range
@@ -439,7 +439,7 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
             
             // The range for this type is the current range index + size of the
             // type block
-            mpl_parsim_set_range
+            mpl_parsim_init_parsdat
             (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
             
             // Update current range
