@@ -354,7 +354,6 @@ double mpl_fitch_na_second_downpass
     
     for (i = pd->start; i < end; ++i) {
         if (upset[n][i] & ISAPPLIC) {
-            // Try this with the second uppass sets
             t = upset[left][i] & upset[right][i];
             if (t) {
                 if (t & ISAPPLIC) {
@@ -363,9 +362,7 @@ double mpl_fitch_na_second_downpass
                     upset[n][i] = t;
                 }
             } else {
-                
                 upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
-                
                 if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
                     cost += weights[i];
                 } else if (actives[left][i] && actives[right][i]) {
@@ -373,8 +370,6 @@ double mpl_fitch_na_second_downpass
                 }
             }
         } else {
-//            upset[n][i] = dnset[n][i];
-            // Set is alread in prelim state
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
             }
@@ -392,7 +387,72 @@ double mpl_fitch_na_second_downpass
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
-    // TODO: Finish this
+    long i;
+    const long end = pd->end;
+    mpl_discr t = 0;
+    for (i = pd->start; i < end; ++i) {
+        
+        if (dnset[n][i] & ISAPPLIC) {
+            
+            t = dnset[anc][i] & dnset[n][i];
+            
+            if (t == dnset[anc][i]) {
+                dnset[n][i] = t;
+            } else {
+                if (dnset[left][i] & dnset[right][i]) {
+                    dnset[n][i] = (dnset[n][i] | (dnset[anc][i] & (dnset[left][i] | dnset[right][i])));
+                } else {
+                    if ((dnset[left][i] | dnset[right][i]) & NA) {
+                        if ((dnset[anc][i] & (dnset[left][i] | dnset[right][i]))) {
+                            dnset[n][i] = dnset[anc][i];
+                        }
+                        else {
+                            dnset[n][i] = (dnset[anc][i] | dnset[left][i] | dnset[right][i]) & ISAPPLIC;
+                        }
+                    } else {
+                        dnset[n][i] = dnset[anc][i] | dnset[n][i];
+                    }
+                }
+            }
+        }
+    }
+//    for (i = nchars; i--;) {
+//
+//        j = indices[i];
+//
+//        if (npre[j] & ISAPPLIC) {
+//            if (anc[j] & ISAPPLIC) {
+//                if ((anc[j] & npre[j]) == anc[j]) {
+//                    nfin[j] = anc[j] & npre[j];
+//                } else {
+//                    if (left[j] & right[j]) {
+//                        nfin[j] = (npre[j] | (anc[j] & (left[j] | right[j])));
+//                    }
+//                    else {
+//                        if ((left[j] | right[j]) & NA) {
+//                            if ((left[j] | right[j]) & anc[j]) {
+//                                nfin[j] = anc[j];
+//                            } else {
+//                                nfin[j] = (left[j] | right[j] | anc[j]) & ISAPPLIC;
+//                            }
+//                        } else {
+//                            nfin[j] = npre[j] | anc[j];
+//                        }
+//                    }
+//                }
+//            }
+//            else {
+//                nfin[j] = npre[j];
+//            }
+//        }
+//        else {
+//            nfin[j] = npre[j];
+//
+//            /*if (lacts[j] && racts[j]) {
+//             steps += weights[i];
+//             nset->changes[j] = true;
+//             }*/
+//        }
 }
 
 double mpl_fitch_na_local_check
