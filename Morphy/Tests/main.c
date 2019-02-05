@@ -90,6 +90,8 @@ int main(int argc, const char * argv[]) {
     // Test mpl_stepwise.c
     fails += test_initial_fork();
     fails += test_build_arbitrary_tree();
+    fails += test_build_med_tree();
+    fails += test_build_large_tree();
     
     fails += test_basic_parsimony();
     fails += test_parsimony_on_tree();
