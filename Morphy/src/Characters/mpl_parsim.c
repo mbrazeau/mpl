@@ -51,13 +51,13 @@ static const mpl_parsdat Wagner_Std = {
 
 
 // Data from the discrete character charbuf
-mpl_discr** dnset   = NULL;
-mpl_discr** upset   = NULL;
-mpl_discr** actives = NULL;
-mpl_discr** tempdn  = NULL;
-mpl_discr** tempup  = NULL;
-mpl_discr** tempact = NULL;
-double*     weights = NULL;
+mpl_discr** restrict dnset   = NULL;
+mpl_discr** restrict upset   = NULL;
+mpl_discr** restrict actives = NULL;
+mpl_discr** restrict tempdn  = NULL;
+mpl_discr** restrict tempup  = NULL;
+mpl_discr** restrict tempact = NULL;
+double*     restrict weights = NULL;
 
 
 /**
@@ -180,7 +180,7 @@ void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd)
     const long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        upset[anc][i] = dnset[n][i];
+        dnset[anc][i] = upset[anc][i] = dnset[n][i];
     }
 }
 
@@ -194,15 +194,14 @@ void mpl_fitch_uppass
     
     for (i = pd->start; i < end; ++i) {
        
-        fin = upset[anc][i] & upset[n][i];
+        fin = upset[anc][i] & dnset[n][i];
         
-        if (fin != anc) {
+        if (fin != upset[anc][i]) {
             if (dnset[left][i] & dnset[right][i]) {
-                fin = (upset[n][i] |
-                       (upset[anc][i] & (dnset[left][i] | dnset[right][i])));
+                fin = (dnset[n][i] | (upset[anc][i] & (dnset[left][i] | dnset[right][i])));
             }
             else {
-                fin = upset[n][i] | upset[anc][i];
+                fin = dnset[n][i] | upset[anc][i];
             }
         }
 
