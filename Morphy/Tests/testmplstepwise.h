@@ -14,6 +14,8 @@
 
 int test_initial_fork (void);
 int test_build_arbitrary_tree (void);
+int test_build_med_tree (void);
+int test_build_large_tree (void);
 
 void mpl_test_setup_first_fork(mpl_stepwise* sw);
 
