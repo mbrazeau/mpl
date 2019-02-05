@@ -27,6 +27,7 @@ typedef struct _charbuf {
     long        row_max;
     long*       orig_indices;
     double*     weights;
+    long*       charchanges;
     mpl_data_t  datype;
     mpl_discr** dnset; // The set of downpass characters
     mpl_discr** upset; // The set of uppass characters

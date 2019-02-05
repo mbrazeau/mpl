@@ -33,6 +33,7 @@ void mpl_charbuf_init
     
     cb->weights = (double*)safe_calloc(ncols, sizeof(double));
     cb->orig_indices = (long*)safe_calloc(ncols, sizeof(long));
+    cb->charchanges = (long*)safe_calloc(ncols, sizeof(long));
     // TODO: CHECK RETURN!!!
     
     for (i = 0; i < cb->char_max; ++i) {
