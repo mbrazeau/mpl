@@ -6,6 +6,8 @@
 //  Copyright © 2019 Martin Brazeau. All rights reserved.
 //
 
+#include <assert.h>
+
 #include "../Characters/mpl_matrix.h"
 #include "../Trees/mpl_tree.h"
 #include "../Characters/mpl_parsim.h"
@@ -72,16 +74,16 @@ double mpl_fullpass_parsimony(mpl_tree* t)
         mpl_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
         
         // Uppass
-        //    for (i = t->size; i--; ) {
-        //        if (n->tip == 0) {
-        //            mpl_parsim_second_uppass
-        //            (n->left->mem_index, n->right->mem_index,
-        //             n->mem_index, n->anc->mem_index, glblm);
-        //        }
-        //        else {
-        //            // TODO: Finalize tips
-        //        }
-        //    }
+            for (i = t->size; i--; ) {
+                if (n->tip == 0) {
+                    mpl_parsim_second_uppass
+                    (n->left->mem_index, n->right->mem_index,
+                     n->mem_index, n->anc->mem_index, glmatrix);
+                }
+                else {
+                    // TODO: Finalize tips
+                }
+            }
         
         // Finalise the tips
     }
@@ -89,39 +91,125 @@ double mpl_fullpass_parsimony(mpl_tree* t)
     return len;
 }
 
+double mpl_fullpass_parsimony_na_only(mpl_tree* t)
+{
+    double len = 0.0;
+    long i = 0;
+    mpl_node* n;
+    
+    mpl_tree_traverse(t);
+    
+//    mpl_parsim_reset_scores(glmatrix);
+    
+    // Downpass
+    for (i = 0; i < t->nintern; ++i) {
+        
+        n = t->postord_intern[i];
+        
+        len += mpl_na_only_parsim_first_downpass(n->left->mem_index,
+                                         n->right->mem_index,
+                                         n->mem_index, glmatrix);
+    }
+    
+    n = t->postord_intern[i-1];
+    mpl_na_only_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
+    
+    // Uppass
+    for (i = t->size; i--; ) {
+        
+        n = t->postord_all[i];
+        
+        if (n->tip == 0) {
+            mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index,
+                                    n->mem_index, n->anc->mem_index, glmatrix);
+        }
+        else {
+            mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
+        }
+    }
+    
+    // Downpass for inapplicables
+    for (i = 0; i < t->nintern; ++i) {
+        n = t->postord_intern[i];
+        
+        len += mpl_na_only_parsim_second_downpass (n->left->mem_index,
+                                                   n->right->mem_index,
+                                                   n->mem_index, glmatrix);
+    }
+    
+    
+    return len;
+}
+
+
+/**
+ This function  does a partial uppass on the tree and should be called first
+ on the deepest node in the tree to be affected by a branch insertion. The
+ result of this function fould be a full set of nodes requiring a second
+ uppass update should this be necessary when working with inapplicable
+ characters.
+
+ @param n Pointer to the node being visited on this call.
+ @param ostart Constant pointer to the original starting position
+ @param i A pointer to the index of the current number of nodes stored.
+ @param t A pointer to the tree being worked on.
+ */
+void mpl_part_parsim_uppass
+(mpl_node* n, const mpl_node* ostart, long* i, mpl_tree* t)
+{
+    if (n->tip > 0) {
+        // partial tip function
+        return;
+    }
+    
+    // Partial up function:
+    // mpl_parsim_update_first_uppass(n->left->mem_index, n->right->mem_index,
+    //                                n->mem_index, n->anc->mem_index, glmatrix)
+    // if (!mpl_check_updated(n->mem_index, glmatrix) && n != ostart) {
+    //      return;
+    // }
+    
+    t->partial_pass[*i] = n;
+    ++(*i);
+    
+    if (n->anc == ostart) {
+        return;
+    }
+    
+    mpl_part_parsim_uppass(n->left, ostart, i, t);
+    mpl_part_parsim_uppass(n->right, ostart, i, t);
+}
+
 double mpl_partpass_parsimony(mpl_node* start, mpl_tree* t)
 {
     double len = 0.0;
-//    long i = 0;
-//    mpl_node* n;
-//
-//    // Do a downpath from the clipsite
-//
-//    // Downpass
-//    for (i = 0; i < t->size; ++i) {
-//        // Perform this on a partial path to the root, not the full downpass set
-//    }
-//
-//    // Do the root
-//
-//    // Uppass
-//    for (i = t->size; i--; ) {
-//        // If internal do interal
-//        // Else do tip
-//    }
-//
-//    // Downpass for inapplicables
-//    for (i = 0; i < t->size; ++i) {
-//        //
-//    }
-//
-//    // Do the root
-//
-//    // Uppass
-//    for (i = t->size; i--; ) {
-//        // If internal do interal
-//        // Else do tip
-//    }
+    long i = 0;
+    mpl_node* n;
+
+    // Copy the current state sets into the temp buffers
+    // ...
+    
+    // Do a downpath from the clipsite
+    n = start;
+    do {
+        // Perform partial downpass calculations and check for updates
+        // If the length already exceeds the limit, you can exit here
+        n = n->anc;
+    } while (n->tip != -1);
+    
+    // If n->tip == -1, then you hit the bottom. Do the root
+
+    // Perform a recursive uppass on this
+    // void mpl_part_parsim_uppass(mpl_node* n, const mpl_node* ostart, long* i, mpl_tree* t)
+    // i = 0;
+    // mpl_part_parsim_uppass(n, start, &i, t);
+    
+    
+    // Downpass for inapplicables
+    // For now, this should be a full downpass, working only on those inapplic
+    // characters that cannot be resolved at a local insertion
+
+    // Restore to the original state sets.
     
     return len;
 }
@@ -165,16 +253,29 @@ double mpl_score_try_parsimony
 (const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
     double score = 0.0;
-    
+    double oldnascore = 0.0;
+    double scorerecall = 0.0;
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
     // If the lim is set and the score exceeds the limit already, return score.
+    score = mpl_parsim_local_check(lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, glmatrix);
+    scorerecall = mpl_parsim_get_score_recall(glmatrix);
+    // TODO: For this to work, the state sets from the start tree need to be
+    // stored to the temp buffers and copied back immediately after this
+    // operation.
+    if (glmatrix->gaphandl == GAP_INAPPLIC) {
+//        oldnascore = mpl_parsim_get_na_scores(glmatrix);
+//        assert(scorerecall == oldnascore);
+        score = score - scorerecall;
+        score += mpl_fullpass_parsimony_na_only(t);
+    }
     
     // Otherwise, check if the sum of score of the standard characters and the
     // minimum possible score of the inapplicable characters exceeds the limit.
     // If so, abort try and move on.
-    double stdtryscore = 0.0;
-    stdtryscore = mpl_parsim_get_standard_tryscore(glmatrix);
+//    double stdtryscore = 0.0;
+//    stdtryscore = mpl_parsim_get_standard_tryscore(glmatrix);
+    
     
     // Otherwise, temporarily insert the branch at tgt.
     

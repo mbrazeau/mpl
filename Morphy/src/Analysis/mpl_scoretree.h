@@ -17,5 +17,6 @@ typedef double  (*mpl_scoretry)(const double lim, mpl_node* src, mpl_node* tgt, 
 void    mpl_init_parsimony(mpl_matrix* m);
 double  mpl_fullpass_parsimony(mpl_tree* t);
 double  mpl_partpass_parsimony(mpl_node* start, mpl_tree* t);
+double  mpl_score_try_parsimony(const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t);
 
 #endif /* mpl_scoretree_h */
