@@ -93,7 +93,6 @@ long mpl_stepwise_get_num_tips(mpl_stepwise* sw)
     return sw->num_tips;
 }
 
-
 void mpl_stepwise_do_search(mpl_stepwise* sw)
 {
     long i = 0;
@@ -129,10 +128,9 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
         // For all the trees in the queue
         for (j = 0; j < nsaved; ++j) {
             
-            nexttopol = mpl_treelist_get_topol(0, sw->queued);
+            nexttopol = mpl_treelist_get_topol(j, sw->queued);
             
             mpl_tree_read_topol(sw->tree, nexttopol);
-            
             mpl_node_push_desc(sw->next, nexttip);
             // try nexttip in all the places in the tree
             mpl_try_all_sites(nexttip, sw->tree, sw);
@@ -227,59 +225,55 @@ static void mpl_try_all_sites
     long i = 0;
     long nsites = 0;
     
-    double bestlength = 0.0;
-    double longest = t->score;
+//    double bestlength = 0.0;
+//    double longest = t->score;
+    double sttlen = 0.0;
     
     // Store all the sites locally, as traversals on the tree during
     // checking may modify the list.
     mpl_store_starttree_nodes(t, sw);
     nsites = sw->nsites;
     
-    // First do the first site and set the best length
-    mpl_node_bin_connect(sw->sites[0], NULL, n);
-    longest = bestlength = t->score = mpl_fullpass_parsimony(t);
-    if (longest > sw->longest) {
-        sw->longest = longest;
-    }
-//    printf("Try length: %f\n", t->score);
-    mpl_treelist_add_tree(false, t, sw->held);
-    mpl_node_bin_clip(n);
+    sttlen = mpl_fullpass_parsimony(t);
     
-    for (i = 1; i < nsites; ++i) {
+    for (i = 0; i < nsites; ++i) {
         
         // Test insertion at
         mpl_node_bin_connect(sw->sites[i], NULL, n);
         
-        t->score = mpl_fullpass_parsimony(t);
+//        t->score = mpl_fullpass_parsimony(t);
+        t->score = sttlen + mpl_score_try_parsimony(-1.0, n, sw->sites[i], t);
+//        double checklen = 0.0;
+//        checklen = mpl_fullpass_parsimony(t);
+//
+//        if (checklen != t->score) {
+//            printf("Length mismatch! Est'd: %f; direct: %f\n", t->score, checklen);
+//            printf("Src: %li; tgt: %li\n\n", n->mem_index, sw->sites[i]->mem_index);
+//        }
         
-        if (t->score < bestlength) {
-            bestlength = t->score;
-            mpl_treelist_overwrite_longest(t, sw->held);
-
-            if (bestlength < sw->shortest) {
-                sw->shortest = bestlength;
-            }
+        if (sw->held->num_trees == 0) {
+            sw->longest = sw->shortest = t->score;
+            mpl_treelist_add_tree(false, t, sw->held);
         }
-        else if (t->score == bestlength) {
-            mpl_treelist_overwrite_longest(t, sw->held);
+        else if (sw->held->num_trees < sw->held->max_trees) {
+            mpl_treelist_add_tree(false, t, sw->held);
+            
+            if (t->score < sw->shortest) {
+                sw->shortest = t->score;
+            }
+            else if (t->score > sw->longest) {
+                sw->longest = t->score;
+            }
         }
         else if (t->score <= sw->longest) {
-
-            if (sw->held->num_trees < sw->held->max_trees) {
-                 mpl_treelist_add_tree(false, t, sw->held);
-            }
-            else {
-                mpl_treelist_overwrite_longest(t, sw->held);
-            }
-        }
-        else {
-            longest = t->score;
-            if (longest > sw->longest) {
-                sw->longest = longest;
-            }
+            mpl_treelist_overwrite_longest(t, sw->held);
+            // TODO: Need to update the value of longest overall
+            // based on what's left in the list
         }
 
         mpl_node_bin_clip(n);
+//
+//        mpl_fullpass_parsimony(t);
     }
 }
 
