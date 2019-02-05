@@ -21,6 +21,7 @@ typedef struct _tree {
     mpl_node*   nodes;
     mpl_node**  postord_all;
     mpl_node**  postord_intern;
+    mpl_node**  partial_pass;
     mpl_node*   base;
     mpl_node*   dummy;
     mpl_node*   root;

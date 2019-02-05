@@ -56,7 +56,7 @@ mpl_tree* mpl_new_tree(long num_taxa)
     t->postord_all = (mpl_node**)safe_calloc(t->num_nodes, sizeof(mpl_node*));
     t->postord_intern = (mpl_node**)safe_calloc(t->num_nodes - num_taxa,
                                                 sizeof(mpl_node*));
-    
+    t->partial_pass = (mpl_node**)safe_calloc(t->num_nodes, sizeof(mpl_node*));
     return t;
 }
 
@@ -88,15 +88,9 @@ int mpl_delete_tree(mpl_tree** t)
         (*t)->nodes = NULL;
     }
     
-    if ((*t)->postord_all) {
-        free((*t)->postord_all);
-        (*t)->postord_all = NULL;
-    }
-    
-    if ((*t)->postord_intern) {
-        free((*t)->postord_intern);
-        (*t)->postord_intern = NULL;
-    }
+    safe_free((*t)->postord_all);
+    safe_free((*t)->postord_intern);
+    safe_free((*t)->partial_pass);
     
     free(*t);
     *t = NULL;
