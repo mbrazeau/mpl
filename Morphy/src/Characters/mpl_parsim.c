@@ -58,6 +58,7 @@ mpl_discr** restrict tempdn  = NULL;
 mpl_discr** restrict tempup  = NULL;
 mpl_discr** restrict tempact = NULL;
 double*     restrict weights = NULL;
+long*       restrict changes = NULL;
 
 
 /**
@@ -75,6 +76,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     tempup  = cb->tempup;
     tempact = cb->tempact;
     weights = cb->weights;
+    changes = cb->charchanges;
 }
 
 
@@ -93,22 +95,22 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd)
     
     long range = end-start;
     
-    pd->nchanges = (long*)safe_calloc(range, sizeof(long));
+//    pd->nchanges = (long*)safe_calloc(range, sizeof(long));
     pd->indexbuf = (long*)safe_calloc(range, sizeof(long));
 }
 
-void mpl_parsim_reset_nchanges(mpl_parsdat* pd)
-{
-    long range = pd->end - pd->start;
-    
-    memset(pd->nchanges, 0, range * sizeof(long));
-}
+//void mpl_parsim_reset_nchanges(mpl_parsdat* pd)
+//{
+//    long range = pd->end - pd->start;
+//
+//    memset(pd->nchanges, 0, range * sizeof(long));
+//}
 
 void mpl_parsim_reset_indexbuf(mpl_parsdat* pd)
 {
     long range = pd->end - pd->start;
     
-    memset(pd->nchanges, 0, range * sizeof(long));
+    memset(pd->indexbuf, 0, range * sizeof(long));
 }
 
 void mpl_parsim_set_type
@@ -164,7 +166,7 @@ double mpl_fitch_downpass
         if (dnset[n][i] == 0) {
             dnset[n][i] = dnset[left][i] | dnset[right][i];
             cost += weights[i];
-            ++pd->nchanges[i];
+            ++changes[i];
         }
     }
     
@@ -232,7 +234,7 @@ double mpl_fitch_local_check
  const long src,
  const long tgt1,
  const long tgt2,
- const mpl_parsdat* pd)
+ mpl_parsdat* pd)
 {
     long i;
     const long end = pd->end;
@@ -395,16 +397,16 @@ double mpl_fitch_na_second_downpass
                 upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
                 if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
                     cost += weights[i];
-//                    ++pd->nchanges[i];
+                    ++changes[i];
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
-//                    ++pd->nchanges[i];
+                    ++changes[i];
                 }
             }
         } else {
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
-//                ++pd->nchanges[i];
+                ++changes[i];
             }
         }
         
@@ -463,8 +465,11 @@ mpl_fitch_na_recalc_first_downpass
     long j;
     
     for (j = 0; j < pd->nchars; ++j) {
-        
+
         i = pd->indexbuf[j];
+//    long end = pd->end;
+//
+//    for (i = pd->start; i < end; ++i) {
         
         dnset[n][i] = dnset[left][i] & dnset[right][i];
         
@@ -503,8 +508,11 @@ void mpl_fitch_na_recalc_first_uppass
     mpl_discr t = 0;
     
     for (j = 0; j < pd->nchars; ++j) {
-        
+
         i = pd->indexbuf[j];
+//    long end = pd->end;
+//
+//    for (i = pd->start; i < end; ++i) {
         
         if (dnset[n][i] & NA) {
             if (dnset[n][i] & ISAPPLIC) {
@@ -542,8 +550,11 @@ double mpl_fitch_na_recalc_second_downpass
     double cost = 0.0;
     
     for (j = 0; j < pd->nchars; ++j) {
-        
+
         i = pd->indexbuf[j];
+//    long end = pd->end;
+//
+//    for (i = pd->start; i < end; ++i) {
         
         if (upset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
@@ -570,7 +581,7 @@ double mpl_fitch_na_recalc_second_downpass
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
     }
     
-    pd->score += cost;
+//    pd->score += cost;
     
     return cost;
 }
@@ -594,58 +605,60 @@ double mpl_fitch_na_local_check
     const long end = pd->end;
     double score = 0.0;
     
-    if (lim < 0.0) {
+//    if (lim < 0.0) {
         for (i = pd->start; i < end; ++i) {
-            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC
-                && upset[src][i] & ISAPPLIC) {
-                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
-                    score += weights[i];
-                }
-            }
-            else if (upset[tgt1][i] & upset[src][i] & NA) {
-                if (actives[tgt1][i] && actives[src][i]) {
-                    score += weights[i];
-                }
-            }
-            else {
+//            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC && dnset[src][i] & ISAPPLIC) {
+//                if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+//                    score += weights[i];
+//                }
+//            }
+//            else if (upset[tgt1][i] & upset[src][i] & NA) {
+//                if (actives[tgt1][i] && actives[src][i]) {
+//                    score += weights[i];
+//                }
+//            }
+//            else {
                 // Add this index to the buffer needing checks
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 // And record its old score
-                pd->scorerecall += (pd->nchanges[i] * weights[i]);
-            }
+                pd->scorerecall += (changes[i] * weights[i]);
+//            if(pd->scorerecall < 0) {
+//                assert(0);
+//            }
+//            }
         }
         
         return score;
-    }
-    else {
-        for (i = pd->start; i < end; ++i) {
-            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC
-                && upset[src][i] & ISAPPLIC) {
-                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
-                    score += weights[i];
-                    if (score > lim) {
-                        return score;
-                    }
-                }
-            }
-            else if (upset[tgt1][i] & upset[src][i] & NA) {
-                if (actives[tgt1][i] && actives[src][i]) {
-                    score += weights[i];
-                    if (score > lim) {
-                        return score;
-                    }
-                }
-            }
-            else {
-                // Add this index to the buffer needing checks
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                // And record its old score
-                pd->scorerecall += (pd->nchanges[i] * weights[i]);
-            }
-        }
-    }
+//    }
+//    else {
+//        for (i = pd->start; i < end; ++i) {
+//            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC
+//                && upset[src][i] & ISAPPLIC) {
+//                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
+//                    score += weights[i];
+//                    if (score > lim) {
+//                        return score;
+//                    }
+//                }
+//            }
+////            else if (upset[tgt1][i] & upset[src][i] & NA) {
+////                if (actives[tgt1][i] && actives[src][i]) {
+////                    score += weights[i];
+////                    if (score > lim) {
+////                        return score;
+////                    }
+////                }
+////            }
+//            else {
+//                // Add this index to the buffer needing checks
+//                pd->indexbuf[pd->nchars] = i;
+//                ++pd->nchars;
+//                // And record its old score
+//                pd->scorerecall += (changes[i] * weights[i]);
+//            }
+//        }
+//    }
     
     return score;
 }
@@ -669,6 +682,7 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].score = 0.0;
     }
+    memset(changes, 0, m->cbufs[MPL_DISCR_T].num_chars * sizeof(long));
 }
 
 
@@ -774,13 +788,23 @@ double mpl_na_only_parsim_first_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+//            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+            score += mpl_fitch_na_recalc_first_downpass(left, right, n, &m->parsets[i]);
         }
     }
     
     return score;
 }
 
+void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            m->parsets[i].rootfxn(n, anc, &m->parsets[i]);
+        }
+    }
+}
 
 void mpl_na_only_parsim_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m)
@@ -789,11 +813,22 @@ void mpl_na_only_parsim_first_uppass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
+//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
+            mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
         }
     }
 }
 
+
+void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
+        }
+    }
+}
 
 double mpl_na_only_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
@@ -803,7 +838,8 @@ double mpl_na_only_parsim_second_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            score += m->parsets[i].downfxn2(left, right, n, &m->parsets[i]);
+//            score += m->parsets[i].downfxn2(left, right, n, &m->parsets[i]);
+            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
         }
     }
     
@@ -832,7 +868,7 @@ double mpl_parsim_local_check
     for (i = 0; i < m->nparsets; ++i) {
         
         // TODO: TEMPORARY CONDITION:
-        if (m->parsets[i].isNAtype == false) {
+//        if (m->parsets[i].isNAtype == false) {
         
             m->parsets[i].tryscore = 0.0;
             // Reset the number of indices in the index buffer to 0
@@ -841,10 +877,24 @@ double mpl_parsim_local_check
             score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, &m->parsets[i]);
             m->parsets[i].tryscore = score;
         
-        }
+//        }
     }
     
     return score;
+}
+
+double mpl_parsim_get_score_recall(mpl_matrix* m)
+{
+    double recall = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            recall += m->parsets[i].scorerecall;
+        }
+    }
+    
+    return recall;
 }
 
 double mpl_parsim_get_standard_tryscore(mpl_matrix* m)
