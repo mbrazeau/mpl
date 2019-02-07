@@ -108,38 +108,21 @@ double mpl_fullpass_parsimony(mpl_tree* t)
  @param t A pointer to the tree being worked on.
  */
 void mpl_part_parsim_uppass
-(mpl_node* n, const mpl_node* ostart, long* i, mpl_tree* t)
+(mpl_node* n, mpl_node* ostart, long* i, mpl_tree* t)
 {
     if (n->tip > 0) {
         mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
         return;
     }
-    
-    // Partial up function:
-    // mpl_parsim_update_first_uppass(n->left->mem_index, n->right->mem_index,
-    //                                n->mem_index, n->anc->mem_index, glmatrix)
-    // if (!mpl_check_updated(n->mem_index, glmatrix) && n != ostart) {
-    //      return;
-    // }
-//    if (!mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix))
-//    {
-//        return;
-//    }
 
-    mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix);
-    
-//    t->partial_pass[*i] = n;
-//    ++(*i);
-    
-//    if (n->anc == ostart) {
-//        return;
-//    }
+    mpl_na_only_parsim_first_uppass
+    (n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix);
     
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
 }
 
-double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
+double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t)
 {
     double len = 0.0;
     long i = 0;
@@ -147,17 +130,7 @@ double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
     
     mpl_tree_traverse(t);
     
-//     Downpass
-//    for (i = 0; i < t->nintern; ++i) {
-//
-//        n = t->postord_intern[i];
-//
-//        mpl_na_only_parsim_first_downpass(n->left->mem_index,
-//                                         n->right->mem_index,
-//                                         n->mem_index, glmatrix);
-//    }
-
-    n = start;
+    n = start->anc;
 
     while (n->anc != NULL) {
         double chgs = 0.0;
@@ -170,26 +143,12 @@ double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
         n = n->anc;
     };
 
-    
     if (n == t->base->anc) {
         n = t->base;//t->postord_intern[i-1];
         mpl_na_only_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
     }
-//
-    mpl_part_parsim_uppass(n, NULL, NULL, t);
-//    // Uppass
-//    for (i = t->size; i--; ) {
-//
-//        n = t->postord_all[i];
-//
-//        if (n->tip == 0) {
-//            mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index,
-//                                    n->mem_index, n->anc->mem_index, glmatrix);
-//        }
-//        else { //if (n != start ){
-//            mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
-//        }
-//    }
+
+    mpl_part_parsim_uppass(n, mpl_node_get_sib(start), NULL, t);
     
     // Downpass for inapplicables
     for (i = 0; i < t->nintern; ++i) {
@@ -276,7 +235,7 @@ double mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
  @return The calculated length added to the tree by proposed move.
  */
 double mpl_score_try_parsimony
-(const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
+(const double sttlen, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
     double score = 0.0;
 //    double oldnascore = 0.0;
@@ -286,17 +245,16 @@ double mpl_score_try_parsimony
     // this junction.
     // If the lim is set and the score exceeds the limit already, return score.
     score       = mpl_parsim_local_check
-                 (lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, glmatrix);
+                 (-1.0, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, glmatrix);
     scorerecall = mpl_parsim_get_score_recall(glmatrix);
 
-    
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
 //        mpl_scoretree_restore_original_characters();
 //        oldnascore = mpl_parsim_get_na_scores(glmatrix);
 //        assert(scorerecall == oldnascore);
 //        mpl_scoretree_restore_original_characters();
         score -= scorerecall;
-        score += mpl_fullpass_parsimony_na_only(src->anc, t);
+        score += mpl_fullpass_parsimony_na_only(scorerecall, src, t);
 //        mpl_scoretree_restore_original_characters();
 //        mpl_parsim_reset_state_buffers(glmatrix);
     }
