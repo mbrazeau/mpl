@@ -638,10 +638,16 @@ int mpl_fitch_na_recalc_first_uppass
         else {
             upset[n][i] = dnset[n][i];
         }
-        
-        if (upset[n][i] != t) {
+//
+//        if (dnset[n][i] != tempdn[n][i]) {
+//            ++chgs;
+//        }
+        if (t != upset[n][i]) {
             ++chgs;
         }
+//        if (dnset[n][i] != upset[n][i]) {
+//            ++chgs;
+//        }
 //        assert(upset[n][i]);
     }
     
@@ -964,7 +970,7 @@ int mpl_na_only_parsim_first_uppass
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
 //            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
-            chgs = mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
+            chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
         }
     }
     
@@ -1029,6 +1035,38 @@ void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matri
     }
 }
 
+void mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        dnset[n][i] = upset[left][i] | upset[right][i];
+    }
+}
+
+void mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        dnset[n][i] = upset[left][i] | upset[right][i];
+        if (dnset[n][i] & ISAPPLIC) {
+            dnset[n][i] &= ISAPPLIC;
+        }
+        actives[n][i] = actives[left][i] | actives[right][i];
+    }
+}
+
+void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl_matrix* m)
+{
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        
+    }
+}
 
 double mpl_parsim_local_check
 (const double lim, const long src, const long tgt1, const long tgt2, mpl_matrix* m)
