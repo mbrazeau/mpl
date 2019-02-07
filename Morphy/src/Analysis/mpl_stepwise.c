@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "../mpl_utils.h"
 #include "mpl_stepwise.h"
@@ -219,6 +220,19 @@ static void mpl_store_starttree_nodes(mpl_tree* t, mpl_stepwise *sw)
     }
 }
 
+void dbg_print_tree(mpl_node* n)
+{
+    if (n->tip) {
+        printf("%li", n->tip);
+        return;
+    }
+    printf("(");
+    dbg_print_tree(n->left);
+    printf(",");
+    dbg_print_tree(n->right);
+    printf(")");
+}
+
 static void mpl_try_all_sites
 (mpl_node* n, mpl_tree* t, mpl_stepwise *sw)
 {
@@ -235,20 +249,26 @@ static void mpl_try_all_sites
     nsites = sw->nsites;
     
     sttlen = mpl_fullpass_parsimony(t);
+//    mpl_scoretree_copy_original_characters();
     
     for (i = 0; i < nsites; ++i) {
-        
+
         // Test insertion at
         mpl_node_bin_connect(sw->sites[i], NULL, n);
         
 //        t->score = mpl_fullpass_parsimony(t);
         t->score = sttlen + mpl_score_try_parsimony(-1.0, n, sw->sites[i], t);
+//
 //        double checklen = 0.0;
 //        checklen = mpl_fullpass_parsimony(t);
 //
 //        if (checklen != t->score) {
-//            printf("Length mismatch! Est'd: %f; direct: %f\n", t->score, checklen);
-//            printf("Src: %li; tgt: %li\n\n", n->mem_index, sw->sites[i]->mem_index);
+//            printf("\nLength mismatch! Est'd: %f; direct: %f\n", t->score, checklen);
+//            if (n->mem_index == 94) {
+//                printf("Src: %li; tgt: %li\n", n->mem_index, sw->sites[i]->mem_index);
+//                dbg_print_tree(t->base);
+//                printf("\n");
+//            }
 //        }
         
         if (sw->held->num_trees == 0) {
@@ -272,8 +292,6 @@ static void mpl_try_all_sites
         }
 
         mpl_node_bin_clip(n);
-//
-//        mpl_fullpass_parsimony(t);
     }
 }
 
@@ -281,9 +299,9 @@ static void mpl_try_all_sites
  *  TEST INTERFACE FUNCTION DEFINITIONS
  */
 
-#ifdef DEBUG
+//#ifdef DEBUG
 void mpl_test_setup_first_fork(mpl_stepwise* sw)
 {
     mpl_setup_first_fork(sw);
 }
-#endif
+//#endif

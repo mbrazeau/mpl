@@ -45,5 +45,6 @@ void mpl_charbuf_add_data_column
 (const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb);
 void mpl_charbuf_store_discr_states(mpl_charbuf* cb);
 void mpl_charbuf_restore_discr_states(mpl_charbuf* cb);
-
+void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb);
+int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb);
 #endif /* mpl_discchars_h */

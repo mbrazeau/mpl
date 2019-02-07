@@ -7,6 +7,7 @@
 //
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../mpl_utils.h"
 #include "mpl_charbuf.h"
@@ -97,6 +98,7 @@ void mpl_charbuf_add_data_column
     
     for (i = 0; i < cb->row_max; ++i) {
         cb->dnset[i][colnum] = datcol[i];
+        cb->tempdn[i][colnum] = datcol[i];
     }
 }
 
@@ -113,21 +115,74 @@ void mpl_charbuf_set_weight
 void mpl_charbuf_store_discr_states(mpl_charbuf* cb)
 {
     long i = 0;
-    for (i = 0; i < cb->num_rows; ++i) {
-        memcpy(cb->tempdn[i], cb->dnset[i], cb->char_max * sizeof(mpl_discr));
-        memcpy(cb->tempup[i], cb->upset[i], cb->char_max * sizeof(mpl_discr));
-        memcpy(cb->tempact[i], cb->actives[i], cb->char_max * sizeof(mpl_discr));
+    long j = 0;
+    for (i = 2 * cb->row_max; i-- ;) {
+        for (j = cb->char_max; j-- ;) {
+            cb->tempdn[i][j]  =  cb->dnset[i][j] ;
+            cb->tempup[i][j]  =  cb->upset[i][j] ;
+            cb->tempact[i][j] =  cb->actives[i][j] ;
+        }
+//        memcpy(cb->tempdn[i],  cb->dnset[i],   cb->char_max * sizeof(mpl_discr));
+//        memcpy(cb->tempup[i],  cb->upset[i],   cb->char_max * sizeof(mpl_discr));
+//        memcpy(cb->tempact[i], cb->actives[i], cb->char_max * sizeof(mpl_discr));
     }
 }
 
 void mpl_charbuf_restore_discr_states(mpl_charbuf* cb)
 {
-    long i = 0;
-    for (i = 0; i < cb->num_rows; ++i) {
-        memcpy(cb->dnset[i], cb->tempdn[i], cb->char_max * sizeof(mpl_discr));
-        memcpy(cb->upset[i], cb->tempup[i], cb->char_max * sizeof(mpl_discr));
-        memcpy(cb->actives[i], cb->tempact[i], cb->char_max * sizeof(mpl_discr));
+    long i;
+    long j;
+    for (i = 2 * cb->row_max; i-- ;) {
+        for (j = cb->char_max; j-- ;) {
+            cb->dnset[i][j]     = cb->tempdn[i][j] ;
+            cb->upset[i][j]     = cb->tempup[i][j] ;
+            cb->actives[i][j]   = cb->tempact[i][j] ;
+        }
     }
+}
+
+void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb)
+{
+    long i = 0;
+    long rowmax = 2 * cb->row_max;
+    long j = 0;
+    long k = 0;
+    
+    for (i = 0; i < rowmax; ++i) {
+        for (j = 0; j < nchar; ++j) {
+//            k = inds[j];
+            cb->dnset[i][k]   =  cb->tempdn[i][k];
+            cb->upset[i][k]   =  cb->tempup[i][k];
+            cb->actives[i][k]  = cb->tempact[i][k];
+        }
+    }
+}
+
+int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb)
+{
+    int  ret = 0;
+    long i = 0;
+    long j = 0;
+    long nrows = 2 * cb->row_max;
+    
+    for (i = 0; i < nrows; ++i) {
+        for (j = 0; j < cb->char_max; ++j) {
+            if (cb->dnset[i][j] != cb->tempdn[i][j]) {
+                printf("buffer mismatch: row: %li, col: %li\n", i, j);
+                printf("dnset: %lu, tmpdn: %lu\n", cb->dnset[i][j], cb->tempdn[i][j]);
+            }
+            if (cb->upset[i][j] != cb->tempup[i][j]) {
+                printf("buffer mismatch: row: %li, col: %li\n", i, j);
+                printf("upset: %lu, tempup: %lu\n", cb->upset[i][j], cb->tempup[i][j]);
+            }
+            if (cb->actives[i][j] != cb->tempact[i][j]) {
+                printf("buffer mismatch: row: %li, col: %li\n", i, j);
+                printf("actives: %lu, tempact: %lu\n", cb->actives[i][j], cb->tempact[i][j]);
+            }
+        }
+    }
+    
+    return ret;
 }
 
 /*******************************************************************************

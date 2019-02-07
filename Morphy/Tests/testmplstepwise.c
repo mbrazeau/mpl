@@ -155,6 +155,7 @@ int test_build_med_tree (void)
     mpl_matrix* m = mpl_matrix_new();
     mpl_matrix_set_nrows(ntax, m);
     mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_set_nnodes(2 * ntax, m);
     mpl_matrix_attach_rawdata(rawmatrix, m);
 //    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);
@@ -185,7 +186,7 @@ int test_build_med_tree (void)
         mpl_tree_read_topol(t, top);
         
         mpl_tree_write_newick(&nwkresult, t);
-        printf("TREE Morphy_%i = [&U] %s [length: %f]\n", i+1, nwkresult, top->score);
+        printf("TREE Morphy_%i = [&U] %s [length: %.10f]\n", i+1, nwkresult, top->score);
         free(nwkresult);
     }
     
@@ -203,7 +204,7 @@ int test_build_large_tree (void)
         int nchar = 284;
 //    int ntax = 5;
 //    int nchar = 10;
-    int hold = 5; // Hold up to 3 trees
+    int hold = 30;
     
     char* rawmatrix =
 //    "0000100011\
@@ -311,6 +312,7 @@ int test_build_large_tree (void)
     mpl_matrix* m = mpl_matrix_new();
     mpl_matrix_set_nrows(ntax, m);
     mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_set_nnodes(2 * ntax, m);
     mpl_matrix_attach_rawdata(rawmatrix, m);
 //    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);

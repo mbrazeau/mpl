@@ -96,8 +96,10 @@ int main(int argc, const char * argv[]) {
     fails += test_basic_parsimony();
     fails += test_parsimony_on_tree();
     fails += test_fullpass_parsimony();
+    fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
+    fails += test_find_char_by_char_mismatches();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

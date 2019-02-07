@@ -387,7 +387,7 @@ static long mpl_bbreak_get_target_list
  *  TEST INTERFACE FUNCTION DEFINITIONS
  */
 
-#ifdef DEBUG
+//#ifdef DEBUG
 int mpl_test_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
 {
     return mpl_bbreak_tbr_reroot(tgtnbr, base);
@@ -397,4 +397,4 @@ void mpl_test_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 {
     mpl_branch_swap(t, bbk);
 }
-#endif
+//#endif

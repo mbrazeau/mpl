@@ -38,7 +38,7 @@ int mpl_tree_checker(const mpl_tree* t)
     mpl_node* n = NULL;
     mpl_node** p = NULL;
     
-    for (i = t->num_taxa; i < t->num_nodes; ++t) {
+    for (i = t->num_taxa; i < t->num_nodes; ++i) {
         n = NULL;
         
         n = &t->nodes[i];
@@ -46,20 +46,44 @@ int mpl_tree_checker(const mpl_tree* t)
         if (n->descs[0] != n->left) {
             printf("Warning! left pointer not pointing to same node as start of desc array!\n");
         }
-        if (n->descs[n->ndescs - 1] != n->right) {
-            printf("Warning! Right pointer not pointing to same node as end of desc array!\n");
+        if (n->ndescs > 0) {
+            if (n->descs[n->ndescs - 1] != n->right) {
+                printf("Warning! Right pointer not pointing to same node as end of desc array!\n");
+            }
         }
         
-        p = NULL;
-        
-        p = &n->descs[0];
-        
-        while (*p) {
-            if ((*p)->anc != n) {
-                ++err;
-                printf ("Your goddamned tree is broken!\n");
+        if (n->ndescs == 2) {
+            if (n->left) {
+                if (n->left->anc != n) {
+                    ++err;
+                    printf ("Your goddamned tree is broken!\n");
+                }
             }
-            ++p;
+            else {
+                printf("Warning! Lack of left pointer on binary node!\n");
+            }
+            if (n->right) {
+                if (n->right->anc != n) {
+                    ++err;
+                    printf ("Your goddamned tree is broken!\n");
+                }
+            }
+            else {
+                printf("Warning! Lack of right pointer on binary node\n");
+            }
+        }
+        else {
+            p = NULL;
+            
+            p = &n->descs[0];
+            
+            while (*p) {
+                if ((*p)->anc != n) {
+                    ++err;
+                    printf ("Your goddamned tree is broken!\n");
+                }
+                ++p;
+            }
         }
     }
     

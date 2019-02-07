@@ -747,7 +747,7 @@ static mpl_discr mpl_rawcharptr2bitset
  *  TEST INTERFACE FUNCTION DEFINITIONS
  */
 
-#ifdef DEBUG
+//#ifdef DEBUG
 
 char*
 mpl_test_matrix_get_rawdat_ptr(const long row, const long col, mpl_matrix* m)
@@ -776,4 +776,4 @@ char* mpl_test_skip_whitespace(char* c)
     return mpl_skip_whitespace(c);
 }
 
-#endif
+//#endif

@@ -14,5 +14,6 @@ int test_parsimony_on_tree (void);
 int test_fullpass_parsimony (void);
 int test_fullpass_with_inapplicables (void);
 int test_fullpass_with_multiple_inapplics (void);
-
+int test_multiple_small_matrices (void);
+int test_find_char_by_char_mismatches (void);
 #endif /* mpltestparsimony_h */

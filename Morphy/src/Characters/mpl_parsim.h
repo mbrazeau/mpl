@@ -42,6 +42,7 @@ typedef struct mpl_parsdat {
     mpl_upfxn       upfxn1;
     mpl_upfxn       upfxn2;
     mpl_branchfxn   tipfxn1;
+    mpl_branchfxn   tipfxn2;
     mpl_branchfxn   rootfxn;
     mpl_locfxn      locfxn;
     
@@ -52,6 +53,7 @@ typedef struct mpl_parsdat {
 
 
 void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb);
+void mpl_parsim_swap_stateset_ptrs(mpl_charbuf* cb);
 
 void mpl_parsim_set_range(const long start, const long end, mpl_parsdat* pd);
 
@@ -92,10 +94,12 @@ double mpl_fitch_na_second_downpass
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 
+void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
+
 double mpl_na_only_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
-void mpl_na_only_parsim_first_uppass
+int mpl_na_only_parsim_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
 double mpl_na_only_parsim_second_downpass
@@ -114,11 +118,14 @@ double mpl_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_parsim_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
+void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m);
 double mpl_parsim_local_check
 (const double lim, const long src, const long tgt1, const long tgt2, mpl_matrix* m);
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
 double mpl_parsim_get_score_recall(mpl_matrix* m);
 double mpl_parsim_get_standard_tryscore(mpl_matrix* m);
+void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd);
+void mpl_parsim_reset_state_buffers(mpl_matrix *m);
 
 #endif /* mpl_parsim_h */
