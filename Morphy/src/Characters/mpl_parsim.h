@@ -119,6 +119,7 @@ double mpl_parsim_second_downpass
 void mpl_parsim_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m);
+void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matrix* m);
 double mpl_parsim_local_check
 (const double lim, const long src, const long tgt1, const long tgt2, mpl_matrix* m);
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);

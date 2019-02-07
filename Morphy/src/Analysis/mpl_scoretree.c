@@ -121,10 +121,12 @@ void mpl_part_parsim_uppass
     // if (!mpl_check_updated(n->mem_index, glmatrix) && n != ostart) {
     //      return;
     // }
-    if (!mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix))
-    {
-        return;
-    }
+//    if (!mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix))
+//    {
+//        return;
+//    }
+
+    mpl_na_only_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix);
     
 //    t->partial_pass[*i] = n;
 //    ++(*i);
@@ -154,7 +156,7 @@ double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
 //                                         n->right->mem_index,
 //                                         n->mem_index, glmatrix);
 //    }
-//
+
     n = start;
 
     while (n->anc != NULL) {
@@ -167,13 +169,13 @@ double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
         }
         n = n->anc;
     };
-    
+
     
     if (n == t->base->anc) {
         n = t->base;//t->postord_intern[i-1];
         mpl_na_only_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
     }
-    
+//
     mpl_part_parsim_uppass(n, NULL, NULL, t);
 //    // Uppass
 //    for (i = t->size; i--; ) {
@@ -198,6 +200,7 @@ double mpl_fullpass_parsimony_na_only(mpl_node* start, mpl_tree* t)
                                                   n->mem_index, glmatrix);
     }
     
+    mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
 //    mpl_parsim_reset_state_buffers(glmatrix);
     
     return len;
@@ -295,7 +298,7 @@ double mpl_score_try_parsimony
         score -= scorerecall;
         score += mpl_fullpass_parsimony_na_only(src->anc, t);
 //        mpl_scoretree_restore_original_characters();
-        mpl_parsim_reset_state_buffers(glmatrix);
+//        mpl_parsim_reset_state_buffers(glmatrix);
     }
     
     // Otherwise, check if the sum of score of the standard characters and the

@@ -570,7 +570,7 @@ mpl_fitch_na_recalc_first_downpass
             }
         }
         
-        if (t != tempdn[n][i]) {
+        if (t != dnset[n][i]) {
             chgs = chgs + 1;
         }
         
@@ -715,6 +715,14 @@ double mpl_fitch_na_recalc_second_downpass
         }
 //        assert(upset[n][i]);
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        
+        dnset[left][i] = tempdn[left][i];
+        upset[left][i] = tempup[left][i];
+        actives[left][i] = tempact[left][i];
+        dnset[right][i] = tempdn[right][i];
+        upset[right][i] = tempup[right][i];
+        actives[right][i] = tempact[right][i];
+        
     }
     
     return cost;
@@ -989,6 +997,36 @@ double mpl_na_only_parsim_second_downpass
     }
     
     return score;
+}
+
+void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
+{
+    long j = 0;
+    long i = 0;
+    long* restrict indices = pd->indexbuf;
+    
+    //    for (j = 0; j < pd->nchars; ++j) {
+    for (j = pd->nchars; j-- ; ) {
+        
+        i = indices[j];
+        dnset[n][i] = tempdn[n][i];
+        upset[n][i] = tempup[n][i];
+        actives[n][i] = tempact[n][i];
+        dnset[anc][i] = tempdn[anc][i];
+        upset[anc][i] = tempup[anc][i];
+        actives[anc][i] = tempact[anc][i];
+    }
+}
+
+void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matrix* m)
+{
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_reset_root_buffers(n, anc, &m->parsets[i]);
+        }
+    }
 }
 
 
