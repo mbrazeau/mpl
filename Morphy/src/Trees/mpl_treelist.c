@@ -59,7 +59,11 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
         }
     }
     
+    tl->back = top;
     ++tl->num_trees;
+    if (tl->num_trees == 1) {
+        tl->head = top;
+    }
     
     assert(tl->num_trees <= tl->max_trees);
     // TODO: Rebase the topology if the tree is unrooted
@@ -100,6 +104,8 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
     mpl_tree_record_topol(top, t);
     
     if (tl->num_trees == 0) {
+        tl->back = &tl->trees[0];
+        tl->head = tl->back;
         ++tl->num_trees;
     }
 }
@@ -113,12 +119,45 @@ mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
     return NULL;
 }
 
+mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
+{
+    mpl_topol* ret = NULL;
+    ret = tl->head;
+    if (tl->head > tl->back) {
+        tl->head = NULL;
+        ret = NULL;
+    }
+    ++tl->head;
+    
+    return ret;
+}
+
+mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
+{
+    long i = 0;
+    double shortest;
+    
+    mpl_topol* ret = 0;
+    ret = &tl->trees[0];
+    shortest = ret->score;
+    
+    for (i = 1; i < tl->num_trees; ++i) {
+        if (tl->trees[i].score < shortest) {
+            ret = &tl->trees[i];
+            shortest = ret->score;
+        }
+    }
+    
+    return ret;
+}
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
     tl->num_trees = 0;
     tl->shortest = 0.0;
     tl->longest = 0.0;
+    tl->head = NULL;
+    tl->back = NULL;
 }
 
 /*

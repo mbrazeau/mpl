@@ -35,6 +35,7 @@ void            mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_topol(long tnum, mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_next(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_new_rep(mpl_treelist* tl);
+mpl_topol*      mpl_treelist_get_shortest(mpl_treelist* tl);
 void            mpl_treelist_clear_rep(mpl_treelist* tl);
 void            mpl_treelist_clear_all(mpl_treelist* tl);
 void            mpl_treelist_remove_topol(mpl_topol* top, mpl_treelist* tl);
