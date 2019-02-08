@@ -23,6 +23,7 @@ typedef struct _bbreak {
     long            numreps;
     mpl_bbreak_t    bbktype;
     long            num_nodes;
+    mpl_node**      clips;
     mpl_node**      srcs;
     long            nlongtgts;
     mpl_node**      tgtslong;
@@ -31,6 +32,7 @@ typedef struct _bbreak {
     unsigned long   num_rearrangs;
     mpl_treelist*   treelist;
     mpl_stepwise    stepwise;
+    double          shortest;
 
 } mpl_bbreak;
 
@@ -38,6 +40,7 @@ mpl_bbreak* mpl_bbreak_new(long num_nodes);
 void        mpl_bbreak_delete(mpl_bbreak** bbk);
 int         mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk);
 void        mpl_bbreak_reset(mpl_bbreak* bbk);
+void        mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk);
 void        mpl_do_bbreak(mpl_bbreak* bbk);
 
 #endif /* mpl_bbreak_h */

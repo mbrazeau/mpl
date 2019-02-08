@@ -39,6 +39,7 @@ typedef void (*mpl_searchfxn)(mpl_search* s);
 
 typedef struct _search {
     
+    long            num_taxa;
     mpl_search_t    search_type;
     mpl_bbreak_t    bbreak_type;
     mpl_stepwise_t  stepw_type;
