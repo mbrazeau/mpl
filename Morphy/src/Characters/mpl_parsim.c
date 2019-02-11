@@ -92,6 +92,7 @@ mpl_discr** restrict tempup  = NULL;
 mpl_discr** restrict tempact = NULL;
 double*     restrict weights = NULL;
 long*       restrict changes = NULL;
+long*       restrict minchanges = NULL;
 
 
 /**
@@ -110,6 +111,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     tempact = cb->tempact;
     weights = cb->weights;
     changes = cb->charchanges;
+    minchanges = cb->minchanges;
 }
 
 void mpl_parsim_swap_stateset_ptrs(mpl_charbuf* cb)
@@ -156,6 +158,7 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd)
     
 //    pd->nchanges = (long*)safe_calloc(range, sizeof(long));
     pd->indexbuf = (long*)safe_calloc(range, sizeof(long));
+    pd->minchanges = (long*)safe_calloc(range, sizeof(long));
 }
 
 //void mpl_parsim_reset_nchanges(mpl_parsdat* pd)
@@ -202,6 +205,7 @@ void mpl_parsim_add_data_column_to_buffer
 (mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd)
 {
     mpl_charbuf_add_data_column(col, pd->start + pd->nchars, ci, cb);
+    cb->minchanges[pd->start + pd->nchars] = mpl_charbuf_analyze_discr_minchanges(pd->start + pd->nchars, pd->isNAtype, cb);
     ++pd->nchars;
 #ifdef DEBUG
     assert(pd->nchars <= pd->end);
@@ -817,7 +821,7 @@ double mpl_fitch_na_local_check
     
 //    if (lim < 0.0) {
         for (i = pd->start; i < end; ++i) {
-            if (dnset[src][i] < UNKNOWN) {
+//            if (dnset[src][i] < UNKNOWN) {
                 if (((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) && (dnset[src][i] & ISAPPLIC)) {
                     if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
                         score += weights[i];
@@ -835,17 +839,20 @@ double mpl_fitch_na_local_check
                         ++pd->nchars;
                         // And sum its old score
                         pd->scorerecall += (changes[i] * weights[i]);
+                        pd->minscore += (minchanges[i] * weights[i]);
                     }
                 }
                 else {
+                    if (dnset[src][i] < MISSING) {
                     //                     Add this index to the buffer needing checks
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    // And sum its old score
-                    pd->scorerecall += (changes[i] * weights[i]);
-    //                    //                pd->minscore += 1.0;
+                        pd->indexbuf[pd->nchars] = i;
+                        ++pd->nchars;
+                        // And sum its old score
+                        pd->scorerecall += (changes[i] * weights[i]);
+                        pd->minscore += (minchanges[i] * weights[i]);
+                    }
                 }
-            }
+//            }
         }
         
         return score;
@@ -1229,6 +1236,21 @@ double mpl_parsim_get_standard_tryscore(mpl_matrix* m)
     }
     
     return tryscore;
+}
+
+double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
+{
+    int i;
+    double minremain = 0.0;
+
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            minremain += m->parsets[i].tryscore;
+        }
+    }
+    
+    return minremain;
 }
 
 void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd)

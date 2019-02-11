@@ -9,6 +9,7 @@
 #ifndef mpl_charbuf_h
 #define mpl_charbuf_h
 
+#include <stdbool.h>
 #include "mpl_chardefs.h"
 
 
@@ -28,6 +29,7 @@ typedef struct _charbuf {
     long*       orig_indices;
     double*     weights;
     long*       charchanges;
+    long*       minchanges;
     mpl_data_t  datype;
     mpl_discr** dnset; // The set of downpass characters
     mpl_discr** upset; // The set of uppass characters
@@ -47,4 +49,5 @@ void mpl_charbuf_store_discr_states(mpl_charbuf* cb);
 void mpl_charbuf_restore_discr_states(mpl_charbuf* cb);
 void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb);
 int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb);
+long mpl_charbuf_analyze_discr_minchanges(const long i, bool gapmissing, mpl_charbuf* cb);
 #endif /* mpl_discchars_h */

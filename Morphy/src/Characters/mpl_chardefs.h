@@ -19,7 +19,7 @@ typedef unsigned long mpl_discr;
 
 #define NA       ((mpl_discr)1UL) // Bitwise representation of the inapplicable symbol
 #define ISAPPLIC ((mpl_discr)~NA) // Bitmask for states that are applicable
-#define MISSING  ((mpl_discr)UINT_MAX) // Bitmask for missing data (all state)
+#define MISSING  ((mpl_discr)ULONG_MAX) // Bitmask for missing data (all state)
 #define UNKNOWN  ((mpl_discr)~NA) // Bitmask for missing data that's know to be logically applicable
 #define GAPPUSH  1 // Shift value for the position of the gap
 

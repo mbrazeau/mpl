@@ -398,7 +398,7 @@ double mpl_score_try_parsimony
         score -= scorerecall;
 
         if (lim > 0.0) {
-            if ((score + sttlen /* + minscore of remaining NAs*/) > lim) {
+            if ((score + sttlen + mpl_parsim_get_na_remaining_minscore(glmatrix)) > lim) {
                 return score;
             }
         }

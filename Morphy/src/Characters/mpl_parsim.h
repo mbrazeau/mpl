@@ -31,6 +31,7 @@ typedef struct mpl_parsdat {
     long*           nchanges;
     long*           indexbuf;
     double          minscore;
+    long*           minchanges;
     double          scorerecall; // For characters needing full-pass estimation
                                  // during a partial reopt.
     double          score; // The score for this parsimony type.
@@ -115,6 +116,7 @@ double mpl_parsim_get_score_recall(mpl_matrix* m);
 double mpl_parsim_get_standard_tryscore(mpl_matrix* m);
 void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd);
 void mpl_parsim_reset_state_buffers(mpl_matrix *m);
+double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m);
 
 // TODO: remove these when you don't need them anymore
 void reset_temporary_changebuf(void);

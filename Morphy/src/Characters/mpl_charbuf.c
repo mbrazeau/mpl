@@ -33,6 +33,7 @@ void mpl_charbuf_init
     mpl_charbuf_init_datatype(cb);
     
     cb->weights = (double*)safe_calloc(ncols, sizeof(double));
+    cb->minchanges = (long*)safe_calloc(ncols, sizeof(double));
     cb->orig_indices = (long*)safe_calloc(ncols, sizeof(long));
     cb->charchanges = (long*)safe_calloc(ncols, sizeof(long));
     // TODO: CHECK RETURN!!!
@@ -185,6 +186,28 @@ int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb)
     return ret;
 }
 
+
+long mpl_charbuf_analyze_discr_minchanges(const long i, bool gapinapplic, mpl_charbuf* cb)
+{
+    mpl_discr d = 0;
+    mpl_discr g = 0;
+    long j = 0;
+    long result = 0;
+    
+    if (gapinapplic == true) {
+        g = NA;
+    }
+    
+    for (j = 0; j < cb->num_rows; ++j) {
+        if (cb->dnset[j][i] < UNKNOWN && cb->dnset[j][i] > g) {
+            d |= cb->dnset[j][i];
+        }
+    }
+    
+    MPL_POPCOUNTLL(result, d);
+    
+    return result;
+}
 /*******************************************************************************
  *                                                                             *
  *  PRIVATE FUNCTION DEFINITIONS                                               *
