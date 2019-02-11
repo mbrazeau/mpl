@@ -8,7 +8,7 @@
 
 #include <assert.h>
 #include <string.h>
-
+#include <time.h>
 #include <stdio.h>
 
 #include "mpl_bbreak.h"
@@ -79,6 +79,11 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     long i = 0;
     long j = 0;
     long nstarts = 0;
+    time_t timein;
+    time_t timeout;
+    
+    timein = (float)clock()/CLOCKS_PER_SEC;
+    
     mpl_topol* current = NULL;
 //    mpl_treelist* starttrees = NULL;
     mpl_topol* top;
@@ -113,21 +118,25 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             do {
                 // Rebuild the tree according to the stored topology
                 mpl_tree_read_topol(t, current);
-                
+
                 mpl_branch_swap(t, bbk);
                 
                 current = mpl_treelist_get_next(bbk->treelist);
                 
                 printf("Shortest tree found: %f; %li trees saved\n", bbk->shortest, bbk->treelist->num_trees);
+                
             } while (current != NULL);
             
             // If no better equal or tree was found in this replicate,
             // wipe the rep
+            
         }
         
     }
     
-    printf("\nHeuristic search completed:\n");
+    timeout = (float)clock()/CLOCKS_PER_SEC;
+    
+    printf("\nHeuristic search completed in %li seconds:\n", timeout - timein);
     printf("\t%lu rearrangements tried:\n", bbk->num_rearrangs);
     printf("\tShortest tree found: %.3f steps\n", bbk->shortest);
     printf("\t%li trees saved\n", bbk->treelist->num_trees);
@@ -136,6 +145,22 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
 
 }
 
+
+void dbg_print_tree(mpl_node* n)
+{
+    if (n->tip > 0) {
+        printf("%li", n->tip);
+        return;
+    }
+    
+    printf("(");
+    dbg_print_tree(n->left);
+    printf(",");
+    dbg_print_tree(n->right);
+    printf(")");
+}
+
+
 void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 {
 //    long ntax = 0; // The number of taxa in the tree
@@ -143,6 +168,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long clipmax = 0;
     long tgtnum = 0;
     double score = 0.0;
+    double bound = 0.0;
     mpl_node* left;
     mpl_node* right;
     mpl_node* csite;
@@ -155,13 +181,23 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long i = 0;
     long j = 0;
     
+    bound = t->score;
+    
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
     memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
     nnodes = t->size;
     clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
     
-    for (i = 1; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
+    // TODO: clipmax-1 is temporary (root-adjacent clips need to be fixed)
+    for (i = 1; i < clipmax-1; ++i) { // NOTE: Assumes 'unrooted' tree!!!
+        
+        if (clips[i]->lock == true) {
+            clips[i]->lock = false;
+            continue;
+        }
+        
+        clips[i]->clipmark = true;
         
         // Clip the tree at i
         left = NULL;
@@ -184,11 +220,21 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         srcs = bbk->srcs;
         
         // << Reoptimise the subtrees as quickly as possible >>
-        // 
-        
-        // <<< Check the cost >>> of reinserting the node at this clip
-        // If the result is no difference on the length of the
-        // tree, this branch is zero-length and can be skipped
+        double tgtlen =
+        mpl_fullpass_parsimony(t);
+        double srclen = 0.0;
+        if ((*src)->tip == 0) {
+            srclen = mpl_fullpass_subtree(*src, t);
+        }
+
+        // If the branch is zero-length, no need to continue. All swaps will
+        // result in redundant trees after collapsing.
+        if ((srclen + tgtlen) == bound) {
+            mpl_node_bin_connect(left, right, clips[i]);
+            clips[i]->lock = false;
+            clips[i]->clipmark = false;
+            continue;
+        }
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
@@ -210,11 +256,28 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         
         // Size of the long list is determined by the traversal
         mpl_bbreak_get_target_list(t, csite, bbk);
+        src = bbk->srcs;
         
+        mpl_node* curnbr = NULL;
+        mpl_node* oldnbr = NULL;
         for (src = bbk->srcs; src < srcs; ++src) {
+        
+            curnbr = *src;
             
             // Re-root the tree
             mpl_bbreak_tbr_reroot(*src, clips[i]);
+            
+            if (clips[i]->tip == 0) {
+                if (oldnbr != NULL) {
+                    if (oldnbr->tip > 0) {
+                        oldnbr = oldnbr->anc;
+                    }
+                    mpl_update_src_actives(oldnbr, clips[i]);
+                }
+                mpl_src_root_parsimony(clips[i]);
+            }
+            
+            oldnbr = curnbr;
             
             // Get any additional nodes needed for unique rerootings
             if ((*src)->tip == 0) {
@@ -248,22 +311,31 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 mpl_node_bin_connect(tgts[j], NULL, clips[i]);
                 ++bbk->num_rearrangs;
                 
-                // for each target site <<< check the length >>> of the tree {
-                score = mpl_fullpass_parsimony(t);
-//
-                if (score <= bbk->shortest) {
-                    if (score < bbk->shortest) {
-                        bbk->shortest = score;
+                score = mpl_score_try_parsimony(tgtlen + srclen, bound, clips[i], tgts[j], t);
+                t->score = (score + tgtlen + srclen);
+
+//                t->score = mpl_fullpass_parsimony(t);
+
+                if (t->score <= bbk->shortest) {
+                    if (t->score < bbk->shortest) {
+                        bbk->shortest = t->score;
                         mpl_treelist_clear_all(bbk->treelist);
-                        mpl_treelist_add_tree(true, t, bbk->treelist);
+                        
+                        // The stuff here depends on STEEP/SHALLOW descent options
+                        clips[i]->clipmark = false;
+                        mpl_treelist_add_tree(false, t, bbk->treelist);
+                        clips[i]->lock = false;
+//                        clips[i]->clipmark = false;
                         return;
                     }
-                    mpl_treelist_add_tree(true, t, bbk->treelist);
+                    else {
+                        mpl_treelist_add_tree(true, t, bbk->treelist);
+                    }
                 }
 
                 //  Put the src tree back in its original spot
                 mpl_node_bin_clip(clips[i]);
-                
+
             }
         }
         
@@ -272,16 +344,14 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             mpl_bbreak_tbr_reroot(rtlef, clips[i]);
             if (clips[i]->left != rtlef) {
                 mpl_node_rotate(clips[i]);
-//                mpl_node* t = NULL;
-//                t = clips[i]->left;
-//                clips[i]->left = clips[i]->right;
-//                clips[i]->right = t;
             }
             mpl_bbreak_tbr_reroot(rtrig, clips[i]);
         }
        
         // Restore the tree to exactly as it was before
         mpl_node_bin_connect(left, right, clips[i]);
+        clips[i]->lock = false;
+        clips[i]->clipmark = false;
     }
 }
 
@@ -313,8 +383,6 @@ static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base)
     base->anc = NULL;
     
     while (n) {
-        // TODO: This can be simplified without pointers to pointers by using
-        // an intermediate variable. But for now this should work.
         q = n->anc;
         if (n->left == p) {
             r = n->left;

@@ -73,6 +73,8 @@ int mpl_reset_node(mpl_node* n)
     n->po_index = 0;
     n->copy_index = 0;
     n->weight = 0;
+    n->clipmark = false;
+    n->lock = false;
     
     return 0;
 }

@@ -47,6 +47,7 @@ int test_tree_assembly_from_topology (void)
     mpl_topol top;
     top.num_taxa = numtaxa;
     top.num_nodes = numnodes;
+    top.lock = 0;
     top.edges = &edgetable[0];
     
     mpl_tree* t = mpl_new_tree(numtaxa);
@@ -84,6 +85,7 @@ int test_binary_postorder (void)
     mpl_topol top;
     top.num_taxa = numtaxa;
     top.num_nodes = numnodes;
+    top.lock = 0;
     top.edges = &edgetable[0];
     
     mpl_tree* t = mpl_new_tree(numtaxa);
@@ -132,6 +134,7 @@ int test_polytomous_postorder (void)
     mpl_topol top;
     top.num_taxa = numtaxa;
     top.num_nodes = numnodes;
+    top.lock = 0;
     top.edges = &edgetable[0];
     
     mpl_tree* t = mpl_new_tree(numtaxa);

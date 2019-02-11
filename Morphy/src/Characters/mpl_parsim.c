@@ -13,6 +13,34 @@
 #include "mpl_parsim.h"
 #include "mpl_matrix.h"
 
+
+
+long tempdbgchanges[400] = {0};
+
+void reset_temporary_changebuf(void)
+{
+    memset(tempdbgchanges, 0, 400 * sizeof(long));
+}
+
+long get_temp_change(long i)
+{
+    return tempdbgchanges[i];
+}
+
+void tempchangebuf_selective_reset(mpl_matrix *m)
+{
+    mpl_parsdat* pd = &m->parsets[1];
+    long* indices = pd->indexbuf;
+    long nchar = pd->nchars;
+    long i = 0;
+    long j = 0;
+    for (i = 0; i < nchar; ++i) {
+        j = indices[i];
+        tempdbgchanges[j] = 0;
+    }
+}
+
+
 static const mpl_parsdat Fitch_Std = {
     
     .parstype   = MPL_FITCH_T,
@@ -24,7 +52,9 @@ static const mpl_parsdat Fitch_Std = {
     .tipfxn1    = &mpl_fitch_tip_update,
     .tipfxn2    = NULL,
     .rootfxn    = &mpl_fitch_root,
-    .locfxn     = &mpl_fitch_local_check
+    .locfxn     = &mpl_fitch_local_check,
+    .srcroot    = &mpl_do_src_root
+    
     
 };
 
@@ -40,7 +70,8 @@ static const mpl_parsdat Fitch_NA = {
     .tipfxn1    = &mpl_fitch_na_tip_update,
     .tipfxn2    = &mpl_fitch_na_tip_finalize,
     .rootfxn    = &mpl_fitch_na_root,
-    .locfxn     = &mpl_fitch_na_local_check
+    .locfxn     = &mpl_fitch_na_local_check,
+    .srcroot    = &mpl_na_do_src_root
 };
 
 
@@ -177,6 +208,26 @@ void mpl_parsim_add_data_column_to_buffer
 #endif
 }
 
+/// Functions to buffer tips and tip indices that would end up requiring
+/// updates during the search.
+
+void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
+{
+    long i = 0;
+    long j = 0;
+    long end = pd->end;
+    for (i = 0; i < m->num_rows; ++i) {
+        for (j = pd->start; j < end; ++j) {
+            if ((dnset[i][j] & (dnset[i][j] - 1)) != 0) {
+                // Put this one in the buffer
+            }
+            else {
+                actives[i][j] = tempact[i][j] = tempup[i][j]
+                = tempdn[i][j] = upset[i][j] = dnset[i][j];
+            }
+        }
+    }
+}
 
 /// Parsimony state set functions
 
@@ -189,9 +240,9 @@ double mpl_fitch_downpass
     
     for (i = pd->start; i < end; ++i) {
         
-        dnset[n][i] = dnset[left][i] & dnset[right][i];
+//        dnset[n][i] = dnset[left][i] & dnset[right][i];
         
-        if (dnset[n][i] == 0) {
+        if (!(dnset[n][i] = dnset[left][i] & dnset[right][i])) {
             dnset[n][i] = dnset[left][i] | dnset[right][i];
             cost += weights[i];
             ++changes[i];
@@ -471,6 +522,24 @@ double mpl_fitch_na_second_downpass
 }
 
 
+void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        upset[anc][i] = upset[n][i];
+        if (upset[anc][i] & ISAPPLIC) {
+            upset[anc][i] &= ISAPPLIC;
+        }
+        
+        tempdn[anc][i] = dnset[anc][i];
+        tempup[anc][i] = upset[anc][i];
+        //        assert(upset[anc][i]);
+    }
+}
+
+
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
@@ -638,17 +707,10 @@ int mpl_fitch_na_recalc_first_uppass
         else {
             upset[n][i] = dnset[n][i];
         }
-//
-//        if (dnset[n][i] != tempdn[n][i]) {
-//            ++chgs;
-//        }
-        if (t != upset[n][i]) {
+
+        if (tempup[n][i] != upset[n][i]) {
             ++chgs;
         }
-//        if (dnset[n][i] != upset[n][i]) {
-//            ++chgs;
-//        }
-//        assert(upset[n][i]);
     }
     
     return chgs;
@@ -683,6 +745,7 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
     }
 }
 
+
 double mpl_fitch_na_recalc_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
@@ -692,7 +755,6 @@ double mpl_fitch_na_recalc_second_downpass
     double cost = 0.0;
     long* restrict indices = pd->indexbuf;
     
-//    for (j = 0; j < pd->nchars; ++j) {
     for (j = pd->nchars; j-- ; ) {
         i = indices[j];
 //    long end = pd->end;
@@ -722,11 +784,11 @@ double mpl_fitch_na_recalc_second_downpass
 //        assert(upset[n][i]);
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
-        dnset[left][i] = tempdn[left][i];
-        upset[left][i] = tempup[left][i];
-        actives[left][i] = tempact[left][i];
-        dnset[right][i] = tempdn[right][i];
-        upset[right][i] = tempup[right][i];
+        dnset[left][i]    = tempdn[left][i];
+        upset[left][i]    = tempup[left][i];
+        actives[left][i]  = tempact[left][i];
+        dnset[right][i]   = tempdn[right][i];
+        upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
         
     }
@@ -755,23 +817,34 @@ double mpl_fitch_na_local_check
     
 //    if (lim < 0.0) {
         for (i = pd->start; i < end; ++i) {
-            if (((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) && (dnset[src][i] & ISAPPLIC)) {
-                if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
-                    score += weights[i];
+            if (dnset[src][i] < UNKNOWN) {
+                if (((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) && (dnset[src][i] & ISAPPLIC)) {
+                    if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+                        score += weights[i];
+                    }
                 }
-            }
-            else if (upset[tgt1][i] & dnset[src][i] & NA) {
-                if (actives[tgt1][i] && actives[src][i]) {
-                    score += weights[i];
+                else if (upset[tgt1][i] == NA && dnset[src][i] == NA) {
+                    if (actives[tgt1][i] && actives[src][i]) {
+                        score += weights[i];
+                    }
+                    else if (actives[tgt2][i] && actives[src][i]) {
+                        score += weights[i];
+                    }
+                    else {
+                        pd->indexbuf[pd->nchars] = i;
+                        ++pd->nchars;
+                        // And sum its old score
+                        pd->scorerecall += (changes[i] * weights[i]);
+                    }
                 }
-            }
-            else {
-                // Add this index to the buffer needing checks
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                // And record its old score
-                pd->scorerecall += (changes[i] * weights[i]);
-
+                else {
+                    //                     Add this index to the buffer needing checks
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    // And sum its old score
+                    pd->scorerecall += (changes[i] * weights[i]);
+    //                    //                pd->minscore += 1.0;
+                }
             }
         }
         
@@ -819,6 +892,15 @@ void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m)
     }
 }
 
+void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_root_finalize(n, anc, &m->parsets[i]);
+        }
+    }
+}
 
 void mpl_parsim_reset_scores(mpl_matrix* m)
 {
@@ -1015,11 +1097,11 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
-        dnset[n][i] = tempdn[n][i];
-        upset[n][i] = tempup[n][i];
-        actives[n][i] = tempact[n][i];
-        dnset[anc][i] = tempdn[anc][i];
-        upset[anc][i] = tempup[anc][i];
+        dnset[n][i]     = tempdn[n][i];
+        upset[n][i]     = tempup[n][i];
+        actives[n][i]   = tempact[n][i];
+        dnset[anc][i]   = tempdn[anc][i];
+        upset[anc][i]   = tempup[anc][i];
         actives[anc][i] = tempact[anc][i];
     }
 }
@@ -1035,7 +1117,7 @@ void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matri
     }
 }
 
-void mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+double mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -1043,20 +1125,29 @@ void mpl_do_src_root(const long left, const long right, const long n, mpl_parsda
     for (i = pd->start; i < end; ++i) {
         dnset[n][i] = upset[left][i] | upset[right][i];
     }
+    
+    return 0.0;
 }
 
-void mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
+        
         dnset[n][i] = upset[left][i] | upset[right][i];
+        
         if (dnset[n][i] & ISAPPLIC) {
             dnset[n][i] &= ISAPPLIC;
         }
-        actives[n][i] = actives[left][i] | actives[right][i];
+        
+        tempdn[n][i] = dnset[n][i];
+        
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
     }
+    
+    return 0.0;
 }
 
 void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl_matrix* m)
@@ -1064,7 +1155,33 @@ void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-        
+        m->parsets[i].srcroot(left, right, n, &m->parsets[i]);
+    }
+}
+
+
+void mpl_update_active_sets(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
+    }
+}
+
+
+void mpl_parsim_update_active_sets(const long left, const long right, const long n, mpl_matrix* m)
+{
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
+            mpl_update_active_sets(left, right, n, &m->parsets[i]);
+        }
     }
 }
 
@@ -1075,11 +1192,12 @@ double mpl_parsim_local_check
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-//            m->parsets[i].tryscore = 0.0;
-            m->parsets[i].scorerecall = 0.0;
-            m->parsets[i].nchars = 0;
-            score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, &m->parsets[i]);
-//            m->parsets[i].tryscore = score;
+//      m->parsets[i].tryscore = 0.0;
+        m->parsets[i].scorerecall = 0.0;
+        m->parsets[i].nchars = 0;
+        m->parsets[i].minscore = 0.0;
+        score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, &m->parsets[i]);
+//      m->parsets[i].tryscore = score;
     }
     
     return score;

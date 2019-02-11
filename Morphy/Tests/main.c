@@ -71,12 +71,13 @@ int main(int argc, const char * argv[]) {
     fails += test_reject_new();
     
     // Test mpl_taxablock.c
-    fails += test_taxa_block_basic(argc, argv);
+//    fails += test_taxa_block_basic(argc, argv);
     
     // Test mpl_bbreak.c
-    fails += test_bbreak_reroot_all_for_subtree();
-    fails += test_bbreak_store_allswaps();
-    fails += test_bbreak_store_TBR_allswaps();
+//    fails += test_bbreak_reroot_all_for_subtree();
+//    fails += test_bbreak_store_allswaps();
+//    fails += test_bbreak_store_TBR_allswaps();
+    fails += test_single_rep_hsearch();
     
     // Test mpl_matrix.c
     fails += test_basic_matrix();
@@ -89,8 +90,8 @@ int main(int argc, const char * argv[]) {
     
     // Test mpl_stepwise.c
     fails += test_initial_fork();
-    fails += test_build_arbitrary_tree();
-    fails += test_build_med_tree();
+//    fails += test_build_arbitrary_tree();
+//    fails += test_build_med_tree();
     fails += test_build_large_tree();
     
     fails += test_basic_parsimony();

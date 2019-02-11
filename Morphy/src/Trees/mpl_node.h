@@ -33,6 +33,8 @@ typedef struct _node {
     char*       label; // Only points, no memory allocated by mpl_node.h functions
     double      length;
     bool        lock;
+    bool        clipmark;
+    int         marked;
     
 } mpl_node;
 

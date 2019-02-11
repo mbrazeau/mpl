@@ -194,6 +194,7 @@ int mpl_topol_init(long num_taxa, mpl_topol* top)
         return -1;
     }
     
+    top->lock = 0;
     top->num_taxa = num_taxa;
     top->num_nodes = 2 * num_taxa - 1;
     

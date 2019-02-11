@@ -148,11 +148,11 @@ char* mpl_str_c(mpl_str* s)
     return s->str;
 }
 
-int mpl_rng_seed = MPL_DEFAULT_RSEED;
+unsigned mpl_rng_seed = 3;//MPL_DEFAULT_RSEED;
 
-int mpl_rng(void)
+unsigned mpl_rng(void)
 {
-    return (mpl_rng_seed = (397204094 * mpl_rng_seed) % ((int)pow(2, 31) - 1));
+    return (mpl_rng_seed = (397204094 * mpl_rng_seed) % ((unsigned)pow(2, 31) - 1));
 }
 
 int mpl_rng_set_seed(const int seed)

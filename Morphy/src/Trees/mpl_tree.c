@@ -122,8 +122,8 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
             j = 0;
             
             for (j = 0; j < t->num_nodes; ++j) {
-                if (top->edges[j] == t->nodes[i].mem_index
-                    && t->nodes[j].anc == NULL)
+               
+                if (top->edges[j] == t->nodes[i].mem_index && t->nodes[j].anc == NULL)
                 {
                     mpl_node_push_desc(&t->nodes[i], &t->nodes[j]);
                 }
@@ -168,12 +168,17 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
         }
     }
     
+    if (top->lock > 0) {
+        t->nodes[top->lock-1].lock = true;
+    }
+    
     // TODO: Make this more general and safer
     mpl_node* p = &t->nodes[0];
     while (p->anc != NULL) p = p->anc;
     t->base = p;
     t->dummy->left = p;
     p->anc = t->dummy;
+    t->score = top->score;
     
     return ret;
 }
@@ -189,24 +194,24 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
     
     mpl_tree_mark_uniquely(t);
     
+    top->lock = 0;
     // Then copy into the topology record
     int i = 0;
     for (i = 0; i < t->num_nodes; ++i) {
         if (i < t->num_taxa) {
             if (t->nodes[i].anc != NULL) {
                 top->edges[i] = t->nodes[i].anc->copy_index;
+                if (t->nodes[i].clipmark == true) {
+                    top->lock = i + 1;
+                }
             }
         } else {
             if (t->nodes[i].anc != NULL) {
                 top->edges[t->nodes[i].copy_index] = t->nodes[i].anc->copy_index;
+                
             }
         }
-        //        if (t->nodes[i].anc != NULL && t->nodes[i].anc != d) {
-//            top->edges[i] = t->nodes[t->nodes[i].anc->copy_index].copy_index;
-//        }
-//        else {
-//            top->edges[i] = -1;
-//        }
+        
     }
     
     top->score = t->score;

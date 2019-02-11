@@ -33,6 +33,7 @@ typedef struct _bbreak {
     mpl_treelist*   treelist;
     mpl_stepwise    stepwise;
     double          shortest;
+    double          bestofall;
 
 } mpl_bbreak;
 

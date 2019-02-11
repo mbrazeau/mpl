@@ -9,7 +9,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <time.h>
 
+#include "../mpl_defs.h"
 #include "../mpl_utils.h"
 #include "mpl_stepwise.h"
 #include "mpl_scoretree.h"
@@ -102,6 +104,10 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
     long nheld;
     mpl_node* nexttip = NULL;
     
+//    float timein;
+//    float timeout;
+//    float timeused;
+    
     sw->longest = 0.0;
     sw->shortest = 0.0;
     
@@ -118,6 +124,8 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
 //    nsaved = 1;
     
     for (i = sw->tips_added; i < sw->num_tips; ++i) {
+        
+//        timein = (float)clock()/CLOCKS_PER_SEC;
         
         mpl_treelist_clear_all(sw->held);
         // Push the tip onto a new base, so that it can be joined to the
@@ -140,6 +148,12 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
         ++sw->next;
         // Swap results and queue bufers
         mpl_switch_tree_buffers(sw);
+//
+//        timeout = (float)clock()/CLOCKS_PER_SEC;
+//
+//        timeused  = timeout - timein;
+//        printf("Round %li of stepwise addition completed\n", i+1);
+//        printf("Time used: %f seconds\n", timeused);
         
     }
 
@@ -159,7 +173,7 @@ static void mpl_shuffle_addseq(mpl_stepwise* sw)
     long t = 0;
     
     for (i = 0; i < sw->num_tips; ++i) {
-        j = i + mpl_rng() / (MPL_RAND_MAX / (sw->num_tips) + 1);
+        j = i + mpl_rng() / (MPL_RAND_MAX / (sw->num_tips - i) + 1);
         t = sw->addseq[j];
         sw->addseq[j] = sw->addseq[i];
         sw->addseq[i] = t;
@@ -220,18 +234,18 @@ static void mpl_store_starttree_nodes(mpl_tree* t, mpl_stepwise *sw)
     }
 }
 
-void dbg_print_tree(mpl_node* n)
-{
-    if (n->tip) {
-        printf("%li", n->tip);
-        return;
-    }
-    printf("(");
-    dbg_print_tree(n->left);
-    printf(",");
-    dbg_print_tree(n->right);
-    printf(")");
-}
+//void dbg_print_tree(mpl_node* n)
+//{
+//    if (n->tip) {
+//        printf("%li", n->tip);
+//        return;
+//    }
+//    printf("(");
+//    dbg_print_tree(n->left);
+//    printf(",");
+//    dbg_print_tree(n->right);
+//    printf(")");
+//}
 
 static void mpl_try_all_sites
 (mpl_node* n, mpl_tree* t, mpl_stepwise *sw)
@@ -257,7 +271,7 @@ static void mpl_try_all_sites
         mpl_node_bin_connect(sw->sites[i], NULL, n);
         
 //        t->score = mpl_fullpass_parsimony(t);
-        t->score = sttlen + mpl_score_try_parsimony(sttlen, sw->longest, n, sw->sites[i], t);
+        t->score = sttlen + mpl_score_try_parsimony(-1.0, sw->longest, n, sw->sites[i], t);
 //
 //        double checklen = 0.0;
 //        checklen = mpl_fullpass_parsimony(t);
