@@ -327,6 +327,7 @@ double mpl_fitch_local_check
  const long src,
  const long tgt1,
  const long tgt2,
+ const long troot,
  mpl_parsdat* pd)
 {
     long i;
@@ -623,9 +624,6 @@ mpl_fitch_na_recalc_first_downpass
     for (j = pd->nchars; j-- ; ) {
 
         i = indices[j];
-//    long end = pd->end;
-//
-//    for (i = pd->start; i < end; ++i) {
         
         t = dnset[left][i] & dnset[right][i];
         
@@ -643,7 +641,7 @@ mpl_fitch_na_recalc_first_downpass
             }
         }
         
-        if (t != dnset[n][i]) {
+        if (t != tempdn[n][i]) {
             chgs = chgs + 1;
         }
         
@@ -753,17 +751,16 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
 double mpl_fitch_na_recalc_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
-    long i;
-    long j;
+    size_t i;
+    size_t j;
     mpl_discr t = 0;
     double cost = 0.0;
     long* restrict indices = pd->indexbuf;
     
     for (j = pd->nchars; j-- ; ) {
+        
         i = indices[j];
-//    long end = pd->end;
-//
-//    for (i = pd->start; i < end; ++i) {
+        
         if (upset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
             if (t) {
@@ -785,7 +782,7 @@ double mpl_fitch_na_recalc_second_downpass
                 cost += weights[i];
             }
         }
-//        assert(upset[n][i]);
+
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         dnset[left][i]    = tempdn[left][i];
@@ -808,6 +805,7 @@ double mpl_fitch_na_local_check
  const long src,
  const long tgt1,
  const long tgt2,
+ const long troot,
  mpl_parsdat* pd)
 {
     // For any characters that can be checked without direct reopt at this point
@@ -815,44 +813,60 @@ double mpl_fitch_na_local_check
     // never hit, then the calling function may need to perform a full check
     // on inapplicable characters.
     
-    long i;
+    size_t i;
     const long end = pd->end;
     double score = 0.0;
     
 //    if (lim < 0.0) {
         for (i = pd->start; i < end; ++i) {
-//            if (dnset[src][i] < UNKNOWN) {
-                if (((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) && (dnset[src][i] & ISAPPLIC)) {
-                    if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+            
+            if (dnset[src][i] & ISAPPLIC) {
+                if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
+                    if (!((tempup[tgt1][i] | tempup[tgt2][i]) & dnset[src][i])) {
                         score += weights[i];
                     }
                 }
-                else if (upset[tgt1][i] == NA && dnset[src][i] == NA) {
-                    if (actives[tgt1][i] && actives[src][i]) {
-                        score += weights[i];
+                else if (dnset[src][i] < UNKNOWN) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (minchanges[i] * weights[i]);
+                }
+            } else {
+                if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
+                    if (tempup[tgt1][i] == NA) {
+                        if (tempact[tgt1][i] && tempact[src][i]) {
+                            score += weights[i];
+                        }
+                        else if (tempact[tgt2][i] && tempact[src][i]) {
+                            score += weights[i];
+                        }
+                        else if (tempact[src][i]) {
+                            pd->indexbuf[pd->nchars] = i;
+                            ++pd->nchars;
+                            pd->scorerecall += (changes[i] * weights[i]);
+                            pd->minscore    += (minchanges[i] * weights[i]);
+                        }
                     }
-                    else if (actives[tgt2][i] && actives[src][i]) {
-                        score += weights[i];
+                    else if (tempdn[tgt1][i] == NA) {
+                        if (tempact[troot][i] && tempact[src][i]) {
+                            score += weights[i];
+                        }
                     }
-                    else {
+                    else if (tempact[src][i]) {
                         pd->indexbuf[pd->nchars] = i;
                         ++pd->nchars;
-                        // And sum its old score
                         pd->scorerecall += (changes[i] * weights[i]);
-                        pd->minscore += (minchanges[i] * weights[i]);
+                        pd->minscore    += (minchanges[i] * weights[i]);
                     }
                 }
-                else {
-                    if (dnset[src][i] < MISSING) {
-                    //                     Add this index to the buffer needing checks
-                        pd->indexbuf[pd->nchars] = i;
-                        ++pd->nchars;
-                        // And sum its old score
-                        pd->scorerecall += (changes[i] * weights[i]);
-                        pd->minscore += (minchanges[i] * weights[i]);
-                    }
+                else if (tempact[troot][i]) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (minchanges[i] * weights[i]);
                 }
-//            }
+            }
         }
         
         return score;
@@ -1086,7 +1100,6 @@ double mpl_na_only_parsim_second_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-//            score += m->parsets[i].downfxn2(left, right, n, &m->parsets[i]);
             score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
         }
     }
@@ -1100,10 +1113,10 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long i = 0;
     long* restrict indices = pd->indexbuf;
     
-    //    for (j = 0; j < pd->nchars; ++j) {
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
+        
         dnset[n][i]     = tempdn[n][i];
         upset[n][i]     = tempup[n][i];
         actives[n][i]   = tempact[n][i];
@@ -1193,7 +1206,7 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
 }
 
 double mpl_parsim_local_check
-(const double lim, const long src, const long tgt1, const long tgt2, mpl_matrix* m)
+(const double lim, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
     int i;
@@ -1203,7 +1216,7 @@ double mpl_parsim_local_check
         m->parsets[i].scorerecall = 0.0;
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
-        score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, &m->parsets[i]);
+        score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, troot, &m->parsets[i]);
 //      m->parsets[i].tryscore = score;
     }
     
@@ -1246,7 +1259,7 @@ double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            minremain += m->parsets[i].tryscore;
+            minremain += m->parsets[i].minscore;
         }
     }
     
