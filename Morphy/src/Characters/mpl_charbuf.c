@@ -98,8 +98,12 @@ void mpl_charbuf_add_data_column
     cb->orig_indices[colnum] = ci->index;
     
     for (i = 0; i < cb->row_max; ++i) {
-        cb->dnset[i][colnum] = datcol[i];
+        cb->upset[i][colnum] = cb->dnset[i][colnum] = datcol[i];
         cb->tempdn[i][colnum] = datcol[i];
+        cb->tempup[i][colnum] = datcol[i];
+        if (((datcol[i] - 1) & datcol[i]) == 0) {
+            cb->actives[i][colnum] = cb->tempact[i][colnum];
+        }
     }
 }
 
@@ -108,6 +112,15 @@ void mpl_charbuf_set_weight
 {
     cb->weights[charnum] = weight;
 }
+
+void mpl_charbuf_set_weights_equal(const double weight, mpl_charbuf* cb)
+{
+    long i = 0;
+    for (i = 0; i < cb->char_max; ++i) {
+        cb->weights[i] = weight;
+    }
+}
+
 
 // TODO: These functions are not the  most efficient possible implememtation
 // for this strategy Temp buffers could be written during full-pass optimisation
@@ -205,6 +218,10 @@ long mpl_charbuf_analyze_discr_minchanges(const long i, bool gapinapplic, mpl_ch
     }
     
     MPL_POPCOUNTLL(result, d);
+    
+    if (result > 0) {
+        result -= 1;
+    }
     
     return result;
 }
