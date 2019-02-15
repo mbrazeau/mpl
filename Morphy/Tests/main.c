@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
     fails += test_get_char_pointer_from_matrix();
     fails += test_counting_gaps_in_matrix_columns();
     fails += test_parsimony_data_setup();
-    fails += test_matrix_from_io_source(argc, argv);
+//    fails += test_matrix_from_io_source(argc, argv);
     
     // Test mpl_stepwise.c
     fails += test_initial_fork();
@@ -100,7 +100,7 @@ int main(int argc, const char * argv[]) {
     fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
-    fails += test_find_char_by_char_mismatches();
+//    fails += test_find_char_by_char_mismatches();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

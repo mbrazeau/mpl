@@ -774,7 +774,7 @@ int test_find_char_by_char_mismatches (void)
     double oldnascore = 0.0;
     double scorerecall = 0.0;
    
-    score = mpl_parsim_local_check(-1.0, t->nodes[27].mem_index, site->mem_index, site->anc->mem_index, m);
+    score = mpl_parsim_local_check(-1.0, t->nodes[27].mem_index, site->mem_index, site->anc->mem_index, t->base->mem_index, m);
     scorerecall = mpl_parsim_get_score_recall(m);
     
     score -= scorerecall;
