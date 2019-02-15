@@ -838,9 +838,9 @@ double mpl_fitch_na_local_check
                         if (tempact[tgt1][i] && tempact[src][i]) {
                             score += weights[i];
                         }
-                        else if (tempact[tgt2][i] && tempact[src][i]) {
-                            score += weights[i];
-                        }
+//                        else if (tempact[tgt2][i] && tempact[src][i]) {
+//                            score += weights[i];
+//                        }
                         else if (tempact[src][i]) {
                             pd->indexbuf[pd->nchars] = i;
                             ++pd->nchars;

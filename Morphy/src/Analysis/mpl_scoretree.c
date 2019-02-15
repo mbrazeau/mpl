@@ -296,6 +296,15 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                   n->right->mem_index,
                                                   n->mem_index, glmatrix);
+        if (lim > -1.0) {
+            if (len > lim) {
+                for (; i < t->nintern; ++i) {
+                    n = t->postord_intern[i];
+                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+                }
+                break;
+            }
+        }
     }
     
     mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
@@ -384,7 +393,7 @@ double mpl_score_try_parsimony
     // this junction.
     // If the lim is set and the score exceeds the limit already, return score.
     score = mpl_parsim_local_check
-                 (lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, glmatrix);
+                 (lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, t->base->mem_index, glmatrix);
 
 
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
@@ -396,14 +405,15 @@ double mpl_score_try_parsimony
 //        assert(scorerecall == oldnascore);
 //        mpl_scoretree_restore_original_characters();
         score -= scorerecall;
+        double minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
 
-        if (lim > 0.0) {
-            if ((score + sttlen + mpl_parsim_get_na_remaining_minscore(glmatrix)) > lim) {
-                return score;
+        if (lim > -1.0) {
+            if ((score + sttlen + minscore) > lim) {
+                return score + minscore;
             }
         }
         
-        score += mpl_fullpass_parsimony_na_only(scorerecall, src, t);
+        score += mpl_fullpass_parsimony_na_only(lim - (score + sttlen), src, t);
 //        mpl_scoretree_restore_original_characters();
 //        mpl_parsim_reset_state_buffers(glmatrix);
     }

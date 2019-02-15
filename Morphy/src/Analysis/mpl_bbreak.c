@@ -91,7 +91,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(0, bbk->numtaxa, 5, &bbk->stepwise);
+    mpl_stepwise_init(0, bbk->numtaxa, 30, &bbk->stepwise);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
@@ -322,7 +322,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         mpl_treelist_clear_all(bbk->treelist);
                         
                         // The stuff here depends on STEEP/SHALLOW descent options
-                        clips[i]->clipmark = false;
+//                        clips[i]->clipmark = false;
                         mpl_treelist_add_tree(false, t, bbk->treelist);
                         clips[i]->lock = false;
 //                        clips[i]->clipmark = false;
