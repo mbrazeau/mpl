@@ -252,7 +252,7 @@ double mpl_fitch_downpass
             ++changes[i];
         }
         
-        tempdn[n][i] = dnset[n][i];
+//        tempdn[n][i] = dnset[n][i];
     }
     
     pd->score += cost;
@@ -269,7 +269,7 @@ void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd)
     for (i = pd->start; i < end; ++i) {
         dnset[anc][i] = upset[anc][i] = dnset[n][i];
     
-        tempdn[anc][i] = tempup[anc][i] = upset[anc][i];
+//        tempdn[anc][i] = tempup[anc][i] = upset[anc][i];
     }
     
     
@@ -297,7 +297,7 @@ void mpl_fitch_uppass
         }
 
         upset[n][i] = fin;
-        tempup[n][i] = fin;
+//        tempup[n][i] = fin;
     }
 }
 
@@ -309,15 +309,18 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
     mpl_discr t;
     
     for (i = pd->start; i < end; ++i) {
-        t = dnset[tipn][i] & upset[anc][i];
-        if (t) {
-            upset[tipn][i] = t;
-        } else {
-            upset[tipn][i] = dnset[tipn][i];
-        }
         
-        tempdn[tipn][i] = dnset[tipn][i];
-        tempup[tipn][i] = upset[tipn][i];
+//        upset[tipn][i] = dnset[tipn][i];
+        
+        if (((dnset[tipn][i] - 1) & dnset[tipn][i]) != 0) {
+            t = dnset[tipn][i] & upset[anc][i];
+            if (t) {
+                upset[tipn][i] = t;
+            }
+            
+            tempdn[tipn][i] = dnset[tipn][i];
+            tempup[tipn][i] = upset[tipn][i];
+        }
     }
 }
 
@@ -462,18 +465,22 @@ void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
     
     for (i = pd->start; i < end; ++i) {
         
-        if (dnset[tipn][i] & upset[anc][i]) {
-            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
-        } else {
-            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
-        }
-        
-        upset[tipn][i] = dnset[tipn][i];
-        
-        if (dnset[tipn][i] & upset[anc][i]) {
-            if (upset[anc][i] & ISAPPLIC) {
-                upset[tipn][i] &= ISAPPLIC;
+        if (((dnset[tipn][i] - 1) & dnset[tipn][i]) != 0) {
+            if (dnset[tipn][i] & upset[anc][i]) {
+                actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+            } else {
+                actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
             }
+            
+            upset[tipn][i] = dnset[tipn][i];
+            
+            if (dnset[tipn][i] & upset[anc][i]) {
+                if (upset[anc][i] & ISAPPLIC) {
+                    upset[tipn][i] &= ISAPPLIC;
+                }
+            }
+        } else {
+            actives[tipn][i] = dnset[tipn][i] & ISAPPLIC;
         }
         
         tempdn[tipn][i]  = dnset[tipn][i];
@@ -595,12 +602,13 @@ void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
     long end = pd->end;
 
     for (i = pd->start; i < end; ++i) {
+        
         if (dnset[tipn][i] & upset[anc][i]) {
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
-        else {
-            upset[tipn][i] = dnset[tipn][i];
-        }
+//        else {
+//            upset[tipn][i] = dnset[tipn][i];
+//        }
     
         tempup[tipn][i] = upset[tipn][i];
     }
@@ -710,7 +718,7 @@ int mpl_fitch_na_recalc_first_uppass
             upset[n][i] = dnset[n][i];
         }
 
-        if (tempup[n][i] != upset[n][i]) {
+        if (tempup[n][i] != dnset[n][i]) {
             ++chgs;
         }
     }
@@ -730,20 +738,37 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
-        
-        if (dnset[tipn][i] & upset[anc][i]) {
-            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
-        } else {
-            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
-        }
-        
-        upset[tipn][i] = dnset[tipn][i];
-        
-        if (dnset[tipn][i] & upset[anc][i]) {
-            if (upset[anc][i] & ISAPPLIC) {
-                upset[tipn][i] &= ISAPPLIC;
+
+        if (((dnset[tipn][i] - 1) & dnset[tipn][i]) != 0) {
+            if (dnset[tipn][i] & upset[anc][i]) {
+                actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+            } else {
+                actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
             }
+            
+            upset[tipn][i] = dnset[tipn][i];
+            
+            if (dnset[tipn][i] & upset[anc][i]) {
+                if (upset[anc][i] & ISAPPLIC) {
+                    upset[tipn][i] &= ISAPPLIC;
+                }
+            }
+        } else {
+            actives[tipn][i] = dnset[tipn][i] & ISAPPLIC;
         }
+//        if (dnset[tipn][i] & upset[anc][i]) {
+//            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+//        } else {
+//            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+//        }
+//
+//        upset[tipn][i] = dnset[tipn][i];
+//
+//        if (dnset[tipn][i] & upset[anc][i]) {
+//            if (upset[anc][i] & ISAPPLIC) {
+//                upset[tipn][i] &= ISAPPLIC;
+//            }
+//        }
     }
 }
 
@@ -833,7 +858,9 @@ double mpl_fitch_na_local_check
                     pd->minscore    += (minchanges[i] * weights[i]);
                 }
             } else {
+                
                 if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
+                    
                     if (tempup[tgt1][i] == NA) {
                         if (tempact[tgt1][i] && tempact[src][i]) {
                             score += weights[i];
@@ -853,12 +880,13 @@ double mpl_fitch_na_local_check
                             score += weights[i];
                         }
                     }
-                    else if (tempact[src][i]) {
+                    else if (tempact[src][i] && (tempdn[tgt1][i] | tempdn[tgt2][i]) & ISAPPLIC) {
                         pd->indexbuf[pd->nchars] = i;
                         ++pd->nchars;
                         pd->scorerecall += (changes[i] * weights[i]);
                         pd->minscore    += (minchanges[i] * weights[i]);
                     }
+                    
                 }
                 else if (tempact[troot][i]) {
                     pd->indexbuf[pd->nchars] = i;
@@ -1113,16 +1141,27 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long i = 0;
     long* restrict indices = pd->indexbuf;
     
-    for (j = pd->nchars; j-- ; ) {
-        
-        i = indices[j];
-        
-        dnset[n][i]     = tempdn[n][i];
-        upset[n][i]     = tempup[n][i];
-        actives[n][i]   = tempact[n][i];
-        dnset[anc][i]   = tempdn[anc][i];
-        upset[anc][i]   = tempup[anc][i];
-        actives[anc][i] = tempact[anc][i];
+    if (anc != 0) {
+        for (j = pd->nchars; j-- ; ) {
+            
+            i = indices[j];
+            
+            dnset[n][i]     = tempdn[n][i];
+            upset[n][i]     = tempup[n][i];
+            actives[n][i]   = tempact[n][i];
+            dnset[anc][i]   = tempdn[anc][i];
+            upset[anc][i]   = tempup[anc][i];
+            actives[anc][i] = tempact[anc][i];
+        }
+    } else {
+        for (j = pd->nchars; j-- ; ) {
+            
+            i = indices[j];
+            
+            dnset[n][i]     = tempdn[n][i];
+            upset[n][i]     = tempup[n][i];
+            actives[n][i]   = tempact[n][i];
+        }
     }
 }
 
@@ -1271,13 +1310,6 @@ void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd)
     long i = 0;
     long j = 0;
     long k = 0;
-//    mpl_discr** dnptr = dnset;
-//    mpl_discr** upptr = tempup;
-//    mpl_discr** acptr = actives;
-//    mpl_discr** tdptr = tempdn;
-//    mpl_discr** tuptr = tempup;
-//    mpl_discr** taptr = tempact;
-//    mpl_discr** rwend = &dnset[nrows];
     
     for (i = nrows; i--; ) {
         for (j = pd->nchars; j-- ;) {
