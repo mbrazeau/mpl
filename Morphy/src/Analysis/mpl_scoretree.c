@@ -211,9 +211,9 @@ void mpl_part_parsim_uppass
     if (!mpl_na_only_parsim_first_uppass (n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-            if (!n->marked && n->anc != ostart && n != ostart && n->anc != ostart->anc) {
-            return;
-        }
+//            if (!n->marked && n->anc != ostart && n != ostart && n->anc != ostart->anc) {
+//            return;
+//        }
     }
     n->marked = 0;
     n->anc->marked = 0;
@@ -398,7 +398,6 @@ double mpl_score_try_parsimony
 
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
         
-        
         scorerecall = mpl_parsim_get_score_recall(glmatrix);
 //        mpl_scoretree_restore_original_characters();
 //        oldnascore = mpl_parsim_get_na_scores(glmatrix);
@@ -409,7 +408,7 @@ double mpl_score_try_parsimony
 
         if (lim > -1.0) {
             if ((score + sttlen + minscore) > lim) {
-                return score + minscore;
+                return score + sttlen + minscore;
             }
         }
         

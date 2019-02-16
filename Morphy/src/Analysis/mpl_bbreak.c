@@ -229,12 +229,15 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 
         // If the branch is zero-length, no need to continue. All swaps will
         // result in redundant trees after collapsing.
-        if ((srclen + tgtlen) == bound) {
-            mpl_node_bin_connect(left, right, clips[i]);
-            clips[i]->lock = false;
-            clips[i]->clipmark = false;
-            continue;
-        }
+
+//        double testscore = mpl_score_try_parsimony(-1.0, -1.0, clips[i], csite, t);
+        
+//        if ((srclen + tgtlen/* + testscore*/) == bound) {
+//            mpl_node_bin_connect(left, right, clips[i]);
+//            clips[i]->lock = false;
+//            clips[i]->clipmark = false;
+//            continue;
+//        }
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
@@ -322,7 +325,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         mpl_treelist_clear_all(bbk->treelist);
                         
                         // The stuff here depends on STEEP/SHALLOW descent options
-//                        clips[i]->clipmark = false;
+                        clips[i]->clipmark = false;
                         mpl_treelist_add_tree(false, t, bbk->treelist);
                         clips[i]->lock = false;
 //                        clips[i]->clipmark = false;

@@ -98,12 +98,13 @@ void mpl_charbuf_add_data_column
     cb->orig_indices[colnum] = ci->index;
     
     for (i = 0; i < cb->row_max; ++i) {
-        cb->upset[i][colnum] = cb->dnset[i][colnum] = datcol[i];
+//        cb->upset[i][colnum] =
+        cb->dnset[i][colnum] = datcol[i];
         cb->tempdn[i][colnum] = datcol[i];
-        cb->tempup[i][colnum] = datcol[i];
-        if (((datcol[i] - 1) & datcol[i]) == 0) {
-            cb->actives[i][colnum] = cb->tempact[i][colnum];
-        }
+//        cb->tempup[i][colnum] = datcol[i];
+//        if (((datcol[i] - 1) & datcol[i]) == 0) {
+//            cb->actives[i][colnum] = cb->tempact[i][colnum];
+//        }
     }
 }
 
