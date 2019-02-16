@@ -606,9 +606,9 @@ void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
         if (dnset[tipn][i] & upset[anc][i]) {
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
-//        else {
-//            upset[tipn][i] = dnset[tipn][i];
-//        }
+        else {
+            upset[tipn][i] = dnset[tipn][i];
+        }
     
         tempup[tipn][i] = upset[tipn][i];
     }
@@ -718,7 +718,7 @@ int mpl_fitch_na_recalc_first_uppass
             upset[n][i] = dnset[n][i];
         }
 
-        if (tempup[n][i] != dnset[n][i]) {
+        if (tempup[n][i] != upset[n][i]) {
             ++chgs;
         }
     }
@@ -1174,6 +1174,7 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         tempdn[n][i] = dnset[n][i];
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
