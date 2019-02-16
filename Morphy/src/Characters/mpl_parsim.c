@@ -851,7 +851,7 @@ double mpl_fitch_na_local_check
                         score += weights[i];
                     }
                 }
-                else /*if (dnset[src][i] < MISSING)*/ {
+                else if (dnset[src][i] < MISSING) {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
@@ -868,19 +868,19 @@ double mpl_fitch_na_local_check
 //                        else if (tempact[tgt2][i] && tempact[src][i]) {
 //                            score += weights[i];
 //                        }
-                        else /*if (tempact[src][i])*/ {
+                        else if (tempact[src][i]) {
                             pd->indexbuf[pd->nchars] = i;
                             ++pd->nchars;
                             pd->scorerecall += (changes[i] * weights[i]);
                             pd->minscore    += (minchanges[i] * weights[i]);
                         }
                     }
-//                    else if (tempdn[tgt1][i] == NA) {
-//                        if (tempact[troot][i] && tempact[src][i]) {
-//                            score += weights[i];
-//                        }
-//                    }
-                    else /*if (tempact[src][i] && (tempdn[tgt1][i] | tempdn[tgt2][i]) & ISAPPLIC)*/ {
+                    else if (tempdn[tgt1][i] == NA) {
+                        if (tempact[troot][i] && tempact[src][i]) {
+                            score += weights[i];
+                        }
+                    }
+                    else if (tempact[src][i] && (tempdn[tgt1][i] | tempdn[tgt2][i]) & ISAPPLIC) {
                         pd->indexbuf[pd->nchars] = i;
                         ++pd->nchars;
                         pd->scorerecall += (changes[i] * weights[i]);
@@ -888,7 +888,7 @@ double mpl_fitch_na_local_check
                     }
                     
                 }
-                else /*if (tempact[troot][i])*/ {
+                else if (tempact[troot][i]) {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);

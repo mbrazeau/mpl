@@ -329,7 +329,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         mpl_treelist_add_tree(false, t, bbk->treelist);
                         clips[i]->lock = false;
 //                        clips[i]->clipmark = false;
-//                        return;
+                        return;
                     }
                     else {
                         mpl_treelist_add_tree(true, t, bbk->treelist);
