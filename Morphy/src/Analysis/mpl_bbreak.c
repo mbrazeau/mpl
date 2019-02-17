@@ -91,7 +91,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(0, bbk->numtaxa, 30, &bbk->stepwise);
+    mpl_stepwise_init(0, bbk->numtaxa, 20, &bbk->stepwise);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
@@ -232,12 +232,12 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 
 //        double testscore = mpl_score_try_parsimony(-1.0, -1.0, clips[i], csite, t);
         
-//        if ((srclen + tgtlen/* + testscore*/) == bound) {
-//            mpl_node_bin_connect(left, right, clips[i]);
-//            clips[i]->lock = false;
-//            clips[i]->clipmark = false;
-//            continue;
-//        }
+        if ((srclen + tgtlen/* + testscore*/) == bound) {
+            mpl_node_bin_connect(left, right, clips[i]);
+            clips[i]->lock = false;
+            clips[i]->clipmark = false;
+            continue;
+        }
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
