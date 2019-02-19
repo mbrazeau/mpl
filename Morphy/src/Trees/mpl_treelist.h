@@ -16,6 +16,7 @@
 
 typedef struct _treelist {
     
+    long        num_taxa;
     long        num_trees;
     long        max_trees;
     long        increase_rate;

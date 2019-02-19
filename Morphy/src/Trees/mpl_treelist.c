@@ -18,6 +18,7 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
     mpl_treelist* tl = NULL;
     
     if ((tl = (mpl_treelist*)safe_calloc(1, sizeof(mpl_treelist)))) {
+        tl->num_taxa = num_taxa;
         tl->num_trees = 0;
         tl->max_trees = max_trees;
         tl->increase_rate = increase_rate;
@@ -193,4 +194,69 @@ static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         tl->trees[i].edges = NULL;
         mpl_topol_init(num_taxa, &tl->trees[i]);
     }
+}
+
+void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
+{
+    if (tl->back != NULL) {
+        mpl_topol_link(tl->back, top);
+        
+    }
+    else {
+        tl->front = top;
+        top->back = NULL;
+    }
+    
+    tl->back = top;
+}
+
+void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
+{
+    
+    long i = 0;
+    long limit = 0;
+    mpl_topol* nt = NULL;
+    mpl_topol* en = NULL;
+    
+    // Check if the requested number of elements will exceed maxtrees
+    // and if that maximum is allowed to be extended.
+    if ((tl->num_trees + nelems) > tl->max_trees) {
+        if (tl->increase_rate == 0) {
+            limit = tl->max_trees - tl->num_trees;
+        }
+    }
+    else {
+        limit = nelems;
+        tl->max_trees += nelems;
+    }
+    
+    // If the request amounts to zero, then do nothing.
+    if (!limit) {
+        return;
+    }
+    
+    // Set up the start of the linked list
+    nt = mpl_topol_new(tl->num_taxa);
+    
+    // Check the list isn't empty
+    if (tl->back != NULL) {
+        mpl_topol_link(tl->back, nt);
+    }
+    else {
+        assert(tl->front == NULL);
+        tl->back = tl->front = nt;
+    }
+    
+    do {
+        en = mpl_topol_new(tl->num_taxa);
+        mpl_topol_link(nt, en);
+        nt = en;
+        en = en->next;
+        tl->back = nt;
+        ++i;
+    }
+    while (i < nelems);
+    
+    assert(en == NULL);
+
 }
