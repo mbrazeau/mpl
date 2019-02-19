@@ -38,7 +38,7 @@ mpl_topol*  mpl_topol_new(long num_taxa)
     return newtop;
 }
 
-int  mpl_topol_delete(mpl_topol** top)
+int mpl_topol_delete(mpl_topol** top)
 {
     if (!top) {
         return -1;
@@ -47,10 +47,7 @@ int  mpl_topol_delete(mpl_topol** top)
         return -1;
     }
     
-    if ((*top)->edges != NULL) {
-        free((*top)->edges);
-        (*top)->edges = NULL;
-    }
+    safe_free((*top)->edges);
     
     free(*top);
     *top = NULL;
