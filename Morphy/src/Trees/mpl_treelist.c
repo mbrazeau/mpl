@@ -249,13 +249,13 @@ void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
     
     do {
         en = mpl_topol_new(tl->num_taxa);
+        mpl_topol_init(tl->num_taxa, en);
         mpl_topol_link(nt, en);
         nt = en;
         en = en->next;
         tl->back = nt;
         ++i;
-    }
-    while (i < nelems);
+    } while (i < nelems);
     
     assert(en == NULL);
 
