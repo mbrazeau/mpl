@@ -517,15 +517,18 @@ double mpl_fitch_na_second_downpass
                 if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
                     cost += weights[i];
                     ++changes[i];
+//                    nodechanges[n][i] = true;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                     ++changes[i];
+//                    nodechanges[n][i] = true;
                 }
             }
         } else {
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
+//                nodechanges[n][i] = true;
             }
         }
 //        assert(upset[n][i]);
