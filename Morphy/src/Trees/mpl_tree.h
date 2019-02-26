@@ -18,6 +18,7 @@ typedef struct _tree {
     long        num_nodes;
     long        size;
     long        nintern;
+    long        nsubnodes;
     mpl_node*   nodes;
     mpl_node**  postord_all;
     mpl_node**  postord_intern;
