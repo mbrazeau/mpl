@@ -219,6 +219,9 @@ void mpl_part_parsim_uppass
     n->anc->marked = 0;
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
+    
+    t->partial_pass[*i] = n;
+    ++(*i);
 }
 
 
@@ -286,13 +289,34 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         mpl_na_only_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
     }
 
-    mpl_part_parsim_uppass(n, start, NULL, t);
+    t->nsubnodes = 0;
+    mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
+    
+//    printf("subnodes: %li\n", t->nsubnodes);
+    
+    // Operate on a partial pass:
+//    for (i = 0; i < t->nsubnodes; ++i) {
+//        n = t->partial_pass[i];
+//
+//        len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
+//                                                  n->right->mem_index,
+//                                                  n->mem_index, glmatrix);
+//        if (lim > -1.0) {
+//            if (len > lim) {
+//                for (; i < t->nsubnodes; ++i) {
+//                    n = t->partial_pass[i];
+//                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+//                }
+//                break;
+//            }
+//        }
+//    }
     
     // Downpass for inapplicables
     for (i = 0; i < t->nintern; ++i) {
         n = t->postord_intern[i];
-        
+
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                   n->right->mem_index,
                                                   n->mem_index, glmatrix);
@@ -405,14 +429,17 @@ double mpl_score_try_parsimony
 //        mpl_scoretree_restore_original_characters();
         score -= scorerecall;
         double minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
-
+        double diff = -1.0;
+        
         if (lim > -1.0) {
             if ((score + sttlen + minscore) > lim) {
                 return score + sttlen + minscore;
             }
+            
+            diff = lim - (score + sttlen);
         }
         
-        score += mpl_fullpass_parsimony_na_only(lim - (score + sttlen), src, t);
+        score += mpl_fullpass_parsimony_na_only(diff, src, t);
 //        mpl_scoretree_restore_original_characters();
 //        mpl_parsim_reset_state_buffers(glmatrix);
     }
@@ -436,4 +463,16 @@ void mpl_scoretree_restore_original_characters(void)
 //        mpl_charbuf_fast_restore_discr_states
 //        (glmatrix->parsets[1].end - glmatrix->parsets[1].start, glmatrix->parsets[1].indexbuf, &glmatrix->cbufs[MPL_DISCR_T]);
 //    }
+}
+
+void mpl_tempset_stdtype(void)
+{
+    glmatrix->gaphandl = GAP_MISSING;
+    mpl_parsim_temp_set_std(glmatrix);
+}
+
+void mpl_tempreset_natype(void)
+{
+    glmatrix->gaphandl = GAP_INAPPLIC;
+    mpl_parsim_temp_reset_std(glmatrix);
 }

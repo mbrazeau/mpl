@@ -24,4 +24,6 @@ void mpl_src_root_parsimony(mpl_node* src);
 double  mpl_score_try_parsimony(const double, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t);
 void mpl_scoretree_copy_original_characters(void);
 void mpl_scoretree_restore_original_characters(void);
+void mpl_tempset_stdtype(void);
+void mpl_tempreset_natype(void);
 #endif /* mpl_scoretree_h */
