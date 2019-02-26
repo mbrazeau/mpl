@@ -148,7 +148,7 @@ char* mpl_str_c(mpl_str* s)
     return s->str;
 }
 
-unsigned mpl_rng_seed = 3;//MPL_DEFAULT_RSEED;
+unsigned mpl_rng_seed = MPL_DEFAULT_RSEED;
 
 unsigned mpl_rng(void)
 {
