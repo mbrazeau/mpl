@@ -32,7 +32,7 @@ typedef struct _charbuf {
     long*       minchanges;
     long*       n_ndindices;
     long**      indexbufs;
-    bool**      nodechanges;
+    long**      nodechanges;
     mpl_data_t  datype;
     mpl_discr** dnset; // The set of downpass characters
     mpl_discr** upset; // The set of uppass characters
