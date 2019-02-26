@@ -504,6 +504,9 @@ double mpl_fitch_na_second_downpass
     double cost = 0.0;
     
     for (i = pd->start; i < end; ++i) {
+        
+        nodechanges[n][i] = false;
+        
         if (upset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
             if (t) {
@@ -517,18 +520,18 @@ double mpl_fitch_na_second_downpass
                 if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
                     cost += weights[i];
                     ++changes[i];
-//                    nodechanges[n][i] = true;
+                    nodechanges[n][i] = true;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                     ++changes[i];
-//                    nodechanges[n][i] = true;
+                    nodechanges[n][i] = true;
                 }
             }
         } else {
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
-//                nodechanges[n][i] = true;
+                nodechanges[n][i] = true;
             }
         }
 //        assert(upset[n][i]);
@@ -783,7 +786,7 @@ double mpl_fitch_na_recalc_second_downpass
         
         // TODO: Here is where you first deduct the original score from this
         // node.
-        // cost -= (nodechanges[n][i] * weights[i]);
+//         cost -= (nodechanges[n][i] * weights[i]);
         
         if (upset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
@@ -952,6 +955,10 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
         m->parsets[i].score = 0.0;
     }
     memset(changes, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    // TODO: Get rid of the 2 * thing
+    for (i = 0; i < (2 * m->cbufs[MPL_DISCR_T].row_max); ++i) {
+        memset(nodechanges[i], 0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(bool));
+    }
 }
 
 

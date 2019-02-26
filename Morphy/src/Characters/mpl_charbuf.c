@@ -272,6 +272,7 @@ static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols)
     long i = 0;
     mpl_discr** newbuf = NULL;
     
+    // TODO: This 2* thing needs to be replaced
     newbuf = (mpl_discr**)safe_calloc(2 * nrows, sizeof(mpl_discr*));
     
     if (newbuf == NULL) {
@@ -289,6 +290,21 @@ static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols)
     return newbuf;
 }
 
+static bool** mpl_charbuf_alloc_bool_matrix(long nrows, long ncols)
+{
+    long i = 0;
+    bool** ret = NULL;
+    
+    // TODO: This 2* thing needs to be replaced
+    ret = (bool**)safe_calloc(2 * nrows, sizeof(bool*));
+    
+    for (i = 0; i < (2 * nrows); ++i) {
+        ret[i] = (bool*)safe_calloc(ncols, sizeof(bool));
+    }
+    
+    return ret;
+}
+
 static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
 {
     assert(cb->row_max && cb->char_max);
@@ -299,4 +315,7 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
     cb->tempdn  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempup  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempact = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    
+    cb->nodechanges = mpl_charbuf_alloc_bool_matrix(cb->row_max, cb->char_max);
+    
 }
