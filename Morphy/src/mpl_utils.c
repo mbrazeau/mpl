@@ -164,6 +164,11 @@ int mpl_rng_set_seed(const int seed)
     return 0;
 }
 
+unsigned mpl_rng_between(unsigned min, unsigned max)
+{
+    return min + mpl_rng() / (MPL_RAND_MAX / (max - min + 1) + 1);
+}
+
 int mpl_rng_get_seed(void)
 {
     return mpl_rng_seed;
