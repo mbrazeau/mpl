@@ -30,6 +30,7 @@ typedef struct _charbuf {
     double*     weights;
     long*       charchanges;
     long*       minchanges;
+    long*       appliccanges;
     long*       n_ndindices;
     long**      indexbufs;
     long**      nodechanges;
