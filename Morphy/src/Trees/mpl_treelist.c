@@ -89,6 +89,9 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
             if (tl->trees[i].score > biglen) {
                 biglen = tl->trees[i].score;
                 longest = i;
+                lcount = 1;
+            }
+            else if (tl->trees[i].score == biglen) {
                 ++lcount;
             }
             else if (tl->trees[i].score < shortlen) {
@@ -97,9 +100,31 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
         }
     }
     
-    if (t->score > biglen && biglen != 0.0) {
+    if (t->score > biglen && biglen != 0.0 && tl->num_trees >= tl->max_trees) {
         return;
     }
+    
+//    if (tl->num_trees == tl->max_trees) {
+//        if (biglen == shortlen) {
+//            // Randomly break ties.
+//            assert(lcount > -1);
+//            unsigned choice = mpl_rng_between(0, (unsigned)lcount+1);
+//            if (choice == lcount) {
+//                // The choice is the new tree, so just exit
+//                return;
+//            }
+//            long j = 0;
+//            for (i = 0; i < tl->num_trees; ++i) {
+//                if (tl->trees[i].score == biglen) {
+//                    if (j == choice) {
+//                        longest = choice;
+//                        break;
+//                    }
+//                    ++j;
+//                }
+//            }
+//        }
+//    }
     
     mpl_topol* top = &tl->trees[longest];
     mpl_tree_record_topol(top, t);
