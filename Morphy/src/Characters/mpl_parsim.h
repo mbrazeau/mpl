@@ -30,6 +30,8 @@ typedef struct mpl_parsdat {
     long            nchars;
     long*           nchanges;
     long*           indexbuf;
+    long*           ntipinbufs;
+    long**          tipinbufs; // Characters in
     double          minscore;
     long*           minchanges;
     int             doeschange; // Number of times a character changes
@@ -61,6 +63,7 @@ void mpl_parsim_set_type
 (const mpl_gap_t gaphandl, const mpl_parsim_t ptype, mpl_parsdat* pd);
 void mpl_parsim_add_data_column_to_buffer
 (mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd);
+void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd);
 double mpl_fitch_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_fitch_uppass
@@ -120,6 +123,8 @@ void mpl_parsim_reset_state_buffers(mpl_matrix *m);
 double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m);
 int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
+void mpl_parsim_double_std_weights(mpl_matrix* m);
+void mpl_parsim_halve_std_weights(mpl_matrix* m);
 
 void mpl_parsim_temp_set_std(mpl_matrix* m);
 void mpl_parsim_temp_reset_std(mpl_matrix* m);
