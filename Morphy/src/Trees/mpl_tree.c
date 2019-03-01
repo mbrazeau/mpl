@@ -174,6 +174,8 @@ int mpl_tree_read_topol(mpl_tree* t, mpl_topol* top)
     
     // TODO: Make this more general and safer
     mpl_node* p = &t->nodes[0];
+    i = 1;
+    while (p->anc == NULL) p = &t->nodes[i++];
     while (p->anc != NULL) p = p->anc;
     t->base = p;
     t->dummy->left = p;
