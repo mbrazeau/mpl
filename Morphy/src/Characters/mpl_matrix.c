@@ -277,6 +277,10 @@ MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
         return MPL_NOTIMPLEMENTED;
     }
     
+    for (i = 0; i < m->nparsets; ++i) {
+        mpl_parsim_setup_tips(m, &m->parsets[i]);
+    }
+    
     return MPL_SUCCESS;
 }
 
