@@ -129,3 +129,42 @@ int test_appending_integers (void)
     
     return failn;
 }
+
+int test_rand_in_range (void)
+{
+    theader("Test obtaining random numbers within a range");
+    
+    int failn = 0;
+    
+    long i = 0;
+    long nrand = 100;
+    unsigned results[nrand];
+    
+    unsigned min = 20;
+    unsigned max = 56;
+    
+    for (i = 0; i < nrand; ++i) {
+        results[i] = mpl_rng_between(min, max);
+    }
+    
+    for (i = 0; i < nrand; ++i) {
+        if (!(results[i] <= max) || !(results[i] >= min)) {
+            ++failn;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+        
+        if (results[i] > max || results[i] < min) {
+            ++failn;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+        printf("%u\n", results[i]);
+    }
+    
+    return failn;
+}

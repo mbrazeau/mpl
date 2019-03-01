@@ -11,5 +11,6 @@
 
 int test_mpl_string_append (void);
 int test_appending_integers (void);
+int test_rand_in_range (void);
 
 #endif /* testmplutils_h */
