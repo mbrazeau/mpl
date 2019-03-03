@@ -125,9 +125,14 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
     
 //    mpl_tempset_stdtype();
     
+//    mpl_double_weights();
+    
     for (i = sw->tips_added; i < sw->num_tips; ++i) {
         
 //        timein = (float)clock()/CLOCKS_PER_SEC;
+//        if (i == (sw->num_tips - 2)) {
+//            mpl_halve_weights();
+//        }
         
         mpl_treelist_clear_all(sw->held);
         // Push the tip onto a new base, so that it can be joined to the
@@ -175,7 +180,7 @@ static void mpl_shuffle_addseq(mpl_stepwise* sw)
     long j;
     long t = 0;
     
-    for (i = 1; i < sw->num_tips; ++i) {
+    for (i = 0; i < sw->num_tips; ++i) {
         j = i + mpl_rng() / (MPL_RAND_MAX / (sw->num_tips - i) + 1);
         t = sw->addseq[j];
         sw->addseq[j] = sw->addseq[i];

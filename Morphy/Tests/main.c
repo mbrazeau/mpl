@@ -29,6 +29,7 @@ int main(int argc, const char * argv[]) {
     // Test mpl_utils.c
     fails += test_mpl_string_append();
     fails += test_appending_integers();
+    fails += test_rand_in_range();
     
     // Test mpl_node.c
     fails += test_node_new_delete();
@@ -92,15 +93,16 @@ int main(int argc, const char * argv[]) {
     fails += test_initial_fork();
 //    fails += test_build_arbitrary_tree();
 //    fails += test_build_med_tree();
-    fails += test_build_large_tree();
+//    fails += test_build_large_tree();
     
     fails += test_basic_parsimony();
     fails += test_parsimony_on_tree();
     fails += test_fullpass_parsimony();
+    fails += test_fullpass_with_large_data_std_parsimony();
     fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
-//    fails += test_find_char_by_char_mismatches();
+    fails += test_find_char_by_char_mismatches();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

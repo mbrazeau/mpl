@@ -13,6 +13,8 @@
 #include "../Characters/mpl_parsim.h"
 #include "mpl_scoretree.h"
 
+void mpl_part_parsim_uppass(mpl_node* n, mpl_node* ostart, long* i, mpl_tree* t);
+
 mpl_matrix* glmatrix = NULL;
 
 void mpl_init_parsimony(mpl_matrix* m)
@@ -25,7 +27,7 @@ double mpl_fullpass_parsimony(mpl_tree* t)
     double len = 0.0;
     long i = 0;
     mpl_node* n;
-    
+
     mpl_tree_traverse(t);
     
     mpl_parsim_reset_scores(glmatrix);
@@ -83,6 +85,60 @@ double mpl_fullpass_parsimony(mpl_tree* t)
             }
             else {
                 mpl_parsim_tip_finalize(n->mem_index, n->anc->mem_index, glmatrix);
+            }
+        }
+    }
+    
+    return len;
+}
+
+double mpl_length_only_parsimony(const double lim, mpl_tree* t)
+{
+    double len = 0.0;
+    long i = 0;
+    mpl_node* n;
+    
+    mpl_tree_traverse(t);
+    
+    // Downpass
+    for (i = 0; i < t->nintern; ++i) {
+        
+        n = t->postord_intern[i];
+        
+        len += mpl_parsim_first_downpass(n->left->mem_index,
+                                         n->right->mem_index,
+                                         n->mem_index, glmatrix);
+    }
+    
+    n = t->postord_intern[i-1];
+    mpl_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
+    
+    // Uppass
+    for (i = t->size; i--; ) {
+        
+        n = t->postord_all[i];
+        
+        if (n->tip == 0) {
+            mpl_parsim_first_uppass(n->left->mem_index, n->right->mem_index,
+                                    n->mem_index, n->anc->mem_index, glmatrix);
+        }
+        else {
+            mpl_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
+        }
+    }
+    
+    
+    if (glmatrix->gaphandl == GAP_INAPPLIC) {
+        
+        // Downpass for inapplicables
+        for (i = 0; i < t->nintern; ++i) {
+            n = t->postord_intern[i];
+            
+            len += mpl_parsim_second_downpass (n->left->mem_index,
+                                               n->right->mem_index,
+                                               n->mem_index, glmatrix);
+            if (len > lim) {
+                return len;
             }
         }
     }
@@ -215,8 +271,10 @@ void mpl_part_parsim_uppass
             return;
         }
     }
+    
     n->marked = 0;
     n->anc->marked = 0;
+    
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
     
@@ -273,7 +331,6 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     }
 
     while (n->anc != NULL) {
-       
         chgs = mpl_na_only_parsim_first_downpass(n->left->mem_index,
                                           n->right->mem_index,
                                           n->mem_index, glmatrix);
@@ -302,12 +359,13 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 //        len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
 //                                                  n->right->mem_index,
 //                                                  n->mem_index, glmatrix);
-//        if (lim > -1.0) {
+//        if (lim > -1.0 && n != start && n != start->anc) {
 //            if (len > lim) {
 //                for (; i < t->nsubnodes; ++i) {
 //                    n = t->partial_pass[i];
 //                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
 //                }
+//                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
 //                break;
 //            }
 //        }
@@ -326,6 +384,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                     n = t->postord_intern[i];
                     mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
                 }
+                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
                 break;
             }
         }
@@ -410,8 +469,13 @@ double mpl_score_try_parsimony
 (const double sttlen, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
     double score = 0.0;
-//    double oldnascore = 0.0;
+    double minscore = 0.0;
     double scorerecall = 0.0;
+    double diff = -1.0;
+    
+//    if (lim > -1.0) {
+//        printf("lim: %.0f\n", lim);
+//    }
     
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
@@ -423,25 +487,31 @@ double mpl_score_try_parsimony
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
         
         scorerecall = mpl_parsim_get_score_recall(glmatrix);
-//        mpl_scoretree_restore_original_characters();
-//        oldnascore = mpl_parsim_get_na_scores(glmatrix);
-//        assert(scorerecall == oldnascore);
-//        mpl_scoretree_restore_original_characters();
+
         score -= scorerecall;
-        double minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
-        double diff = -1.0;
+        minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
         
         if (lim > -1.0) {
+            
             if ((score + sttlen + minscore) > lim) {
                 return score + sttlen + minscore;
             }
             
             diff = lim - (score + sttlen);
+            
+//            if (lim < 900) {
+//                printf("checking: %li of %li NA chars\n", glmatrix->parsets[1].nchars, glmatrix->parsets[1].end - glmatrix->parsets[1].start);
+//            }
+//            printf("estimated: %.0f; ", score + sttlen + minscore);
         }
         
+//        score += scorerecall;
+        
         score += mpl_fullpass_parsimony_na_only(diff, src, t);
-//        mpl_scoretree_restore_original_characters();
-//        mpl_parsim_reset_state_buffers(glmatrix);
+        
+//        if (lim > -1.0) {
+//            printf("length: %.0f\n", score + sttlen);
+//        }
     }
     
     
@@ -475,4 +545,14 @@ void mpl_tempreset_natype(void)
 {
     glmatrix->gaphandl = GAP_INAPPLIC;
     mpl_parsim_temp_reset_std(glmatrix);
+}
+
+void mpl_double_weights(void)
+{
+    mpl_parsim_double_std_weights(glmatrix);
+}
+
+void mpl_halve_weights(void)
+{
+    mpl_parsim_halve_std_weights(glmatrix);
 }

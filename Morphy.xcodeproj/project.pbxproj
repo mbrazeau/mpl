@@ -46,6 +46,7 @@
 		51C5FC6721E0E227004B782F /* testmplutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 51C5FC6621E0E227004B782F /* testmplutils.c */; };
 		51C5FC6A21E103C6004B782F /* testutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 51C5FC6921E103C6004B782F /* testutils.c */; };
 		51C6AEF021E8FCE0002B3122 /* mpl_parsim.c in Sources */ = {isa = PBXBuildFile; fileRef = 51C6AEEF21E8FCE0002B3122 /* mpl_parsim.c */; };
+		51D067FA2229539000A3C49E /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 519F3935221D4A8900D47A25 /* libomp.dylib */; };
 		51F765E321DE21BF00CB29C2 /* testtaxblock.c in Sources */ = {isa = PBXBuildFile; fileRef = 51F765E221DE21BF00CB29C2 /* testtaxblock.c */; };
 		51F765E421DE23EF00CB29C2 /* testio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 516A0CCF21DA602600B58DB8 /* testio.cpp */; };
 		51F765E521DE422D00CB29C2 /* MorphyIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B83821D92FD50086CE68 /* MorphyIO.cpp */; };
@@ -131,6 +132,7 @@
 		518C8F9721D7D1DE00005610 /* testmplnode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmplnode.c; sourceTree = "<group>"; };
 		518C8F9921D8049300005610 /* testmpltree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmpltree.h; sourceTree = "<group>"; };
 		518C8F9A21D8049300005610 /* testmpltree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = testmpltree.c; sourceTree = "<group>"; };
+		519F3935221D4A8900D47A25 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../usr/local/lib/libomp.dylib; sourceTree = "<group>"; };
 		51A6B7F921D8ED610086CE68 /* mpl_taxoninfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_taxoninfo.h; sourceTree = "<group>"; };
 		51A6B7FA21D8ED610086CE68 /* mpl_taxoninfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_taxoninfo.c; sourceTree = "<group>"; };
 		51A6B7FC21D8EEBF0086CE68 /* mpl_taxblock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_taxblock.h; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51D067FA2229539000A3C49E /* libomp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +257,7 @@
 		517CC83C21DA31D1007D37C0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				519F3935221D4A8900D47A25 /* libomp.dylib */,
 				516A0CED21DA74BE00B58DB8 /* libncl.a */,
 				517CC83D21DA31D2007D37C0 /* libncl.a */,
 			);
@@ -660,6 +664,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CC = /usr/local/opt/llvm/bin/clang;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -712,6 +717,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "-fopenmp";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -720,6 +726,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CC = /usr/local/opt/llvm/bin/clang;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -766,6 +773,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "-fopenmp";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -773,13 +781,20 @@
 		518C8F8121D777BA00005610 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = "";
+				CLANG_ENABLE_MODULES = NO;
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/usr/local/include/ncl/,
+					/usr/local/Cellar/libomp/7.0.0/include/,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib/ncl/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/opt/llvm/lib,
+				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = /usr/local/lib/ncl/libncl.a;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -788,13 +803,20 @@
 		518C8F8221D777BA00005610 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = "";
+				CLANG_ENABLE_MODULES = NO;
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/usr/local/include/ncl/,
+					/usr/local/Cellar/libomp/7.0.0/include/,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib/ncl/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/ncl/,
+					/usr/local/opt/llvm/lib,
+				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = /usr/local/lib/ncl/libncl.a;
 				PRODUCT_BUNDLE_IDENTIFIER = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -942,20 +942,21 @@ double mpl_fitch_na_local_check
                         pd->minscore    += (changes[i] * weights[i]);
                     }
                 }
-                else if (tempdn[tgt1][i] == NA) {
+                else {//if (tempdn[tgt1][i] == NA) {
                     if (tempact[troot][i] && tempact[src][i]) {
                         score += weights[i];
                     }
                 }
-                else if ( tempact[src][i] && ((tempdn[tgt1][i] & ISAPPLIC) && (tempdn[tgt2][i] & ISAPPLIC)) ) {
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    pd->scorerecall += (changes[i] * weights[i]);
-                    pd->minscore    += (changes[i] * weights[i]);
-                }
+//                else if ( tempact[src][i] && ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) ) {
+////                    score += weights[i];
+//                    pd->indexbuf[pd->nchars] = i;
+//                    ++pd->nchars;
+//                    pd->scorerecall += (changes[i] * weights[i]);
+//                    pd->minscore    += (applicchgs[i] * weights[i]);
+//                }
                 
             }
-            else if (tempact[troot][i]) {
+            else {//if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC) || tempact[src][i]) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);

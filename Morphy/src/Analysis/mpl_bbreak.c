@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
+#include <omp.h>
 
 #include "mpl_bbreak.h"
 #include "mpl_scoretree.h"
@@ -100,7 +101,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(0, bbk->numtaxa, 30, &bbk->stepwise);
+    mpl_stepwise_init(1, bbk->numtaxa, 10, &bbk->stepwise);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
@@ -129,7 +130,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 // Rebuild the tree according to the stored topology
                 ++tcount;
                 mpl_tree_read_topol(t, current);
-
+                t->score = mpl_fullpass_parsimony(t);
+                mpl_tree_rebase(0, t);
                 mpl_branch_swap(t, bbk);
                 
                 current = mpl_treelist_get_next(bbk->treelist);
@@ -138,7 +140,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                     tcount = 1;
                 }
                 
-                printf("\rShortest tree found: %.3f; swapping %li of %li trees saved.", bbk->shortest, tcount, bbk->treelist->num_trees);
+                printf("Shortest tree found: %.3f; swapping %li of %li trees saved.\n", bbk->shortest, tcount, bbk->treelist->num_trees);
                 fflush(stdout);
                 
                 if (search_interrupt == 1) {
@@ -204,22 +206,22 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long i = 0;
     long j = 0;
     
-    bound = t->score;
+    bound = bbk->shortest;
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
-    for (i = 1, j = 0; i < t->size; ++i) {
-        if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
-            clips[j] = &t->nodes[i];
-            ++j;
-        }
-    }
-//    memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
+//    for (i = 1, j = 0; i < t->size; ++i) {
+//        if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
+//            clips[j] = &t->nodes[i];
+//            ++j;
+//        }
+//    }
+    memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
     nnodes = t->size;
-    clipmax = j;//nnodes-1; /*NOTE: leaving out base!!!*/
+    clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
     
     // TODO: clipmax-1 is temporary (root-adjacent clips need to be fixed)
-    for (i = 0; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
+    for (i = 1; i < clipmax-1; ++i) { // NOTE: Assumes 'unrooted' tree!!!
         
         signal(SIGINT, do_interrupt);
         
@@ -255,26 +257,26 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         srcs = bbk->srcs;
         
         // << Reoptimise the subtrees as quickly as possible >>
-        double tgtlen =
-        mpl_fullpass_parsimony(t);
+        
+        double tgtlen = 0.0;
         double srclen = 0.0;
+//
+////#pragma omp parallel
+////        {
+        tgtlen = mpl_fullpass_parsimony(t);
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
+//        }
 
         // If the branch is zero-length, no need to continue. All swaps will
         // result in redundant trees after collapsing.
-
-//        mpl_node_bin_connect(left, right, clips[i]);
-//        double testscore = mpl_score_try_parsimony(-1.0, -1.0, clips[i], csite, t);
-//        mpl_node_bin_clip(clips[i]);
-        
-        if ((srclen + tgtlen/* + testscore*/) == bound) {
-            mpl_node_bin_connect(left, right, clips[i]);
-            clips[i]->lock = false;
-            clips[i]->clipmark = false;
-            continue;
-        }
+//        if ((srclen + tgtlen) == bound) {
+//            mpl_node_bin_connect(left, right, clips[i]);
+//            clips[i]->lock = false;
+//            clips[i]->clipmark = false;
+//            continue;
+//        }
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
@@ -359,8 +361,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 t->score = (score + tgtlen + srclen);
 
 //                t->score = mpl_fullpass_parsimony(t);
-
-                if (t->score <= bbk->shortest) {
+                
+//                t->score = mpl_length_only_parsimony(bbk->shortest, t);
+                
+                if (t->score <= bound) {
                     if (t->score < bbk->shortest) {
                         bbk->shortest = t->score;
                         mpl_treelist_clear_all(bbk->treelist);

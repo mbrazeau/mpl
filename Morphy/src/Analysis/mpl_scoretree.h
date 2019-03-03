@@ -16,14 +16,18 @@ typedef double  (*mpl_scoretry)(const double lim, mpl_node* src, mpl_node* tgt, 
 
 void    mpl_init_parsimony(mpl_matrix* m);
 double  mpl_fullpass_parsimony(mpl_tree* t);
-double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t);
-void mpl_update_src_actives(mpl_node* start, const mpl_node* end);
-double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t);
+double  mpl_length_only_parsimony(const double lim, mpl_tree* t);
+double  mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t);
+void    mpl_update_src_actives(mpl_node* start, const mpl_node* end);
+double  mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t);
 double  mpl_partpass_parsimony(mpl_node* start, mpl_tree* t);
-void mpl_src_root_parsimony(mpl_node* src);
+void    mpl_src_root_parsimony(mpl_node* src);
 double  mpl_score_try_parsimony(const double, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t);
-void mpl_scoretree_copy_original_characters(void);
-void mpl_scoretree_restore_original_characters(void);
-void mpl_tempset_stdtype(void);
-void mpl_tempreset_natype(void);
+void    mpl_scoretree_copy_original_characters(void);
+void    mpl_scoretree_restore_original_characters(void);
+void    mpl_tempset_stdtype(void);
+void    mpl_tempreset_natype(void);
+
+void mpl_double_weights(void);
+void mpl_halve_weights(void);
 #endif /* mpl_scoretree_h */
