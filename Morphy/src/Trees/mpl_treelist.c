@@ -12,6 +12,7 @@
 #include "mpl_treelist.h"
 
 static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
+void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
 
 mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate)
 {
@@ -46,6 +47,8 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
         
         // TODO: Check return of this
         mpl_treelist_resize(tl->trees[0].num_taxa, tl->increase_rate, tl);
+        
+//        mpl_treelist_extend(tl->increase_rate, tl);
     }
     // TODO: Check bounds and decide whether to extend
     mpl_topol* top = &tl->trees[tl->num_trees];
