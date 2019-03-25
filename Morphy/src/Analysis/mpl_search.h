@@ -17,9 +17,14 @@
 #define DEFAUL_BBREAK MPL_TBR_T
 
 typedef enum {
+    MPL_STEPWISE,
+    MPL_INMEM
+} mpl_starttrees_t;
+
+typedef enum {
     MPL_INPUTORDER_T,
     MPL_RANDOM_T,
-    MPL_DISTANCE_T
+    MPL_DISTANCE_T,
 } mpl_stepwise_t;
 
 typedef enum {

@@ -374,3 +374,37 @@ int test_negative_topology_comparison (void)
     
     return failn;
 }
+
+int test_topology_reuse (void)
+{
+    theader("Test reusing a topology");
+    
+    int failn = 0;
+    
+    int ntax = 5;
+    char* nwk1 = "((1,3),((2,4),5));";
+    char* nwk2 = "((5,1),(3,(2,4)));";
+    
+    mpl_topol* tp1 = mpl_topol_new(ntax);
+    mpl_topol* tp2 = mpl_topol_new(ntax);
+    
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    
+    mpl_newick_read(nwk1, tp1, &rdr);
+    mpl_newick_read(nwk2, tp2, &rdr);
+    
+    mpl_tree* t = NULL;
+    t = mpl_new_tree(ntax);
+    mpl_tree_read_topol(t, tp1);
+    mpl_tree_record_topol(tp2, t);
+    
+    mpl_tree_read_topol(t, tp2);
+    
+    char* nwkop = NULL;
+    mpl_tree_write_newick(&nwkop, t);
+    printf("Result 1: %s", nwkop);
+    printf("\n");
+    
+    return failn;
+}

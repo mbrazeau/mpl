@@ -28,6 +28,7 @@ typedef struct _charbuf {
     long        row_max;
     long*       orig_indices;
     double*     weights;
+    long*       weightindices;
     long*       charchanges;
     long*       minchanges;
     long*       appliccanges;

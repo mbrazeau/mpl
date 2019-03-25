@@ -32,8 +32,11 @@ typedef struct _bbreak {
     unsigned long   num_rearrangs;
     mpl_treelist*   treelist;
     mpl_stepwise    stepwise;
-    double          shortest;
-    double          bestofall;
+    
+    double          keepscore; // Allowance for longer trees
+    double          limit;  // Overall limit
+    double          shortest; // Shortest overall
+    double          bestinrep; // Shortest in a given replicate
 
 } mpl_bbreak;
 

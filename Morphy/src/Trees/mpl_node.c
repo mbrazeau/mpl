@@ -275,7 +275,7 @@ void mpl_node_write_newick(mpl_str* nwk, mpl_node* n)
     mpl_str_append(')', nwk);
 }
 
-inline mpl_node* mpl_node_get_sib(mpl_node* n)
+mpl_node* mpl_node_get_sib(mpl_node* n)
 {
     mpl_node* ret = NULL;
     
@@ -344,9 +344,9 @@ void mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc)
  */
 inline mpl_node* mpl_node_bin_clip(mpl_node* n)
 {
-    if (n->lock == true) {
-        return NULL;
-    }
+//    if (n->lock == true) {
+//        return NULL;
+//    }
     
     mpl_node* p = n->anc;
     mpl_node* s = NULL;

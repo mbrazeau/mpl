@@ -58,6 +58,7 @@ int main(int argc, const char * argv[]) {
     fails += test_topology_comparison();
     fails += test_topology_comparison_after_rebase();
     fails += test_negative_topology_comparison();
+    fails += test_topology_reuse();
     
     // Test mpl_newick_rdr.c
     fails += test_newick_reader();

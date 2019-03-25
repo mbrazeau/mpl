@@ -96,6 +96,21 @@ double mpl_na_only_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 double mpl_fitch_na_local_check
 (const double lim, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
+
+double mpl_fitch_na_local_fork2fork
+(const double lim,
+ const long src,
+ const long srclef,
+ const long srcrig,
+ const long tgt1lef,
+ const long tgt1rig,
+ const long tgt1,
+ const long tgt2,
+ const long tgt2anc,
+ const long tgt2sib,
+ const long troot,
+ mpl_parsdat* pd);
+
 void mpl_parsim_reset_scores(mpl_matrix* m);
 double mpl_parsim_get_std_scores(mpl_matrix* m);
 double mpl_parsim_get_na_scores(mpl_matrix* m);
@@ -113,6 +128,20 @@ void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl
 void mpl_parsim_update_active_sets(const long left, const long right, const long n, mpl_matrix* m);
 double mpl_parsim_local_check
 (const double lim, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
+
+double mpl_parsim_local_check_fork2fork
+(const double lim,
+ const long src,
+ const long srclef,
+ const long srcrig,
+ const long tgt1lef,
+ const long tgt1rig,
+ const long tgt1,
+ const long tgt2,
+ const long tgt2anc,
+ const long tgt2sib,
+ const long troot, mpl_matrix* m);
+
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
@@ -123,11 +152,9 @@ void mpl_parsim_reset_state_buffers(mpl_matrix *m);
 double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m);
 int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
-void mpl_parsim_double_std_weights(mpl_matrix* m);
-void mpl_parsim_halve_std_weights(mpl_matrix* m);
+void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
+void mpl_parsim_reset_all_weights(mpl_charbuf* cb);
 
-void mpl_parsim_temp_set_std(mpl_matrix* m);
-void mpl_parsim_temp_reset_std(mpl_matrix* m);
 
 // TODO: remove these when you don't need them anymore
 void reset_temporary_changebuf(void);

@@ -78,6 +78,11 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
     return 0;
 }
 
+long mpl_treelist_get_numtrees(const mpl_treelist* tl)
+{
+    return tl->num_trees;
+}
+
 void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
 {
     long i = 0;

@@ -10,12 +10,17 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
-#include <omp.h>
+#include <math.h>
 
 #include "mpl_bbreak.h"
 #include "mpl_scoretree.h"
 
 sig_atomic_t search_interrupt = 0;
+
+_Bool anneal = false;
+const double starttemp = 10000;
+double temperature = starttemp;
+double coolingfactor = 0.001;
 
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base);
 static void mpl_bbreak_trav_targets(mpl_node* n, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist, long* i, long* j);
@@ -79,6 +84,7 @@ void mpl_bbreak_reset(mpl_bbreak* bbk)
     bbk->treelist = NULL;
 }
 
+
 void mpl_do_bbreak(mpl_bbreak* bbk)
 {
     // Set up all the global variables.
@@ -101,13 +107,17 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(1, bbk->numtaxa, 10, &bbk->stepwise);
+    mpl_stepwise_init(0, bbk->numtaxa, 30, &bbk->stepwise);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
+        temperature = starttemp;
+        
         // If the buffer is empty get one or more trees by stepwise addition
         // Otheriwse, starttrees is the bbk buffer
+        mpl_rng_set_seed(1);
         mpl_stepwise_do_search(&bbk->stepwise);
+        printf("Random number seed: %u\n", mpl_rng_get_seed());
         // Then get the trees from the stepwise struct
         
         nstarts = 1; // For now, only using one start tree, but a 'swap on all'
@@ -130,7 +140,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 // Rebuild the tree according to the stored topology
                 ++tcount;
                 mpl_tree_read_topol(t, current);
-                t->score = mpl_fullpass_parsimony(t);
+//                t->score = mpl_fullpass_parsimony(t);
                 mpl_tree_rebase(0, t);
                 mpl_branch_swap(t, bbk);
                 
@@ -147,6 +157,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                     break;
                 }
                 
+                temperature *= (1 - coolingfactor);
+                
             } while (current != NULL);
             
             // If no better equal or tree was found in this replicate,
@@ -162,7 +174,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     timeout = (float)clock()/CLOCKS_PER_SEC;
     
     printf("\n\nHeuristic search completed in %li seconds:\n", timeout - timein);
-    printf("\t%lu rearrangements tried:\n", bbk->num_rearrangs);
+    printf("\t%lu rearrangements tried.\n", bbk->num_rearrangs);
     printf("\tShortest tree found: %.3f steps\n", bbk->shortest);
     printf("\t%li trees saved\n", bbk->treelist->num_trees);
     
@@ -206,7 +218,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long i = 0;
     long j = 0;
     
-    bound = bbk->shortest;
+    bound = t->score;//bbk->shortest;
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
@@ -229,10 +241,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             return;
         }
         
-        if (clips[i]->lock == true) {
-            clips[i]->lock = false;
-            continue;
-        }
+//        if (clips[i]->lock == true) {
+//            clips[i]->lock = false;
+//            continue;
+//        }
         
         clips[i]->clipmark = true;
         
@@ -264,11 +276,18 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 ////#pragma omp parallel
 ////        {
         tgtlen = mpl_fullpass_parsimony(t);
+        
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
 //        }
 
+//        if ((srclen + tgtlen) > bound) {
+//            mpl_node_bin_connect(left, right, clips[i]);
+//            clips[i]->lock = false;
+//            clips[i]->clipmark = false;
+//            continue;
+//        }
         // If the branch is zero-length, no need to continue. All swaps will
         // result in redundant trees after collapsing.
 //        if ((srclen + tgtlen) == bound) {
@@ -296,12 +315,14 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             ++srcs;
         }
         
-        // Size of the long list is determined by the traversal
+        // Make a list of target sites
         mpl_bbreak_get_target_list(t, csite, bbk);
+        
         src = bbk->srcs;
         
         mpl_node* curnbr = NULL;
         mpl_node* oldnbr = NULL;
+        
         for (src = bbk->srcs; src < srcs; ++src) {
         
             curnbr = *src;
@@ -334,6 +355,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             if (src == bbk->srcs) {
                 tgtnum = bbk->nshorttgts;
                 tgts = bbk->tgtsshort;
+//                tgtnum = bbk->nlongtgts;
+//                tgts = bbk->tgtslong;
             }
             else {// Try all target sites
                 // For SPR: If this is the first re-rooting, move to all sites
@@ -357,14 +380,14 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 mpl_node_bin_connect(tgts[j], NULL, clips[i]);
                 ++bbk->num_rearrangs;
                 
-                score = mpl_score_try_parsimony(tgtlen + srclen, bound, clips[i], tgts[j], t);
+                score = mpl_score_try_parsimony(tgtlen + srclen, bbk->shortest, clips[i], tgts[j], t);
                 t->score = (score + tgtlen + srclen);
 
 //                t->score = mpl_fullpass_parsimony(t);
                 
 //                t->score = mpl_length_only_parsimony(bbk->shortest, t);
                 
-                if (t->score <= bound) {
+                if (t->score <= bbk->shortest) {
                     if (t->score < bbk->shortest) {
                         bbk->shortest = t->score;
                         mpl_treelist_clear_all(bbk->treelist);
@@ -380,10 +403,25 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         mpl_treelist_add_tree(true, t, bbk->treelist);
                     }
                 }
+//                else if (t->score < (bbk->shortest + 5) && bbk->treelist->num_trees > 1000) { // Begin simulated annealing.
+//                    anneal = true;
+//
+//                    double r = exp((bbk->shortest - t->score) / temperature);
+//                    double p = mpl_rng() / MPL_RAND_MAX;
+//
+//                    if (r < p) {
+//                        bbk->shortest = t->score;
+//                        mpl_treelist_clear_all(bbk->treelist);
+//                        clips[i]->clipmark = false;
+//                        mpl_treelist_add_tree(false, t, bbk->treelist);
+//                        clips[i]->lock = false;
+//                        return;
+//                    }
+//
+//                }
 
                 //  Put the src tree back in its original spot
                 mpl_node_bin_clip(clips[i]);
-
             }
         }
         
@@ -397,7 +435,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             if (clips[i]->left != rtlef) {
                 mpl_node_rotate(clips[i]);
             }
-            mpl_bbreak_tbr_reroot(rtrig, clips[i]);
+            if (clips[i]->left != rtlef || clips[i]->right != rtrig) {
+                mpl_bbreak_tbr_reroot(rtrig, clips[i]);
+            }
         }
        
         // Restore the tree to exactly as it was before

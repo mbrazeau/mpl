@@ -28,6 +28,6 @@ void    mpl_scoretree_restore_original_characters(void);
 void    mpl_tempset_stdtype(void);
 void    mpl_tempreset_natype(void);
 
-void mpl_double_weights(void);
-void mpl_halve_weights(void);
+void mpl_do_ratchet_weights(void);
+void mpl_reset_std_weights(void);
 #endif /* mpl_scoretree_h */

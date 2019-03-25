@@ -33,6 +33,7 @@ void mpl_charbuf_init
     mpl_charbuf_init_datatype(cb);
     
     cb->weights = (double*)safe_calloc(ncols, sizeof(double));
+    cb->weightindices = (long*)safe_calloc(ncols, sizeof(long));
     cb->minchanges = (long*)safe_calloc(ncols, sizeof(double));
     cb->orig_indices = (long*)safe_calloc(ncols, sizeof(long));
     cb->charchanges = (long*)safe_calloc(ncols, sizeof(long));
@@ -41,9 +42,9 @@ void mpl_charbuf_init
     
     for (i = 0; i < cb->char_max; ++i) {
         cb->weights[i] = DEFAULT_WEIGHT;
+        cb->weightindices[i] = i;
     }
 }
-
 
 void mpl_charbuf_clear(mpl_charbuf* cb)
 {
