@@ -104,6 +104,10 @@ void mpl_charbuf_add_data_column
 //        cb->upset[i][colnum] =
         cb->dnset[i][colnum] = datcol[i];
         cb->tempdn[i][colnum] = datcol[i];
+        cb->upset[i][colnum] = datcol[i];
+        cb->tempup[i][colnum] = datcol[i];
+        cb->actives[i][colnum] = datcol[i] & ISAPPLIC;
+        cb->tempact[i][colnum] = datcol[i] & ISAPPLIC;
 //        cb->tempup[i][colnum] = datcol[i];
 //        if (((datcol[i] - 1) & datcol[i]) == 0) {
 //            cb->actives[i][colnum] = cb->tempact[i][colnum];
