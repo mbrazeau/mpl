@@ -27,7 +27,7 @@ typedef struct mpl_parsdat {
     
     long            start;
     long            end;
-    long            nchars;
+    size_t          nchars;
     long*           nchanges;
     long*           indexbuf;
     long*           ntipinbufs;
@@ -141,6 +141,9 @@ double mpl_parsim_local_check_fork2fork
  const long tgt2anc,
  const long tgt2sib,
  const long troot, mpl_matrix* m);
+
+double mpl_fitch_na_recalc_second_downpass
+(const long left, const long right, const long n, mpl_parsdat* restrict pd);
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);
