@@ -107,7 +107,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(0, bbk->numtaxa, 30, &bbk->stepwise);
+    mpl_stepwise_init(1, bbk->numtaxa, 10, &bbk->stepwise);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
@@ -115,7 +115,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
         
         // If the buffer is empty get one or more trees by stepwise addition
         // Otheriwse, starttrees is the bbk buffer
-        mpl_rng_set_seed(1);
+        mpl_rng_set_seed(521096807);
         mpl_stepwise_do_search(&bbk->stepwise);
         printf("Random number seed: %u\n", mpl_rng_get_seed());
         // Then get the trees from the stepwise struct
@@ -222,18 +222,18 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
-//    for (i = 1, j = 0; i < t->size; ++i) {
-//        if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
-//            clips[j] = &t->nodes[i];
-//            ++j;
-//        }
-//    }
-    memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
+    for (i = 1, j = 0; i < t->size; ++i) {
+        if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
+            clips[j] = &t->nodes[i];
+            ++j;
+        }
+    }
+//    memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
     nnodes = t->size;
     clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
-    
+    clipmax = j;
     // TODO: clipmax-1 is temporary (root-adjacent clips need to be fixed)
-    for (i = 1; i < clipmax-1; ++i) { // NOTE: Assumes 'unrooted' tree!!!
+    for (i = 0; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
         
         signal(SIGINT, do_interrupt);
         
@@ -241,10 +241,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             return;
         }
         
-//        if (clips[i]->lock == true) {
-//            clips[i]->lock = false;
-//            continue;
-//        }
+        if (clips[i]->lock == true) {
+            clips[i]->lock = false;
+            continue;
+        }
         
         clips[i]->clipmark = true;
         
@@ -282,7 +282,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         }
 //        }
 
-//        if ((srclen + tgtlen) > bound) {
+//        if ((srclen + tgtlen) >= bbk->shortest) {
 //            mpl_node_bin_connect(left, right, clips[i]);
 //            clips[i]->lock = false;
 //            clips[i]->clipmark = false;
@@ -384,7 +384,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 t->score = (score + tgtlen + srclen);
 
 //                t->score = mpl_fullpass_parsimony(t);
-                
 //                t->score = mpl_length_only_parsimony(bbk->shortest, t);
                 
                 if (t->score <= bbk->shortest) {
@@ -403,22 +402,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         mpl_treelist_add_tree(true, t, bbk->treelist);
                     }
                 }
-//                else if (t->score < (bbk->shortest + 5) && bbk->treelist->num_trees > 1000) { // Begin simulated annealing.
-//                    anneal = true;
-//
-//                    double r = exp((bbk->shortest - t->score) / temperature);
-//                    double p = mpl_rng() / MPL_RAND_MAX;
-//
-//                    if (r < p) {
-//                        bbk->shortest = t->score;
-//                        mpl_treelist_clear_all(bbk->treelist);
-//                        clips[i]->clipmark = false;
-//                        mpl_treelist_add_tree(false, t, bbk->treelist);
-//                        clips[i]->lock = false;
-//                        return;
-//                    }
-//
-//                }
 
                 //  Put the src tree back in its original spot
                 mpl_node_bin_clip(clips[i]);
