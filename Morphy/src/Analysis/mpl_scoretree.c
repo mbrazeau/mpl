@@ -496,28 +496,13 @@ double mpl_score_try_parsimony
         diff = lim-sttlen;
     }
     
-//    score = mpl_parsim_local_check
-//                 (lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, t->base->mem_index, glmatrix);
-//    double mpl_parsim_local_check_forl2fork
-//    (const double lim,
-//     const long src,
-//     const long srclef,
-//     const long srcrig,
-//     const long tgt1lef,
-//     const long tgt1rig,
-//     const long tgt1,
-//     const long tgt2,
-//     const long tgt2anc,
-//     const long tgt2sib,
-//     const long troot, mpl_matrix* m)
-    
-    if (src->tip == 0 && tgt->tip == 0) {
-        score = mpl_parsim_local_check_fork2fork
-        (lim, src->mem_index, src->left->mem_index, src->right->mem_index, tgt->left->mem_index, tgt->right->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, tgt->anc->anc->anc->mem_index, 0, t->base->mem_index, glmatrix);
-    } else {
+//    if (src->tip == 0 && tgt->tip == 0) {
+//        score = mpl_parsim_local_check_fork2fork
+//        (lim, src->mem_index, src->left->mem_index, src->right->mem_index, tgt->left->mem_index, tgt->right->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, tgt->anc->anc->anc->mem_index, 0, t->base->mem_index, glmatrix);
+//    } else {
         score = mpl_parsim_local_check
         (lim, src->mem_index, tgt->mem_index, tgt->anc->anc->mem_index, t->base->mem_index, glmatrix);
-    }
+//    }
 
 
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
@@ -536,7 +521,7 @@ double mpl_score_try_parsimony
             diff = lim - (score + sttlen);
         }
         
-        score += scorerecall;
+//        score += scorerecall;
         score += mpl_fullpass_parsimony_na_only(diff, src, t);
         
     }
@@ -567,7 +552,7 @@ void mpl_scoretree_restore_original_characters(void)
 //    glmatrix->gaphandl = GAP_MISSING;
 //    mpl_parsim_temp_set_std(glmatrix);
 //}
-//
+////
 //void mpl_tempreset_natype(void)
 //{
 //    glmatrix->gaphandl = GAP_INAPPLIC;
