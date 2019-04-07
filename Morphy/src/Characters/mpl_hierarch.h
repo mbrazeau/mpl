@@ -9,20 +9,18 @@
 #ifndef mpl_hierarch_h
 #define mpl_hierarch_h
 
+#include "mpl_parsim.h"
+
 typedef struct _hierarch mpl_hierarch;
 
 typedef struct _hierarch {
     
-    long            num_chars; // Number of characters in the hierarchy
-    long            max_chars;
-    long*           indices;
-    long            nnodes;
-    long*           nodes; // Keep a list of relevant absence nodes
-    int             nparentstates;
-    double*         ddists; // Vector of distances to nearest desc with same state
-    double*         adists; // Vector of distances to nearest ancestor with same state
-    long            nsubch;
-    mpl_hierarch*   subchars;
+    long            i_parent;
+    long            n_subchar;
+    long*           subchars;
+    mpl_parsdat*    parent_pset;
+    int             nsubchr_psets;
+    mpl_parsdat**   subchr_psets;
     
 } mpl_hierarch;
 
