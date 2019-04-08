@@ -974,6 +974,9 @@ double mpl_fitch_na_local_check
 //                    pd->minscore += weights[i];
 //                }
             }
+            else if (tempact[troot][i] && (upset[src][i] & NA) && dnset[src][i] < MISSING) {
+                score += weights[i];
+            }
             else if (dnset[src][i] < MISSING) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
@@ -1346,12 +1349,14 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
 //        upset[n][i] = dnset[n][i];
         dnset[n][i] = upset[left][i] | upset[right][i];
         
+        upset[n][i] = dnset[n][i];
+        
         if (dnset[n][i] & ISAPPLIC) {
             dnset[n][i] &= ISAPPLIC;
         }
         
+        tempup[n][i] = upset[n][i];
         tempdn[n][i] = dnset[n][i];
-//        tempup[n][i] = upset[n][i];
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
