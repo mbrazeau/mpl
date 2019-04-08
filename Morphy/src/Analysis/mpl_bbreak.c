@@ -115,7 +115,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
         
         // If the buffer is empty get one or more trees by stepwise addition
         // Otheriwse, starttrees is the bbk buffer
-        mpl_rng_set_seed(521096807);
+        mpl_rng_set_seed(1805020128);
         mpl_stepwise_do_search(&bbk->stepwise);
         printf("Random number seed: %u\n", mpl_rng_get_seed());
         // Then get the trees from the stepwise struct
@@ -525,6 +525,10 @@ static void mpl_bbreak_trav_targets
         shortlist[*j] = n;
         ++(*j);
     }
+    
+//    if (n->lock == true) {
+//        return;
+//    }
     
     if (!n->tip) {
         mpl_bbreak_trav_targets(n->left, site, longlist, shortlist, i, j);
