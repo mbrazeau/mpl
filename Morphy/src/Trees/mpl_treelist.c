@@ -14,15 +14,18 @@
 static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
 void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
 
-mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate)
+mpl_treelist*
+mpl_treelist_new
+(const long num_taxa, const long max_trees, const long increase_rate)
 {
     mpl_treelist* tl = NULL;
     
     if ((tl = (mpl_treelist*)safe_calloc(1, sizeof(mpl_treelist)))) {
-        tl->num_taxa = num_taxa;
-        tl->num_trees = 0;
-        tl->max_trees = max_trees;
-        tl->increase_rate = increase_rate;
+        
+        tl->num_taxa        = num_taxa;
+        tl->num_trees       = 0;
+        tl->max_trees       = max_trees;
+        tl->increase_rate   = increase_rate;
         
         // TODO: Check return from this:
         mpl_treelist_resize(num_taxa, max_trees, tl);
@@ -274,6 +277,7 @@ void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
     // Check the list isn't empty
     if (tl->back != NULL) {
         mpl_topol_link(tl->back, nt);
+        tl->back = nt;
     }
     else {
         assert(tl->front == NULL);
@@ -281,6 +285,7 @@ void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
     }
     
     do {
+        en = NULL;
         en = mpl_topol_new(tl->num_taxa);
         mpl_topol_init(tl->num_taxa, en);
         mpl_topol_link(nt, en);
