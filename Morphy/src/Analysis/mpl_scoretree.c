@@ -390,21 +390,13 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                 mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
                 break;
             }
-//            
-//            if (!mpl_parsim_check_nas_updated(glmatrix) && n != start && n != start->anc) {
-//                for (; i < t->nintern; ++i) {
-//                    n = t->postord_intern[i];
-//                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
-//                }
-//                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
-//                break;
-//            }
         }
     }
     
-    mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
-//    mpl_parsim_reset_state_buffers(glmatrix);
-//    mpl_charbuf_assert_temps_equal_bufs(&glmatrix->cbufs[MPL_DISCR_T]);
+    if (i == t->nintern) {
+        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
+    }
+
     
     return len;
 }
@@ -412,7 +404,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 double mpl_partpass_parsimony(mpl_node* start, mpl_tree* t)
 {
     double len = 0.0;
-    long i = 0;
+//    long i = 0;
     mpl_node* n;
 
     // Copy the current state sets into the temp buffers
