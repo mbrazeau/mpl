@@ -406,5 +406,19 @@ int test_topology_reuse (void)
     printf("Result 1: %s", nwkop);
     printf("\n");
     
+    mpl_topol* tp3 = mpl_topol_new(ntax);
+    mpl_newick_read(nwkop, tp3, &rdr);
+    
+    mpl_tree_read_topol(t, tp3);
+    mpl_tree_record_topol(tp3, t);
+    
+    if (mpl_topol_compare(tp3, tp2)) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
     return failn;
 }
