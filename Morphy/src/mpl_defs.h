@@ -28,6 +28,7 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 #define MPL_RAND_MAX        2147483646U
 #define MPL_DEFAULT_RSEED   1U
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
+#define MPL_MAX_DEPENDECIES 2 // Maximum number of root characters
 
 typedef enum {
     
