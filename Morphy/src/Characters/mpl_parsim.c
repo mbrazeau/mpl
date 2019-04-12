@@ -358,7 +358,7 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i = 0;
     long j = 0;
-    const long end = pd->end;
+//    const long end = pd->end;
     mpl_discr t;
     
     for (j = 0; j < pd->ntipinbufs[tipn]; ++j) {
@@ -711,7 +711,7 @@ mpl_fitch_na_recalc_first_downpass
         }
         
         if (t != tempdn[n][i]) {
-            chgs = chgs + 1;
+            ++chgs;
         }
         
         dnset[n][i] = t;
@@ -781,7 +781,9 @@ int mpl_fitch_na_recalc_first_uppass
         }
 
         if (tempup[n][i] != upset[n][i]) {
-            ++chgs;
+            if (tempup[n][i] == NA || upset[n][i] == NA) {
+                ++chgs;
+            }
         }
     }
     
@@ -792,38 +794,78 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
 {
     size_t i = 0;
     size_t j = 0;
-
+//    size_t k = 0;
+//    long r = 0;
+    
     long* restrict indices = pd->indexbuf;
     
     for (j = pd->nchars; j-- ; ) {
-
+        
         i = indices[j];
-
-//        if (dnset[tipn][i] & ISAPPLIC) {
-//            if (((dnset[tipn][i] - 1) & dnset[tipn][i]) > 0) {
-                if (dnset[tipn][i] & upset[anc][i]) {
-                    actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
-                    upset[tipn][i] = dnset[tipn][i];
-                    if (upset[anc][i] & ISAPPLIC) {
-                        upset[tipn][i] &= ISAPPLIC;
-                    }
-                }
-//            }
-//        }
         
-        
-//        else {
-//            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
-//        }
-
-        
-
-//        if (dnset[tipn][i] & upset[anc][i]) {
-//            if (upset[anc][i] & ISAPPLIC) {
-//                upset[tipn][i] &= ISAPPLIC;
-//            }
-//        }
+        if (dnset[tipn][i] & upset[anc][i] && dnset[tipn][i] != upset[anc][i]) {
+            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+            upset[tipn][i] = dnset[tipn][i];
+            if (upset[anc][i] & ISAPPLIC) {
+                upset[tipn][i] &= ISAPPLIC;
+            }
+        }
     }
+
+//    while (i < pd->nchars && j < pd->ntipinbufs[tipn] ) {
+//        r = indices[i] - pd->tipinbufs[tipn][j];
+//        if (r < 0) {
+//            r = -1;
+//        } else if (r > 0) {
+//            r = 1;
+//        }
+//        else {
+//            r = 0;
+//        }
+//
+//        switch (r) {
+//            case -1:
+//                ++i;
+//                break;
+//            case 1:
+//                ++j;
+//                break;
+//            default:
+//                k = indices[i];
+//
+//                if (dnset[tipn][k] & upset[anc][k]) {
+//                    actives[tipn][k] = dnset[tipn][k] & upset[anc][k] & ISAPPLIC;
+//                    upset[tipn][k] = dnset[tipn][k];
+//                    if (upset[anc][k] & ISAPPLIC) {
+//                        upset[tipn][k] &= ISAPPLIC;
+//                    }
+//                }
+//
+//                ++i;
+//                break;
+//        }
+    
+//        if (indices[i] < pd->tipinbufs[tipn][j]) {
+//            ++i;
+//        }
+//        else if (pd->tipinbufs[tipn][j] > indices[i]) {
+//            ++j;
+//        }
+//        else {
+//            k = indices[i];
+//
+//            if (dnset[tipn][k] & upset[anc][k]) {
+//                actives[tipn][k] = dnset[tipn][k] & upset[anc][k] & ISAPPLIC;
+//                upset[tipn][k] = dnset[tipn][k];
+//                if (upset[anc][k] & ISAPPLIC) {
+//                    upset[tipn][k] &= ISAPPLIC;
+//                }
+//            }
+//
+//            ++i;
+//        }
+//    }
+//
 }
 
 
@@ -839,47 +881,12 @@ double mpl_fitch_na_recalc_second_downpass
     
     // Reset the doeschange counter
 //    pd->doeschange = 0;
-    
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
         
-        // TODO: Here is where you first deduct the original score from this
-        // node.
 //        if (nodechanges[n][i] > 0) {
 //            cost -= (nodechanges[n][i] * weights[i]);
-//        }
-        
-//        if (upset[n][i] & ISAPPLIC) {
-//            t = upset[left][i] & upset[right][i];
-//            if (t) {
-////                if (t & ISAPPLIC) {
-//                    upset[n][i] = t & ISAPPLIC;
-////                }
-////                else {
-////                    upset[n][i] = t;
-////                }
-//            } else {
-//
-//                upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
-//
-//                if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
-//                    cost += weights[i];
-////                    ++pd->doeschange;
-//                } else if (actives[left][i] && actives[right][i]) {
-//                    cost += weights[i];
-////                    ++pd->doeschange;
-//                }
-//            }
-//        } else {
-//            if (actives[left][i] && actives[right][i]) {
-//                cost += weights[i];
-////                ++pd->doeschange;
-//            }
-//        }
-//
-//        if (upset[n][i] != tempup[n][i]) {
-//            ++pd->doeschange;
 //        }
 
         // More efficient implementation?
@@ -957,6 +964,7 @@ double mpl_fitch_na_local_check
     const long end = pd->end;
     double score = 0.0;
     
+#pragma simd
     for (i = pd->start; i < end; ++i) {
         
         if (dnset[src][i] & ISAPPLIC) {
@@ -970,18 +978,15 @@ double mpl_fitch_na_local_check
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
-//                if (!((tempdn[tgt1][i] | tempdn[tgt2][i]) & dnset[src][i])) {
-//                    pd->minscore += weights[i];
-//                }
-            }
-            else if (tempact[troot][i] && (upset[src][i] & NA) && dnset[src][i] < MISSING) {
-                score += weights[i];
             }
             else if (dnset[src][i] < MISSING) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
+                if (!(tempact[troot][i] & tempact[src][i]) && tempact[troot][i]) {
+                    pd->minscore += weights[i];
+                }
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -994,10 +999,8 @@ double mpl_fitch_na_local_check
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
-                if (tempact[troot][i] && tempact[src][i]) {
-                    if (!((tempdn[tgt1][i] | tempdn[tgt2][i]) & ISAPPLIC)) {
-                        pd->minscore += weights[i];
-                    }
+                if (!(tempact[troot][i] & tempact[src][i]) && tempact[src][i]) {
+                    pd->minscore += weights[i];
                 }
             }
         }
@@ -1349,14 +1352,12 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
 //        upset[n][i] = dnset[n][i];
         dnset[n][i] = upset[left][i] | upset[right][i];
         
-        upset[n][i] = dnset[n][i];
-        
         if (dnset[n][i] & ISAPPLIC) {
             dnset[n][i] &= ISAPPLIC;
         }
         
-        tempup[n][i] = upset[n][i];
         tempdn[n][i] = dnset[n][i];
+//        tempup[n][i] = upset[n][i];
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
@@ -1524,3 +1525,16 @@ void mpl_parsim_reset_state_buffers(mpl_matrix *m)
     }
 }
 
+void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m)
+{
+    long i = 0;
+    long j = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
+                nodechanges[n][j] = 0;
+            }
+        }
+    }
+}

@@ -157,7 +157,7 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
 void mpl_parsim_reset_all_weights(mpl_charbuf* cb);
-
+void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m);
 
 // TODO: remove these when you don't need them anymore
 void reset_temporary_changebuf(void);
