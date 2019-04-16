@@ -337,7 +337,7 @@ int test_parsimony_data_setup (void)
         printf("\n");
     }
     
-    unsigned long expected[nrows][ncols] =
+    unsigned long expected[][15] =
 //   0  1  2  3  4  5  6  7  8  9  0  1  2  3  4
     {
         {4,  2, 2, 2, 2, 2, 2, 2, 2, 2,          2, 4, 2,          2, 2},
