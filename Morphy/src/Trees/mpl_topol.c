@@ -157,7 +157,7 @@ int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
     if (parent && child) {
         
         parent->next = child;
-        child->back = parent;
+//        child->back = parent;
         
         return 0;
     }
