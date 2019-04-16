@@ -61,16 +61,19 @@ int test_basic_treelist (void)
     
     // Delete top so that the pointer can be used to get from the treelist.
     mpl_topol_delete(&top);
+//    mpl_treelist_reset_head(tl);
+    top = tl->front;
     
     printf("\nThe resultant trees from the list:\n");
     for (i = 0; i < numtrees; ++i) {
-        top = mpl_treelist_get_topol(i, tl);
+        //top = mpl_treelist_get_next(tl);//mpl_treelist_get_topol(i, tl);
         mpl_tree_read_topol(t, top);
         mpl_tree_checker(t);
         mpl_tree_write_newick(&nwkout, t);
         printf("%s\n", nwkout);
         free(nwkout);
         nwkout = NULL;
+        top = top->next;
     }
     
     printf("\nCheck the topologies are equal:\n");
@@ -148,16 +151,19 @@ int test_dynamic_treelist (void)
     
     // Delete top so that the pointer can be used to get from the treelist.
     mpl_topol_delete(&top);
+    //    mpl_treelist_reset_head(tl);
+    top = tl->front;
     
     printf("\nThe resultant trees from the list:\n");
     for (i = 0; i < numtrees; ++i) {
-        top = mpl_treelist_get_topol(i, tl);
+        //top = mpl_treelist_get_next(tl);//mpl_treelist_get_topol(i, tl);
         mpl_tree_read_topol(t, top);
         mpl_tree_checker(t);
         mpl_tree_write_newick(&nwkout, t);
         printf("%s\n", nwkout);
         free(nwkout);
         nwkout = NULL;
+        top = top->next;
     }
     
     printf("\nCheck the topologies are equal:\n");
