@@ -300,13 +300,20 @@ static void mpl_try_all_sites
             if (t->score > sw->shortest) {
                 // TODO: This can be made more efficient with the treelist.
                 double longest = 0.0;
-                long it = 0;
-                longest = sw->held->trees[0].score;
-                for (it = 0; it < sw->held->num_trees; ++it) {
-                    if (sw->held->trees[it].score > longest) {
-                        longest = sw->held->trees[it].score;
+//                long it = 0;
+                longest = sw->held->front->score;
+                mpl_topol* top = sw->held->front;
+                while (top != NULL) {
+                    if (top->score > longest) {
+                        longest = top->score;
                     }
+                    top = top->next;
                 }
+//                for (it = 0; it < sw->held->num_trees; ++it) {
+//                    if (sw->held->trees[it].score > longest) {
+//                        longest = sw->held->trees[it].score;
+//                    }
+//                }
                 sw->longest = longest;
             }
             else if (t->score < sw->shortest) {

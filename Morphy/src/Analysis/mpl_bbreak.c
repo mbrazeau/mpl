@@ -128,10 +128,10 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             tcount = 0;
             // Add the first tree from the rep in the buffer
             top = mpl_treelist_get_shortest(bbk->stepwise.queued);
-            current = &bbk->treelist->trees[0];//mpl_treelist_get_next(bbk->treelist);
+            current = mpl_treelist_get_topol(0, bbk->treelist);//&bbk->treelist->trees[0];//mpl_treelist_get_next(bbk->treelist);
             mpl_topol_copy_data(top, current);
             bbk->treelist->num_trees = 1;
-            bbk->treelist->head = &bbk->treelist->trees[0];
+            bbk->treelist->head = bbk->treelist->head;// &bbk->treelist->trees[0];
             bbk->shortest = current->score;
             // If duplicate tree; break out of this loop and go to next rep
             
