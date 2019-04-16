@@ -35,6 +35,7 @@ long            mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_tr
 long            mpl_treelist_get_numtrees(const mpl_treelist* tl);
 void            mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_topol(long tnum, mpl_treelist* tl);
+void            mpl_treelist_reset_head(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_next(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_new_rep(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_shortest(mpl_treelist* tl);
