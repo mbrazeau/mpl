@@ -325,7 +325,7 @@ static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
     // Check dimensions: should be able to get the terminal semicolon by using
     // the matrix dimensions.
     c = NULL;
-    c = mpl_matrix_get_rawdat_ptr(m->num_rows, m->num_rows, m);
+    c = mpl_matrix_get_rawdat_ptr(m->num_rows, m->num_cols, m);
     if (*c != ';') {
         return MPL_BADDIMENSIONS;
     }
@@ -618,6 +618,39 @@ char* mpl_matrix_get_rawdat_ptr(const long row, const long col, const mpl_matrix
     }
     
     return ret;
+}
+
+static long mpl_matrix_get_rawdat_dimens(const char* rawdat)
+{
+    long length = 0;
+    
+    char* ret = NULL;
+    
+    ret = (char*)rawdat;
+    
+    // Skip any leading whitespace
+    ret = mpl_skip_whitespace(ret);
+    
+    while(*ret && strchr(VALIDSYMB, *ret)) {
+        
+        if (!strchr(VALID_WS, *ret)) {
+            
+            if (!strchr(VALID_MPL_MATPUNC, *ret)) {
+                ++length;
+            }
+            else if (*ret != ';') {
+                // If this is the stopping point, return the result
+                ret = mpl_skip_closure(ret, *ret, mpl_get_opposite_bracket(*ret));
+                ++length;
+            }
+            else {
+                break;
+            }
+        }
+        ++ret;
+    }
+    
+    return length;
 }
 
 static long mpl_matrix_count_gaps_in_column(const long col, const mpl_matrix* m)
