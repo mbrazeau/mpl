@@ -12,7 +12,8 @@
 #include "mpl_treelist.h"
 
 static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
-void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
+static void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
+void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl);
 
 mpl_treelist*
 mpl_treelist_new
@@ -28,7 +29,8 @@ mpl_treelist_new
         tl->increase_rate   = increase_rate;
         
         // TODO: Check return from this:
-        mpl_treelist_resize(num_taxa, max_trees, tl);
+//        mpl_treelist_resize(num_taxa, max_trees, tl);
+        mpl_treelist_extend(tl->max_trees, tl);
     }
     
     return tl;
@@ -41,7 +43,8 @@ void mpl_treelist_delete(mpl_treelist** tl)
 
 long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
-    long i = 0;
+//    long i = 0;
+    mpl_topol* tpiter = NULL;
     
     if (!(tl->num_trees < tl->max_trees)) {
         if (tl->increase_rate == 0) {
@@ -49,28 +52,39 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
         }
         
         // TODO: Check return of this
-        mpl_treelist_resize(tl->trees[0].num_taxa, tl->increase_rate, tl);
+        mpl_treelist_extend(tl->increase_rate, tl);
+//        mpl_treelist_resize(tl->trees[0].num_taxa, tl->increase_rate, tl);
         
 //        mpl_treelist_extend(tl->increase_rate, tl);
     }
     // TODO: Check bounds and decide whether to extend
-    mpl_topol* top = &tl->trees[tl->num_trees];
+    mpl_topol* top = NULL;//&tl->trees[tl->num_trees];
+    if (tl->num_trees == 0) {
+        top = tl->front;
+    }
+    else {
+        top = tl->head->next;
+    }
     
     mpl_tree_record_topol(top, t);
     
-    if (checkdupes == true) {
-        for (i = 0; i < tl->num_trees; ++i) {
-            if (!mpl_topol_compare(top, &tl->trees[i])) {
+    if (checkdupes == true && tl->num_trees > 0) {
+        tpiter = tl->front;
+        do {
+            if (!mpl_topol_compare(top, tpiter)) {
                 return 1;
             }
-        }
+            tpiter = tpiter->next;
+        } while (tpiter != tl->back->next);
     }
     
-    tl->back = top;
-    ++tl->num_trees;
-    if (tl->num_trees == 1) {
-        tl->head = top;
+    if (tl->num_trees == 0) {
+        tl->head = tl->front;
     }
+    
+    ++tl->num_trees;
+
+    tl->head = top;
     
     assert(tl->num_trees <= tl->max_trees);
     // TODO: Rebase the topology if the tree is unrooted
@@ -93,21 +107,27 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
     double biglen = 0.0;
     double shortlen = 0.0;
     long longest = 0;
+    mpl_topol* top;
+    mpl_topol* longesttop = NULL;
     
     if (tl->num_trees == tl->max_trees) {
-        shortlen = tl->trees[0].score;
+        shortlen = tl->front->score;//trees[0].score;
+        top = tl->front;
         for (i = 0; i < tl->num_trees; ++i) {
-            if (tl->trees[i].score > biglen) {
-                biglen = tl->trees[i].score;
+            if (top->score > biglen) {
+                biglen = top->score;
                 longest = i;
+                longesttop = top;
                 lcount = 1;
             }
-            else if (tl->trees[i].score == biglen) {
+            else if (top->score == biglen) {
                 ++lcount;
             }
-            else if (tl->trees[i].score < shortlen) {
-                shortlen = tl->trees[i].score;
+            else if (top->score < shortlen) {
+                shortlen = top->score;
             }
+            
+            top = top->next;
         }
     }
     
@@ -137,53 +157,67 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
 //        }
 //    }
     
-    mpl_topol* top = &tl->trees[longest];
-    mpl_tree_record_topol(top, t);
+//    mpl_topol* top = &tl->trees[longest];
+    mpl_tree_record_topol(longesttop, t);
     
     if (tl->num_trees == 0) {
-        tl->back = &tl->trees[0];
+        tl->back = tl->front;//&tl->trees[0];
         tl->head = tl->back;
         ++tl->num_trees;
     }
 }
 
-mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
+mpl_topol* mpl_treelist_get_topol(const long tnum, mpl_treelist* tl)
 {
-    if (tnum < tl->num_trees) {
-        return &tl->trees[tnum];
+    mpl_topol* ret = NULL;
+    long i = 0;
+    
+    ret = tl->front;
+    
+    while (i < tnum) {
+        ret = ret->next;
+        ++i;
     }
     
-    return NULL;
+//    if (tnum < tl->num_trees) {
+//        return &tl->trees[tnum];
+//    }
+    
+    return ret;
+}
+
+void mpl_treelist_reset_head(mpl_treelist* tl)
+{
+    tl->head = tl->front;
 }
 
 mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
     ret = tl->head;
-    if (tl->head > tl->back) {
-        tl->head = NULL;
-        ret = NULL;
+//    if (tl->head > tl->back) {
+//        tl->head = NULL;
+//        ret = NULL;
+//    }
+    if (ret != NULL) {
+        tl->head = tl->head->next;
     }
-    ++tl->head;
     
     return ret;
 }
 
 mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 {
-    long i = 0;
-    double shortest;
-    
-    mpl_topol* ret = 0;
-    ret = &tl->trees[0];
-    shortest = ret->score;
-    
-    for (i = 1; i < tl->num_trees; ++i) {
-        if (tl->trees[i].score < shortest) {
-            ret = &tl->trees[i];
-            shortest = ret->score;
+    mpl_topol* top = tl->front;
+    mpl_topol* ret = top;
+
+    do {
+        // TODO: Write a tie-breaker?
+        if (top->score < ret->score) {
+            ret = top;
         }
-    }
+        top = top->next;
+    } while (top);
     
     return ret;
 }
@@ -194,7 +228,7 @@ void mpl_treelist_clear_all(mpl_treelist* tl)
     tl->shortest = 0.0;
     tl->longest = 0.0;
     tl->head = NULL;
-    tl->back = NULL;
+//    tl->back = NULL;
 }
 
 /*
@@ -246,7 +280,7 @@ void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
     tl->back = top;
 }
 
-void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
+static void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
 {
     
     long i = 0;
@@ -260,14 +294,18 @@ void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
         if (tl->increase_rate == 0) {
             limit = tl->max_trees - tl->num_trees;
         }
+        else {
+            limit = nelems;
+            tl->max_trees += nelems;
+        }
     }
     else {
         limit = nelems;
-        tl->max_trees += nelems;
+//        tl->max_trees += nelems;
     }
     
     // If the request amounts to zero, then do nothing.
-    if (!limit) {
+    if (limit == 0) {
         return;
     }
     
