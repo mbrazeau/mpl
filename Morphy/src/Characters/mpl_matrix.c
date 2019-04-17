@@ -325,7 +325,7 @@ static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
     // Check dimensions: should be able to get the terminal semicolon by using
     // the matrix dimensions.
     c = NULL;
-    c = mpl_matrix_get_rawdat_ptr(m->num_rows, m->num_rows, m);
+    c = mpl_matrix_get_rawdat_ptr(m->num_rows, m->num_cols, m);
     if (*c != ';') {
         return MPL_BADDIMENSIONS;
     }
