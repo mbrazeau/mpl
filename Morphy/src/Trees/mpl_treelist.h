@@ -26,6 +26,7 @@ typedef struct _treelist {
     mpl_topol*  front;
     mpl_topol*  back;
     mpl_topol*  head;
+    mpl_topol*  repstart;
     
 } mpl_treelist;
 
