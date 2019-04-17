@@ -11,7 +11,7 @@
 #include "../mpl_utils.h"
 #include "mpl_treelist.h"
 
-static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
+static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
 void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
 
 mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate)
@@ -23,6 +23,7 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
         tl->num_trees = 0;
         tl->max_trees = max_trees;
         tl->increase_rate = increase_rate;
+        tl->repstart = NULL;
         
         // TODO: Check return from this:
         mpl_treelist_resize(num_taxa, max_trees, tl);
@@ -187,11 +188,12 @@ mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
-    tl->num_trees = 0;
-    tl->shortest = 0.0;
-    tl->longest = 0.0;
-    tl->head = NULL;
-    tl->back = NULL;
+    tl->num_trees   = 0;
+    tl->shortest    = 0.0;
+    tl->longest     = 0.0;
+    tl->head        = NULL;
+    tl->back        = NULL;
+    tl->repstart    = NULL;
 }
 
 /*
@@ -199,9 +201,10 @@ void mpl_treelist_clear_all(mpl_treelist* tl)
  */
 
 // TODO: This really needs a return to check.
-static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
+static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
 {
     size_t i = 0;
+    size_t cleanupstart = 0;
     
     if (tl->trees == NULL) {
         tl->trees = (mpl_topol*)safe_calloc(tl->max_trees, sizeof(mpl_topol));
@@ -214,10 +217,15 @@ static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         if (extlist != NULL) {
             tl->trees = extlist;
         }
+        else {
+            return -1;
+        }
         
         i = tl->max_trees;
         tl->max_trees += extension;
     }
+    
+    cleanupstart = i;
     
     for ( ; i < tl->max_trees; ++i) {
         // TODO: This needs an opposite destructor function for if the process
@@ -225,8 +233,21 @@ static void mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         // TODO: Make sure this isn't leaking memory by cutting off last topology
         // in the list
         tl->trees[i].edges = NULL;
-        mpl_topol_init(num_taxa, &tl->trees[i]);
+        
+        if (mpl_topol_init(num_taxa, &tl->trees[i])) {
+            // Cleanup;
+            mpl_topol* topptr = NULL;
+            for (i = cleanupstart; i < tl->max_trees; ++i) {
+                topptr = &tl->trees[i];
+                mpl_topol_delete(&topptr);
+            }
+            tl->max_trees = cleanupstart;
+            // Exit
+            return -1;
+        }
     }
+    
+    return 0;
 }
 
 void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
