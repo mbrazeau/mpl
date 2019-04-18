@@ -270,6 +270,7 @@ int mpl_tree_reset(mpl_tree* t)
     t->size = 0;
     t->base = NULL;
     t->num_polys = 0;
+    t->score = 0.0;
     
     return 0;
 }
