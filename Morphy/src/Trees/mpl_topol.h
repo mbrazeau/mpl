@@ -11,6 +11,8 @@
 
 typedef struct mpl_topol mpl_topol;
 typedef struct mpl_topol {
+    
+    long        index;
     long        num_taxa;
     long        num_nodes;
     long        num_polys;
@@ -32,7 +34,7 @@ int         mpl_topol_delete(mpl_topol** top);
 int         mpl_topol_reset(long num_taxa, mpl_topol* top);
 int         mpl_topol_link(mpl_topol* parent, mpl_topol* child);
 int         mpl_topol_rebase(const long newbase, mpl_topol* top);
-int         mpl_topol_compare(mpl_topol* t1, mpl_topol* t2);
+int         mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2);
 int         mpl_topol_init(long num_taxa, mpl_topol* top);
 int         mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest);
 
