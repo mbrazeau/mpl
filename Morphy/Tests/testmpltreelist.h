@@ -12,5 +12,7 @@
 int test_basic_treelist (void);
 int test_dynamic_treelist (void);
 int test_reject_new (void);
+int test_buffer_clearing (void);
+int test_basic_replication (void);
 
 #endif /* testmpltreelist_h */

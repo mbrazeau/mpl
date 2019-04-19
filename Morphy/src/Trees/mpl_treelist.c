@@ -24,6 +24,7 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
         tl->max_trees = max_trees;
         tl->increase_rate = increase_rate;
         tl->repstart = NULL;
+        tl->rep_num_trees = 0;
         
         // TODO: Check return from this:
         mpl_treelist_resize(num_taxa, max_trees, tl);
@@ -37,21 +38,20 @@ void mpl_treelist_delete(mpl_treelist** tl)
     // TODO: Implement
 }
 
-long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
+mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
     long i = 0;
     
-    if (!(tl->num_trees < tl->max_trees)) {
+    if (tl->num_trees >= tl->max_trees) {
+        
         if (tl->increase_rate == 0) {
-            return -1;
+            return NULL;
         }
         
         // TODO: Check return of this
         mpl_treelist_resize(tl->trees[0].num_taxa, tl->increase_rate, tl);
-        
-//        mpl_treelist_extend(tl->increase_rate, tl);
     }
-    // TODO: Check bounds and decide whether to extend
+
     mpl_topol* top = &tl->trees[tl->num_trees];
     
     mpl_tree_record_topol(top, t);
@@ -59,15 +59,18 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
     if (checkdupes == true) {
         for (i = 0; i < tl->num_trees; ++i) {
             if (!mpl_topol_compare(top, &tl->trees[i])) {
-                return 1;
+                return &tl->trees[i];
             }
         }
     }
     
     tl->back = top;
     ++tl->num_trees;
-    if (tl->num_trees == 1) {
-        tl->head = top;
+    ++tl->rep_num_trees;
+    
+    if (tl->num_trees == 1 || tl->head == NULL) {
+        tl->head    = top;
+        tl->front   = &tl->trees[0];
     }
     
     assert(tl->num_trees <= tl->max_trees);
@@ -76,8 +79,9 @@ long mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
     // which may have less than the maximum number of tips...
     
     
-    return 0;
+    return NULL;
 }
+
 
 long mpl_treelist_get_numtrees(const mpl_treelist* tl)
 {
@@ -154,15 +158,27 @@ mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
     return NULL;
 }
 
+
+void mpl_treelist_reset_head(mpl_treelist* tl)
+{
+    tl->head = tl->front;
+}
+
 mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
-    ret = tl->head;
-    if (tl->head > tl->back) {
-        tl->head = NULL;
-        ret = NULL;
+    
+    if (tl->head != NULL) {
+        
+        ret = tl->head;
+        
+        if (tl->head == tl->back) {
+            tl->head = NULL;
+        }
+        else {
+            ++tl->head;
+        }
     }
-    ++tl->head;
     
     return ret;
 }
@@ -188,13 +204,47 @@ mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
-    tl->num_trees   = 0;
-    tl->shortest    = 0.0;
-    tl->longest     = 0.0;
-    tl->head        = NULL;
-    tl->back        = NULL;
-    tl->repstart    = NULL;
+    tl->num_trees       = 0;
+    tl->rep_num_trees   = 0;
+    tl->shortest        = 0.0;
+    tl->longest         = 0.0;
+    tl->head            = NULL;
+    tl->back            = NULL;
+    tl->repstart        = NULL;
+    
 }
+
+void mpl_treelist_clear_rep(mpl_treelist* tl)
+{
+    tl->num_trees = tl->num_trees - tl->rep_num_trees;
+    tl->rep_num_trees = 0;
+    assert(tl->num_trees >= 0);
+    tl->back = &tl->trees[tl->num_trees-1];
+    tl->head = NULL;
+//    tl->back = tl->head;
+}
+
+mpl_topol* mpl_treelist_newrep(mpl_tree* t, mpl_treelist* tl)
+{
+    mpl_topol* ret = NULL;
+    
+    tl->rep_num_trees   = 0;
+    
+    ret = mpl_treelist_add_tree(true, t, tl);
+    
+    if (ret == NULL) {
+        tl->repstart = tl->head;
+        tl->head = tl->back;
+        ret = tl->head;
+    }
+    else {
+        ret = NULL;
+    }
+    
+    return ret;
+}
+
+
 
 /*
  *  PRIVATE FUNCTION DEFINITIONS
@@ -210,13 +260,32 @@ static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         tl->trees = (mpl_topol*)safe_calloc(tl->max_trees, sizeof(mpl_topol));
     }
     else {
+        
+        long ihdead = 0;
+        long iback = 0;
+        if (tl->head != NULL) {
+            ihdead = tl->head->index;
+        }
+        if (tl->back != NULL) {
+            iback = tl->head->index;
+        }
         mpl_topol* extlist = NULL;
         
         extlist = (mpl_topol*)realloc(tl->trees, (tl->max_trees + extension) * sizeof(mpl_topol));
         
         if (extlist != NULL) {
             tl->trees = extlist;
+            if (tl->front != NULL) {
+                tl->front = &tl->trees[0];
+            }
+            if (tl->head != NULL) {
+                tl->head = &tl->trees[ihdead];
+            }
+            if (tl->back != NULL) {
+                tl->back = &tl->trees[iback];
+            }
         }
+        
         else {
             return -1;
         }
@@ -232,6 +301,7 @@ static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
         // fails. Also check returns from topol_init.
         // TODO: Make sure this isn't leaking memory by cutting off last topology
         // in the list
+        tl->trees[i].index = i;
         tl->trees[i].edges = NULL;
         
         if (mpl_topol_init(num_taxa, &tl->trees[i])) {

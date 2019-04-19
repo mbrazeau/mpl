@@ -71,6 +71,8 @@ int main(int argc, const char * argv[]) {
     fails += test_basic_treelist();
     fails += test_dynamic_treelist();
     fails += test_reject_new();
+    fails += test_buffer_clearing();
+    fails += test_basic_replication();
     
     // Test mpl_taxablock.c
 //    fails += test_taxa_block_basic(argc, argv);

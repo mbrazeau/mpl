@@ -9,6 +9,8 @@
 #ifndef mpl_bbreak_h
 #define mpl_bbreak_h
 
+#include <stdbool.h>
+
 #include "mpl_search.h"
 #include "../mpl_handle.h"
 #include "../Trees/mpl_node.h"
@@ -21,6 +23,7 @@ typedef struct _bbreak {
     
     long            numtaxa;
     long            numreps;
+    bool            hitisland;
     mpl_bbreak_t    bbktype;
     long            num_nodes;
     mpl_node**      clips;

@@ -108,10 +108,35 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
 //    float timeout;
 //    float timeused;
     
-    sw->longest = 0.0;
-    sw->shortest = 0.0;
-    
+    sw->longest     = 0.0;
+    sw->shortest    = 0.0;
+
+//    for (i = 0; i < sw->num_tips; ++i) {
+//        sw->addseq[i] = i;
+//    }
+//
+//    printf("Current addition sequence:\n");
+//    for (i = 0; i < sw->num_tips; ++i) {
+//        printf("%li ", sw->addseq[i]);
+//    }
+//    printf("\n");
     mpl_set_addition_sequence(sw);
+    mpl_treelist_clear_all(sw->held);
+    mpl_treelist_clear_all(sw->queued);
+    for (i = 0; i < sw->queued->max_trees; ++i) {
+        for (j = 0; j < sw->queued->trees[i].num_nodes; ++j) {
+            sw->queued->trees[i].edges[j] = -1;
+            sw->held->trees[i].edges[j] = -1;
+        }
+    }
+//    
+//    printf("New addition sequence:\n");
+//    for (i = 0; i < sw->num_tips; ++i) {
+//        printf("%li ", sw->addseq[i]);
+//    }
+//    printf("\n\n");
+//    
+    mpl_tree_reset(sw->tree);
     mpl_setup_first_fork(sw);
     mpl_treelist_add_tree(false, sw->tree, sw->queued);
     
