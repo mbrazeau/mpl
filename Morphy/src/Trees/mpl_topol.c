@@ -165,7 +165,7 @@ int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
     return -1;
 }
 
-int mpl_topol_compare(mpl_topol* t1, mpl_topol* t2)
+int mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2)
 {
     int i = 0;
     long int max = 0;
