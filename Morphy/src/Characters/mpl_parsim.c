@@ -973,22 +973,22 @@ double mpl_fitch_na_local_check
                     score += weights[i];
                 }
             }
-            else if (dnset[src][i] < MISSING) {
-//            else if ((tempdn[tgt1][i] & ISAPPLIC) && (tempdn[tgt2][i] & ISAPPLIC)) {
+//            else if (dnset[src][i] < MISSING) {
+            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
             }
-//            else if (dnset[src][i] < MISSING) {
-//                pd->indexbuf[pd->nchars] = i;
-//                ++pd->nchars;
-//                pd->scorerecall += (changes[i] * weights[i]);
-//                pd->minscore    += (changes[i] * weights[i]);
-////                if (!(tempact[troot][i] & tempact[src][i]) && tempact[troot][i]) {
-////                    pd->minscore += weights[i];
-////                }
-//            }
+            else if (dnset[src][i] < MISSING) {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+//                if (!(tempact[troot][i] & tempact[src][i]) && tempact[troot][i]) {
+//                    pd->minscore += weights[i];
+//                }
+            }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
