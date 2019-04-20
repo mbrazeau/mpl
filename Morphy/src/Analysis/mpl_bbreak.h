@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 
+#include "../mpl_defs.h"
 #include "mpl_search.h"
 #include "../mpl_handle.h"
 #include "../Trees/mpl_node.h"
