@@ -36,6 +36,12 @@ int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
     return ret;
 }
 
+int mpl_newick_rdr_cleanup(mpl_newick_rdr* rdr)
+{
+    safe_free(rdr->namebuffer);
+    return 0;
+}
+
 int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr)
 {
     // For instance:    ((1,5),(3,(2,4)))
