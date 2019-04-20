@@ -25,6 +25,7 @@ typedef struct _charinfo {
     bool            isparsinform;
     double          weight;
     double*         wtptr; // Points to the weight in the derived char buf.
+    double          preweight; // Probability of reweighting
     long            depends[MPL_MAX_DEPENDECIES];
     long            nsubchars;
     long*           subchars;
