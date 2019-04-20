@@ -166,7 +166,7 @@ int test_polytomous_postorder (void)
     }
     
     mpl_delete_tree(&t);
-    mpl_topol_cleanup(&top);
+//    mpl_topol_cleanup(&top);
     
     return failn;
 }
