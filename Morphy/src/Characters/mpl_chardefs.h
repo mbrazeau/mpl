@@ -30,6 +30,7 @@ typedef unsigned long mpl_discr;
 #define DEFAULT_PARSIM_T     MPL_FITCH_T
 #define DEFAULT_GAP_T        GAP_INAPPLIC
 #define DEFAULT_WEIGHT       1.0000000000
+#define DEFAULT_PREWEIGHT    0.2000000000
 
 #define VALID_NEXMAT_PUNC   "{}();"
 #define VALID_XREAD_MATPUNC "[];"
