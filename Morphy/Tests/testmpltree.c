@@ -116,7 +116,6 @@ int test_binary_postorder (void)
     }
     
     mpl_delete_tree(&t);
-    
     return failn;
 }
 
@@ -167,6 +166,7 @@ int test_polytomous_postorder (void)
     }
     
     mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     
     return failn;
 }
@@ -217,6 +217,7 @@ int test_worst_case_polytomy (void)
     }
     
     mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     free(nwkprint);
     
     return failn;
@@ -267,6 +268,8 @@ int test_newick_writing (void)
     }
     
     free(nwkrdr.namebuffer);
+    mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     
     return failn;
 }
@@ -309,6 +312,9 @@ int test_tree_rebasing (void)
     free(nwk);
     nwk = NULL;
     
+    mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
+    
     return failn;
 }
 
@@ -350,6 +356,8 @@ int test_tree_rebasing_bigger_tree (void)
     free(nwk);
     nwk = NULL;
     
+    mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     return failn;
 }
 
@@ -405,6 +413,7 @@ int test_perform_all_rerootings_small (void)
     }
     
     mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     
     return failn;
 }
@@ -467,6 +476,7 @@ int test_perform_all_rerootings_large (void)
     }
     
     mpl_delete_tree(&t);
+    mpl_topol_cleanup(&top);
     
     return failn;
 }
