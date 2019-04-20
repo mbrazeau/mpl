@@ -31,6 +31,7 @@ typedef struct mpl_topol {
 
 mpl_topol*  mpl_topol_new(long num_taxa);
 int         mpl_topol_delete(mpl_topol** top);
+int         mpl_topol_cleanup(mpl_topol* top);
 int         mpl_topol_reset(long num_taxa, mpl_topol* top);
 int         mpl_topol_link(mpl_topol* parent, mpl_topol* child);
 int         mpl_topol_rebase(const long newbase, mpl_topol* top);

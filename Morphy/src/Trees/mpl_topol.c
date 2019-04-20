@@ -47,11 +47,25 @@ int mpl_topol_delete(mpl_topol** top)
         return -1;
     }
     
-    safe_free((*top)->edges);
+//    safe_free((*top)->edges);
+    mpl_topol_cleanup(*top);
     
     free(*top);
     *top = NULL;
     
+    return 0;
+}
+
+/**
+ Cleans up a topology record's memory. Should be used before freeing one or
+ more instances of a topology that is not a pointer.
+ 
+ @param top pointer to a topology record.
+ @return 0 if success, non-zero if there's an error.
+ */
+int mpl_topol_cleanup(mpl_topol* top)
+{
+    safe_free(top->edges);
     return 0;
 }
 
