@@ -17,11 +17,6 @@
 
 sig_atomic_t search_interrupt = 0;
 
-_Bool anneal = false;
-const double starttemp = 10000;
-double temperature = starttemp;
-double coolingfactor = 0.001;
-
 static int mpl_bbreak_tbr_reroot(mpl_node* tgtnbr, mpl_node* base);
 static void mpl_bbreak_trav_targets(mpl_node* n, const mpl_node* site, mpl_node** longlist, mpl_node** shortlist, long* i, long* j);
 static long mpl_bbreak_get_target_list
@@ -106,14 +101,12 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     mpl_tree* t = NULL;
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(1, bbk->numtaxa, 10, &bbk->stepwise);
+    mpl_stepwise_init(MPL_AST_RANDOM, bbk->numtaxa, 10, &bbk->stepwise);
     
-    bbk->numreps = 5;
+//    bbk->numreps = 5;
     mpl_rng_set_seed(1); // TODO: Remove me!
     
     for (i = 0; i < bbk->numreps; ++i) {
-        
-        temperature = starttemp;
         
         printf("Replicate: %li\n", i+1);
         // If the buffer is empty get one or more trees by stepwise addition
@@ -153,7 +146,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             // For all unswapped trees in the buffer:
             do {
                 // Rebuild the tree according to the stored topology
-                printf("\tShortest tree found: %.3f; swapping %li of %li trees saved.\n", bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
+//                printf("\r                                                                                ");
+                printf("\r\tShortest tree found: %.3f; swapping %li of %li trees saved.", bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
                 fflush(stdout);
                 
                 mpl_tree_read_topol(t, current);
@@ -167,8 +161,6 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 if (search_interrupt == 1) {
                     break;
                 }
-                
-                temperature *= (1 - coolingfactor);
                 
             } while (current != NULL);
             
