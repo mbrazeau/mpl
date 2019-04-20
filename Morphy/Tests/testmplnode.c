@@ -406,6 +406,7 @@ int test_node_get_sibling (void)
         ppass;
     }
     
+    mpl_newick_rdr_cleanup(&rdr);
     mpl_topol_delete(&top);
     
     return failn;
@@ -557,6 +558,7 @@ int test_binary_node_clip (void)
         ppass;
     }
     
+    mpl_newick_rdr_cleanup(&nwkrdr);
     mpl_topol_cleanup(&top);
     
     return failn;
