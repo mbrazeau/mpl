@@ -35,7 +35,13 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
 
 void mpl_treelist_delete(mpl_treelist** tl)
 {
-    // TODO: Implement
+    long i = 0;
+    
+    for (i = 0; i < (*tl)->max_trees; ++i) {
+        mpl_topol_cleanup(&(*tl)->trees[i]);
+    }
+    
+    safe_free((*tl)->trees);
 }
 
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
