@@ -84,8 +84,7 @@ int mpl_delete_tree(mpl_tree** t)
             }
         }
         
-        free((*t)->nodes);
-        (*t)->nodes = NULL;
+        safe_free((*t)->nodes);
     }
     
     safe_free((*t)->postord_all);
