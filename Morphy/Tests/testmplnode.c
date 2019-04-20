@@ -406,6 +406,8 @@ int test_node_get_sibling (void)
         ppass;
     }
     
+    mpl_topol_delete(&top);
+    
     return failn;
 }
 
@@ -554,6 +556,8 @@ int test_binary_node_clip (void)
     else {
         ppass;
     }
+    
+    mpl_topol_cleanup(&top);
     
     return failn;
 }
