@@ -65,6 +65,7 @@ mpl_matrix* mpl_matrix_new(void)
  */
 void mpl_matrix_delete(mpl_matrix** m)
 {
+    int i = 0;
     mpl_matrix* mi = NULL;
     mi = *m;
     
@@ -75,6 +76,10 @@ void mpl_matrix_delete(mpl_matrix** m)
         // NOTE: This assumes the raw data are copied.
         safe_free(mi->rawdata);
         safe_free(mi->parsets);
+        
+        for (i = 0; i < mi->ndatypes; ++i) {
+            mpl_charbuf_cleanup(&mi->cbufs[i]);
+        }
         
         free(mi);
     }
