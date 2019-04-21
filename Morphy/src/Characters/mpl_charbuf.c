@@ -32,17 +32,17 @@ void mpl_charbuf_init
     
     mpl_charbuf_init_datatype(cb);
     
-    cb->weights = (double*)safe_calloc(ncols, sizeof(double));
-    cb->weightindices = (long*)safe_calloc(ncols, sizeof(long));
-    cb->minchanges = (long*)safe_calloc(ncols, sizeof(double));
-    cb->orig_indices = (long*)safe_calloc(ncols, sizeof(long));
-    cb->charchanges = (long*)safe_calloc(ncols, sizeof(long));
-    cb->appliccanges = (long*)safe_calloc(ncols, sizeof(long));
+    cb->weights         = (double*)safe_calloc(ncols, sizeof(double));
+    cb->preweight       = (double*)safe_calloc(ncols, sizeof(double));
+    cb->minchanges      = (long*)safe_calloc(ncols, sizeof(double));
+    cb->orig_indices    = (long*)safe_calloc(ncols, sizeof(long));
+    cb->charchanges     = (long*)safe_calloc(ncols, sizeof(long));
+    cb->appliccanges    = (long*)safe_calloc(ncols, sizeof(long));
     // TODO: CHECK RETURN!!!
     
     for (i = 0; i < cb->char_max; ++i) {
         cb->weights[i] = DEFAULT_WEIGHT;
-        cb->weightindices[i] = i;
+        cb->preweight[i] = DEFAULT_PREWEIGHT;
     }
 }
 
