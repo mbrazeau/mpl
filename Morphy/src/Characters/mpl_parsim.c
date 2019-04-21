@@ -90,7 +90,7 @@ mpl_discr** restrict tempdn         = NULL;
 mpl_discr** restrict tempup         = NULL;
 mpl_discr** restrict tempact        = NULL;
 double*     restrict weights        = NULL;
-long*       restrict weightindices  = NULL;
+double*     restrict preweight      = NULL;
 long*       restrict changes        = NULL;
 long*       restrict applicchgs     = NULL;
 long*       restrict minchanges     = NULL;
@@ -114,7 +114,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     tempup          = cb->tempup;
     tempact         = cb->tempact;
     weights         = cb->weights;
-    weightindices   = cb->weightindices;
+    preweight       = cb->preweight;
     changes         = cb->charchanges;
     applicchgs      = cb->appliccanges;
     minchanges      = cb->minchanges;
@@ -123,30 +123,16 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     nodechanges     = cb->nodechanges;
 }
 
-void mpl_parsim_shuffle_wt_indices(mpl_charbuf* cb)
-{
-    long i;
-    long j;
-    long t = 0;
-    
-    for (i = 0; i < cb->num_chars; ++i) {
-        j = i + mpl_rng() / (MPL_RAND_MAX / (cb->num_chars - i) + 1);
-        t = weightindices[j];
-        weightindices[j] = weightindices[i];
-        weightindices[i] = t;
-    }
-}
-
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb)
 {
-    mpl_parsim_shuffle_wt_indices(cb);
     
     long i = 0;
-    long numtoreweight = 25; // TODO: Determine this value arithemtically
     
     // Take 10% of characters and double their weights
-    for (i = 0; i < numtoreweight; ++i) {
-        weights[weightindices[i]] *= 2;
+    for (i = 0; i < cb->num_chars; ++i) {
+        if (preweight[i] > ((double)mpl_rng()/MPL_RAND_MAX)) {
+            weights[i] *= 2;
+        }
     }
 }
 
@@ -154,7 +140,7 @@ void mpl_parsim_reset_all_weights(mpl_charbuf* cb)
 {
     long i = 0;
     for (i = 0; i < cb->num_chars; ++i) {
-        weights[i] = DEFAULT_WEIGHT; // TODO: this will need to call the life weight buffer
+        weights[i] = DEFAULT_WEIGHT; // TODO: This can't be forever
     }
 }
 
