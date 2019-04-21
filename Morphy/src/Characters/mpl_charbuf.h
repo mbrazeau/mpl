@@ -47,7 +47,7 @@ typedef struct _charbuf {
 
 void mpl_charbuf_init
 (const mpl_data_t datype, const long nrows, const long ncols, mpl_charbuf* cb);
-void mpl_charbuf_clear(mpl_charbuf* cb);
+void mpl_charbuf_cleanup(mpl_charbuf* cb);
 void mpl_charbuf_add_data_column
 (const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb);
 void mpl_charbuf_store_discr_states(mpl_charbuf* cb);

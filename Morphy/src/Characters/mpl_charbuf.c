@@ -18,6 +18,30 @@ static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db);
 static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols);
 static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb);
 
+static const mpl_charbuf null_cbuf = {
+    .num_chars = 0,
+    .num_rows = 0,
+    .char_max = 0,
+    .row_max = 0,
+    .orig_indices = NULL,
+    .weights = NULL,
+    .preweight = NULL,
+    .charchanges = NULL,
+    .minchanges = NULL,
+    .appliccanges = NULL,
+    .n_ndindices = NULL,
+    .indexbufs = NULL,
+    .nodechanges = NULL,
+    .datype = 0,
+    .dnset = NULL,
+    .upset = NULL,
+    .actives = NULL,
+    .tempdn = NULL,
+    .tempup = NULL,
+    .tempact = NULL
+};
+
+
 
 void mpl_charbuf_init
 (const mpl_data_t datype, const long nrows, const long ncols, mpl_charbuf* cb)
@@ -46,43 +70,28 @@ void mpl_charbuf_init
     }
 }
 
-void mpl_charbuf_clear(mpl_charbuf* cb)
+void mpl_charbuf_cleanup(mpl_charbuf* cb)
 {
-    if (cb->dnset != NULL) {
-        free(cb->dnset);
-        cb->dnset = NULL;
-    }
+    long i = 0;
     
-    if (cb->upset != NULL) {
-        free(cb->upset);
-        cb->upset = NULL;
-    }
-    
-    if (cb->actives != NULL) {
-        free(cb->actives);
-        cb->actives = NULL;
-    }
-    
-    if (cb->tempdn != NULL) {
-        free(cb->tempdn);
-        cb->tempdn = NULL;
-    }
-    
-    if (cb->tempup != NULL) {
-        free(cb->tempup);
-        cb->tempup = NULL;
-    }
-    
-    if (cb->tempact != NULL) {
-        free(cb->tempact);
-        cb->tempact = NULL;
-    }
-    
-    if (cb->weights != NULL) {
-        free(cb->weights);
-        cb->weights = NULL;
-    }
+    safe_free(cb->weights);
     safe_free(cb->orig_indices);
+    safe_free(cb->preweight);
+    safe_free(cb->minchanges);
+    safe_free(cb->appliccanges);
+    safe_free(cb->dnset);
+    safe_free(cb->upset);
+    safe_free(cb->actives);
+    safe_free(cb->tempdn);
+    safe_free(cb->tempup);
+    safe_free(cb->tempact);
+    
+    for (i = 0; i < cb->num_rows; ++i) {
+        // Free the index bufs
+        safe_free(cb->nodechanges);
+    }
+    
+    *cb = null_cbuf;
 }
 
 
