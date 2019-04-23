@@ -367,6 +367,7 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 
 double mpl_fitch_local_check
 (const double lim,
+ const double base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -935,6 +936,7 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m)
 
 double mpl_fitch_na_local_check
 (const double lim,
+ const double base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -953,9 +955,14 @@ double mpl_fitch_na_local_check
 #pragma simd
     for (i = pd->start; i < end; ++i) {
         
-        if (dnset[src][i] & ISAPPLIC) {
+        if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & dnset[src][i])) {
+                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+                    score += weights[i];
+                }
+            }
+            else if (dnset[src][i] & NA && upset[src][i] < UNKNOWN) {
+                if (tempact[troot][i]) {
                     score += weights[i];
                 }
             }
@@ -966,7 +973,8 @@ double mpl_fitch_na_local_check
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
             }
-            else if (dnset[src][i] < MISSING) {
+            else if (upset[src][i] < MISSING) {
+                
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
@@ -989,6 +997,12 @@ double mpl_fitch_na_local_check
 //                if (!(tempact[troot][i] & tempact[src][i]) && tempact[src][i]) {
 //                    pd->minscore += weights[i];
 //                }
+            }
+        }
+        
+        if (lim > -1.0) {
+            if ((score + base - pd->scorerecall) > lim) {
+                return score;
             }
         }
     }
@@ -1337,14 +1351,15 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
     for (i = pd->start; i < end; ++i) {
         
 //        upset[n][i] = dnset[n][i];
-        dnset[n][i] = upset[left][i] | upset[right][i];
+        upset[n][i] = upset[left][i] | upset[right][i];
+        dnset[n][i] = upset[n][i];
         
-        if (dnset[n][i] & ISAPPLIC) {
-            dnset[n][i] &= ISAPPLIC;
+        if (upset[n][i] & ISAPPLIC) {
+            upset[n][i] &= ISAPPLIC;
         }
         
         tempdn[n][i] = dnset[n][i];
-//        tempup[n][i] = upset[n][i];
+        tempup[n][i] = upset[n][i];
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
@@ -1365,8 +1380,8 @@ double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
         tempdn[n][i] = dnset[n][i];
         tempup[n][i] = upset[n][i];
         
-        actives[n][i] = dnset[n][i] & ISAPPLIC;
-        tempact[n][i] = actives[n][i];
+//        actives[n][i] = dnset[n][i] & ISAPPLIC;
+//        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
@@ -1418,9 +1433,10 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
 }
 
 double mpl_parsim_local_check
-(const double lim, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
+(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
+    double cscore = base;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1428,7 +1444,8 @@ double mpl_parsim_local_check
         m->parsets[i].scorerecall = 0.0;
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
-        score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, troot, &m->parsets[i]);
+        score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        cscore += score;
 //      m->parsets[i].tryscore = score;
     }
     
@@ -1436,38 +1453,38 @@ double mpl_parsim_local_check
 }
 
 
-double mpl_parsim_local_check_fork2fork
-(const double lim,
- const long src,
- const long srclef,
- const long srcrig,
- const long tgt1lef,
- const long tgt1rig,
- const long tgt1,
- const long tgt2,
- const long tgt2anc,
- const long tgt2sib,
- const long troot, mpl_matrix* m)
-{
-    double score = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        //      m->parsets[i].tryscore = 0.0;
-        m->parsets[i].scorerecall = 0.0;
-        m->parsets[i].nchars = 0;
-        m->parsets[i].minscore = 0.0;
-        if (m->parsets[i].isNAtype == false) {
-            score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, troot, &m->parsets[i]);
-        }
-        else {
-            score += mpl_fitch_na_local_fork2fork(lim, src, srclef, srcrig, tgt1lef, tgt1rig, tgt1, tgt2, tgt2anc, tgt2sib, troot, &m->parsets[i]);
-        }
-        //      m->parsets[i].tryscore = score;
-    }
-    
-    return score;
-}
+//double mpl_parsim_local_check_fork2fork
+//(const double lim,
+// const long src,
+// const long srclef,
+// const long srcrig,
+// const long tgt1lef,
+// const long tgt1rig,
+// const long tgt1,
+// const long tgt2,
+// const long tgt2anc,
+// const long tgt2sib,
+// const long troot, mpl_matrix* m)
+//{
+//    double score = 0.0;
+//    int i;
+//    
+//    for (i = 0; i < m->nparsets; ++i) {
+//        //      m->parsets[i].tryscore = 0.0;
+//        m->parsets[i].scorerecall = 0.0;
+//        m->parsets[i].nchars = 0;
+//        m->parsets[i].minscore = 0.0;
+//        if (m->parsets[i].isNAtype == false) {
+//            score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, troot, &m->parsets[i]);
+//        }
+//        else {
+//            score += mpl_fitch_na_local_fork2fork(lim, src, srclef, srcrig, tgt1lef, tgt1rig, tgt1, tgt2, tgt2anc, tgt2sib, troot, &m->parsets[i]);
+//        }
+//        //      m->parsets[i].tryscore = score;
+//    }
+//    
+//    return score;
+//}
 
 
 double mpl_parsim_get_score_recall(mpl_matrix* m)
