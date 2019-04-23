@@ -1353,6 +1353,25 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
     return 0.0;
 }
 
+double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        upset[n][i] = dnset[n][i];
+        
+        tempdn[n][i] = dnset[n][i];
+        tempup[n][i] = upset[n][i];
+        
+        actives[n][i] = dnset[n][i] & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
+    }
+    
+    return 0.0;
+}
+
 void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl_matrix* m)
 {
     int i;
@@ -1362,6 +1381,16 @@ void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl
     }
 }
 
+void mpl_parsim_do_src_tip(const long n, mpl_matrix* m)
+{
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_na_do_src_tip(n, &m->parsets[i]);
+        }
+    }
+}
 
 void mpl_update_active_sets(const long left, const long right, const long n, mpl_parsdat* pd)
 {
