@@ -217,6 +217,8 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
     
     top->score = t->score;
     
+//    mpl_topol_compress(top);
+    
     return 0;
 }
 

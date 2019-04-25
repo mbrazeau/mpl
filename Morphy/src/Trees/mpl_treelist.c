@@ -170,6 +170,21 @@ void mpl_treelist_reset_head(mpl_treelist* tl)
     tl->head = tl->front;
 }
 
+void mpl_treelist_reverse_head(mpl_treelist* tl)
+{
+    if (tl->head != NULL) {
+        if (tl->head == tl->front) {
+            tl->head = NULL;
+        }
+        else {
+            --tl->head;
+        }
+    }
+    else {
+        tl->head = tl->back;
+    }
+}
+
 mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
@@ -220,9 +235,14 @@ void mpl_treelist_clear_all(mpl_treelist* tl)
     
 }
 
+void mpl_treelist_restart_rep(mpl_treelist* tl)
+{
+    tl->head = &tl->trees[tl->num_trees-1];
+}
+
 void mpl_treelist_clear_rep(mpl_treelist* tl)
 {
-    tl->num_trees = tl->num_trees - tl->rep_num_trees;
+    tl->num_trees = tl->rep_index; //tl->num_trees - tl->rep_num_trees;
     tl->rep_num_trees = 0;
     assert(tl->num_trees >= 0);
     tl->back = &tl->trees[tl->num_trees-1];
@@ -230,17 +250,26 @@ void mpl_treelist_clear_rep(mpl_treelist* tl)
 //    tl->back = tl->head;
 }
 
-mpl_topol* mpl_treelist_newrep(mpl_tree* t, mpl_treelist* tl)
+mpl_topol* mpl_treelist_new_subrep(mpl_treelist* tl)
+{
+    tl->head = tl->repstart;
+    tl->rep_num_trees = 0;
+    
+    return tl->head;
+}
+
+mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
     
     tl->rep_num_trees   = 0;
     
-    ret = mpl_treelist_add_tree(true, t, tl);
+    ret = mpl_treelist_add_tree(checknew, t, tl);
     
-    if (ret == NULL) {
+    if (ret == NULL || checknew == false) {
         tl->repstart = tl->head;
         tl->head = tl->back;
+        tl->rep_index = tl->back->index;
         ret = tl->head;
     }
     else {

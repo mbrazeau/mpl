@@ -364,10 +364,12 @@ static void mpl_matrix_delete_parsets(mpl_matrix* m)
     if (m->parsets != NULL) {
         
         for (i = 0; i < m->nparsets; ++i) {
-            if (m->parsets[i].indexbuf != NULL) {
-                free(m->parsets[i].indexbuf);
-                m->parsets[i].indexbuf = NULL;
-            }
+            safe_free(m->parsets[i].indexbuf);
+            safe_free(m->parsets[i].rindexbuf);
+//            if (m->parsets[i].indexbuf != NULL) {
+//                free(m->parsets[i].indexbuf);
+//                m->parsets[i].indexbuf = NULL;
+//            }
         }
         
         free(m->parsets);

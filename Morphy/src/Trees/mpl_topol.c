@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 #include "mpl_topol.h"
 #include "../mpl_utils.h"
 
@@ -187,12 +188,26 @@ int mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2)
         return -1;
     }
     
+//    if (t1->compressed != t2->compressed) {
+//        return 1;
+//    }
+    
     max = t1->num_nodes;
-    for (i = 0; i < max; ++i) {
-        if (t1->edges[i] != t2->edges[i]) {
-            return i+1;
+    long* e1 = &t1->edges[0];
+    long* e2 = &t2->edges[0];
+    long* end = &t1->edges[t1->num_nodes-1];
+
+    while (e1 != end) {
+        if (*e1++ != *e2++) {
+            return 1;
         }
     }
+    
+//    for (i = 0; i < max; ++i) {
+//        if (t1->edges[i] != t2->edges[i]) {
+//            return i+1;
+//        }
+//    }
     
     return 0;
 }
@@ -249,9 +264,21 @@ int mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest)
     dest->root      = src->root;
     dest->lock      = src->lock;
     dest->score     = src->score;
+    dest->compressed  = src->compressed;
     memcpy(dest->edges, src->edges, dest->num_nodes * sizeof(long));
     
     return 0;
+}
+
+void mpl_topol_compress(mpl_topol* top)
+{
+    long i = 0;
+    
+    top->compressed = 0UL;
+    
+    for (i = 0; i < top->num_nodes-1; ++i) {
+        // Compress fxn
+    }
 }
 
 /*

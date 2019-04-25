@@ -18,30 +18,6 @@ static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db);
 static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols);
 static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb);
 
-static const mpl_charbuf null_cbuf = {
-    .num_chars = 0,
-    .num_rows = 0,
-    .char_max = 0,
-    .row_max = 0,
-    .orig_indices = NULL,
-    .weights = NULL,
-    .preweight = NULL,
-    .charchanges = NULL,
-    .minchanges = NULL,
-    .appliccanges = NULL,
-    .n_ndindices = NULL,
-    .indexbufs = NULL,
-    .nodechanges = NULL,
-    .datype = 0,
-    .dnset = NULL,
-    .upset = NULL,
-    .actives = NULL,
-    .tempdn = NULL,
-    .tempup = NULL,
-    .tempact = NULL
-};
-
-
 
 void mpl_charbuf_init
 (const mpl_data_t datype, const long nrows, const long ncols, mpl_charbuf* cb)
@@ -91,7 +67,7 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
         safe_free(cb->nodechanges);
     }
     
-    *cb = null_cbuf;
+    memset(cb, 0, sizeof(mpl_charbuf));
 }
 
 

@@ -40,6 +40,7 @@
 		51A6B81521D90BDF0086CE68 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51A6B81321D90BDF0086CE68 /* Main.storyboard */; };
 		51A6B82121D90BDF0086CE68 /* Morphy_GUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82021D90BDF0086CE68 /* Morphy_GUITests.swift */; };
 		51A6B82C21D90BDF0086CE68 /* Morphy_GUIUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A6B82B21D90BDF0086CE68 /* Morphy_GUIUITests.swift */; };
+		51A7B6B7226B18BF00D7E26E /* mpl_tdraw.c in Sources */ = {isa = PBXBuildFile; fileRef = 51A7B6B6226B18BF00D7E26E /* mpl_tdraw.c */; };
 		51AC433721E62A4B008DA49C /* mpl_treelist.c in Sources */ = {isa = PBXBuildFile; fileRef = 51AC433621E62A4B008DA49C /* mpl_treelist.c */; };
 		51AC433A21E8B7D8008DA49C /* testmpltreelist.c in Sources */ = {isa = PBXBuildFile; fileRef = 51AC433921E8B7D8008DA49C /* testmpltreelist.c */; };
 		51B2565321F866030050970D /* mpl_charbuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 51B2565221F866030050970D /* mpl_charbuf.c */; };
@@ -156,6 +157,8 @@
 		51A6B82D21D90BDF0086CE68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51A6B83721D92FD50086CE68 /* Morphy GUI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Morphy GUI-Bridging-Header.h"; sourceTree = "<group>"; };
 		51A6B83821D92FD50086CE68 /* MorphyIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MorphyIO.cpp; sourceTree = "<group>"; };
+		51A7B6B5226B18BF00D7E26E /* mpl_tdraw.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_tdraw.h; sourceTree = "<group>"; };
+		51A7B6B6226B18BF00D7E26E /* mpl_tdraw.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_tdraw.c; sourceTree = "<group>"; };
 		51AC433521E62A4B008DA49C /* mpl_treelist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mpl_treelist.h; sourceTree = "<group>"; };
 		51AC433621E62A4B008DA49C /* mpl_treelist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mpl_treelist.c; sourceTree = "<group>"; };
 		51AC433821E8B7D8008DA49C /* testmpltreelist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testmpltreelist.h; sourceTree = "<group>"; };
@@ -365,6 +368,8 @@
 			children = (
 				51A6B80021D8F6D50086CE68 /* mpl_results.h */,
 				51A6B80121D8F6D50086CE68 /* mpl_results.c */,
+				51A7B6B5226B18BF00D7E26E /* mpl_tdraw.h */,
+				51A7B6B6226B18BF00D7E26E /* mpl_tdraw.c */,
 			);
 			path = Results;
 			sourceTree = "<group>";
@@ -577,6 +582,7 @@
 				51F765E321DE21BF00CB29C2 /* testtaxblock.c in Sources */,
 				517AED0721F268FE003276F7 /* mpl_hierarch.c in Sources */,
 				51C5FC6A21E103C6004B782F /* testutils.c in Sources */,
+				51A7B6B7226B18BF00D7E26E /* mpl_tdraw.c in Sources */,
 				5138A15221FBA45700100F0B /* mpl_stepwise.c in Sources */,
 				5138A15922031DB000100F0B /* mpl_bitset.c in Sources */,
 				517AED0421F11B6B003276F7 /* testmplmatrix.c in Sources */,
@@ -707,6 +713,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -764,6 +771,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
