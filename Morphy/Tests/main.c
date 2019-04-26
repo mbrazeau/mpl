@@ -82,6 +82,7 @@ int main(int argc, const char * argv[]) {
 //    fails += test_bbreak_store_allswaps();
 //    fails += test_bbreak_store_TBR_allswaps();
     fails += test_single_rep_hsearch();
+    fails += test_mutliple_replicate_heuristic_search();
     
     // Test mpl_matrix.c
     fails += test_basic_matrix();
