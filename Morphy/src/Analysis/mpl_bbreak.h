@@ -24,7 +24,7 @@ typedef struct _bbreak {
     
     long            numtaxa;
     long            numreps;
-    long            nratchets; // Number of ratchet replicates
+    long            nratchets; // Number of ratchet iterations
     long            savelim;
     long            savecount;
     bool            hitisland;
