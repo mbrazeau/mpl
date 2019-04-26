@@ -242,10 +242,15 @@ void mpl_treelist_restart_rep(mpl_treelist* tl)
 
 void mpl_treelist_clear_rep(mpl_treelist* tl)
 {
-    tl->num_trees = tl->rep_index; //tl->num_trees - tl->rep_num_trees;
+    tl->num_trees = tl->num_trees - tl->rep_num_trees;
     tl->rep_num_trees = 0;
     assert(tl->num_trees >= 0);
-    tl->back = &tl->trees[tl->num_trees-1];
+    if (tl->num_trees > 0) {
+        tl->back = &tl->trees[tl->num_trees-1];
+    }
+    else {
+        tl->back = NULL;
+    }
     tl->head = NULL;
 //    tl->back = tl->head;
 }

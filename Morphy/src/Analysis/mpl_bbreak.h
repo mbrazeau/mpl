@@ -28,6 +28,7 @@ typedef struct _bbreak {
     long            savelim;
     long            savecount;
     bool            hitisland;
+    bool            doislandcheck;
     mpl_bbreak_t    bbktype;
     long            num_nodes;
     mpl_node**      clips;

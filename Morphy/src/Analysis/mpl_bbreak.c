@@ -225,6 +225,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     bbk->bestinrep = t->score;
     oldbest = bbk->bestinrep;
     bbk->hitisland = false;
+    bbk->doislandcheck = true;
     
     // Swap the starting tree
     mpl_swap_all(t, bbk);
@@ -241,6 +242,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     
     for (i = 0; i < bbk->nratchets; ++i) {
         
+        long index = 0;
+        
         bbk->savecount = 0;
         
         printf("\tRatchet replication %i.\n", i + 1);
@@ -252,8 +255,12 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 
         // Nixon 4:
         // Swap the tree with new weights
-        bbk->bestinrep = mpl_length_only_parsimony(-1.0, t);
+        index = bbk->treelist->back->index; // for assert
+        
+        bbk->bestinrep = /*current->score =*/ mpl_length_only_parsimony(-1.0, t);
+        bbk->doislandcheck = false;
         mpl_swap_all(t, bbk);
+        bbk->doislandcheck = true;
         
         // Nixon 5;
         printf("Reset weights:\n");
@@ -261,20 +268,31 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         // Reset head to last tree in buffer
         bbk->savecount = 1;
+//        mpl_treelist_reverse_head(bbk->treelist);
+        current = bbk->treelist->back;//mpl_treelist_get_next(bbk->treelist);
+        mpl_tree_read_topol(t, current);
         mpl_treelist_reverse_head(bbk->treelist);
+        bbk->bestinrep = current->score = mpl_length_only_parsimony(-1.0, t);
 //        bbk->bestinrep = 0.0;
+//        bbk->bestinrep = oldbest;
+        
+        assert(current->index == index);
         
         mpl_swap_all(t, bbk);
 
+        if (bbk->bestinrep < oldbest) {
+            oldbest = bbk->bestinrep;
+        }
+
+        current = bbk->treelist->back;//mpl_treelist_get_next(bbk->treelist);
+        mpl_tree_read_topol(t, current);
+        
         if (bbk->bestinrep > bbk->shortest) {
             mpl_treelist_clear_rep(bbk->treelist);
         }
 
-//        mpl_treelist_reverse_head(bbk->treelist);
-        current = bbk->treelist->back;//mpl_treelist_get_next(bbk->treelist);
-        mpl_tree_read_topol(t, current);
         // Nixon 6
-        printf("Best tree found: %.0f steps.\n", bbk->shortest);
+        printf("\nBest tree found: %.0f steps.\n", bbk->shortest);
     }
     
 //    assert(entry->score <= bbk->bestinrep);
@@ -502,10 +520,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             bbk->bestinrep = t->score;
                             mpl_treelist_clear_rep(bbk->treelist);
                             clips[i]->clipmark = false;
-                            ret = mpl_treelist_add_tree(true, t, bbk->treelist);
+                            ret = mpl_treelist_add_tree(bbk->doislandcheck, t, bbk->treelist);
                             clips[i]->lock = false;
                             
-                            if (ret != NULL) {
+                            if (ret != NULL && bbk->doislandcheck == true) {
                                 if (t->score == bbk->shortest) {
                                     bbk->hitisland = true;
                                     return;
@@ -517,11 +535,11 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         
                         return;
                     }
-                    else if (bbk->savecount < bbk->savelim)  {
-                        if (mpl_treelist_add_tree(true, t, bbk->treelist) == NULL) {
-                            ++bbk->savecount;
-                        }
+                    else if (bbk->treelist->rep_num_trees < 1)  {
+                        mpl_treelist_add_tree(true, t, bbk->treelist);
                     }
+                    
+                    assert(bbk->treelist->rep_num_trees <= 1);
                 }
             
                 //  Put the src tree back in its original spot
@@ -565,8 +583,9 @@ static void mpl_swap_all(mpl_tree* t, mpl_bbreak* bbk)
     
     do {
         // Rebuild the tree according to the stored topology
-        //                printf("\r                                                                                ");
-        printf("\tShortest tree found: %.0f; swapping %li of %li trees saved.\n", bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
+        printf("\r                                                                                ");
+        printf("\r\tShortest tree found: %.0f; swapping %li of %li trees saved.",
+               bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
         fflush(stdout);
         
         mpl_tree_read_topol(t, current);
