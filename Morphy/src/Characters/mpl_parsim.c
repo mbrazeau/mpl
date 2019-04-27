@@ -192,6 +192,24 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd)
     pd->minchanges = (long*)safe_calloc(range, sizeof(long));
 }
 
+void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd)
+{
+    long i = 0;
+    
+//    safe_free(pd->nchanges);
+    safe_free(pd->indexbuf);
+    safe_free(pd->rindexbuf);
+    safe_free(pd->ntipinbufs);
+    safe_free(pd->minchanges);
+    
+    for (i = 0; i < pd->ntips; ++i) {
+        safe_free(pd->tipinbufs[i]);
+    }
+    
+    safe_free(pd->tipinbufs);
+    safe_free(pd->ntipinbufs);
+}
+
 //void mpl_parsim_reset_nchanges(mpl_parsdat* pd)
 //{
 //    long range = pd->end - pd->start;
@@ -257,6 +275,8 @@ void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
     for (i = 0; i < m->num_rows; ++i) {
         pd->tipinbufs[i] = (long*)safe_calloc(m->num_cols, sizeof(long));
     }
+    
+    pd->ntips = m->num_rows;
     
     for (i = 0; i < m->num_rows; ++i) {
     

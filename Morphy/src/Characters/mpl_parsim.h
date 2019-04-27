@@ -29,6 +29,7 @@ typedef struct mpl_parsdat {
     long            end;
     size_t          nchars;
     size_t          rnchars;
+    size_t          ntips;
     long*           nchanges;
     long*           indexbuf;
     long*           rindexbuf;
@@ -60,6 +61,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb);
 void mpl_parsim_swap_stateset_ptrs(mpl_charbuf* cb);
 void mpl_parsim_set_range(const long start, const long end, mpl_parsdat* pd);
 void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd);
+void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd);
 void mpl_parsim_reset_nchanges(mpl_parsdat* pd);
 void mpl_parsim_set_type
 (const mpl_gap_t gaphandl, const mpl_parsim_t ptype, mpl_parsdat* pd);

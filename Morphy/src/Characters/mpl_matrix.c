@@ -75,12 +75,15 @@ void mpl_matrix_delete(mpl_matrix** m)
         safe_free(mi->symbols);
         // NOTE: This assumes the raw data are copied.
         safe_free(mi->rawdata);
-        safe_free(mi->parsets);
         
         for (i = 0; i < mi->ndatypes; ++i) {
             mpl_charbuf_cleanup(&mi->cbufs[i]);
         }
+        for (i = 0; i < mi->nparsets; ++i) {
+            mpl_parsim_cleanup_parsdat(&mi->parsets[i]);
+        }
         
+        safe_free(mi->parsets);
         free(mi);
     }
     
@@ -356,22 +359,14 @@ static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
 
 static void mpl_matrix_delete_parsets(mpl_matrix* m)
 {
-    // TODO: This function is doing some stuff that should belong to
-    // mpl_parsim.c
-
     int i = 0;
-    
+
     if (m->parsets != NULL) {
-        
+
         for (i = 0; i < m->nparsets; ++i) {
-            safe_free(m->parsets[i].indexbuf);
-            safe_free(m->parsets[i].rindexbuf);
-//            if (m->parsets[i].indexbuf != NULL) {
-//                free(m->parsets[i].indexbuf);
-//                m->parsets[i].indexbuf = NULL;
-//            }
+            mpl_parsim_cleanup_parsdat(&m->parsets[i]);
         }
-        
+
         free(m->parsets);
         m->parsets = NULL;
     }
