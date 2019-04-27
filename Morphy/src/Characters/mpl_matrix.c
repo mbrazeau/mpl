@@ -79,6 +79,7 @@ void mpl_matrix_delete(mpl_matrix** m)
         for (i = 0; i < mi->ndatypes; ++i) {
             mpl_charbuf_cleanup(&mi->cbufs[i]);
         }
+        
         for (i = 0; i < mi->nparsets; ++i) {
             mpl_parsim_cleanup_parsdat(&mi->parsets[i]);
         }

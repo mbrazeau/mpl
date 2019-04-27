@@ -55,17 +55,18 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     safe_free(cb->preweight);
     safe_free(cb->minchanges);
     safe_free(cb->appliccanges);
-    safe_free(cb->dnset);
-    safe_free(cb->upset);
-    safe_free(cb->actives);
-    safe_free(cb->tempdn);
-    safe_free(cb->tempup);
-    safe_free(cb->tempact);
     
     for (i = 0; i < cb->num_rows; ++i) {
         // Free the index bufs
         safe_free(cb->nodechanges);
     }
+    
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnset);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->upset);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->actives);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdn);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempup);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempact);
     
     memset(cb, 0, sizeof(mpl_charbuf));
 }
@@ -245,15 +246,13 @@ static void mpl_charbuf_init_datatype(mpl_charbuf* cb)
 
 static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db)
 {
-    mpl_discr** dbi = *db;
+    mpl_discr** dbi = NULL;
+    dbi = *db;
     
     long i = 0;
     
     for (i = 0; i < nrows; ++i) {
-        if (dbi[i] != NULL) {
-            free(dbi[i]);
-            dbi[i] = NULL;
-        }
+        safe_free(dbi[i]);
     }
     
     free(dbi);
