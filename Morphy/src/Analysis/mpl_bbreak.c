@@ -60,6 +60,7 @@ int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
     bbk->bbktype = s->bbreak_type;
     bbk->treelist = s->treelist;
     bbk->numtaxa = s->num_taxa;
+    bbk->doislandcheck = true;
     
     // Set up all the node buffers:
     
@@ -247,6 +248,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     
     for (i = 0; i < bbk->nratchets; ++i) {
         
+        bbk->hitisland = false;
+        
         long index = 0;
         
         bbk->savecount = 0;
@@ -289,7 +292,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         current = bbk->treelist->back;
         mpl_tree_read_topol(t, current);
         
-        if (bbk->bestinrep > bbk->shortest) {
+        if (bbk->bestinrep > bbk->shortest || bbk->hitisland == true) {
             mpl_treelist_clear_rep(bbk->treelist);
         }
 
