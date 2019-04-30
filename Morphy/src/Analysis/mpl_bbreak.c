@@ -33,18 +33,34 @@ void do_interrupt(int signal)
 /*
  *  PUBLIC FUNCTION DEFINITIONS
  */
+//
+//void mpl_temp_traver_subtr(mpl_node* n)
+//{
+//    if (n->tip) {
+//        printf("%li", n->tip);
+//        return;
+//    }
+//    printf("(");
+//    mpl_temp_traver_subtr(n->left);
+//    printf(",");
+//    mpl_temp_traver_subtr(n->right);
+//    printf(")");
+//}
 
-void mpl_temp_traver_subtr(mpl_node* n)
+void mpl_bbreak_print_status_header(mpl_bbreak* bbk)
 {
-    if (n->tip) {
-        printf("%li", n->tip);
-        return;
-    }
-    printf("(");
-    mpl_temp_traver_subtr(n->left);
-    printf(",");
-    mpl_temp_traver_subtr(n->right);
-    printf(")");
+    printf("               Swapping             Trees            Shortest        Shortest\n");
+    printf("Replic.        tree no.             saved            this rep.       overall\n");
+    printf("--------------------------------------------------------------------------------\n");
+}
+
+void mpl_bbreak_print_status(long rep, mpl_bbreak* bbk)
+{
+    printf("\t%li\t\t\t\t%li\t\t\t\t%li\t\t\t\t\t%.0f\t\t\t\t%.0f\n", rep,
+                                                 bbk->treelist->back->index,
+                                                 bbk->treelist->num_trees,
+                                                 bbk->bestinrep,
+                                                 bbk->shortest);
 }
 
 
@@ -104,12 +120,14 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
 
     t = mpl_new_tree(bbk->numtaxa);
     
-    mpl_stepwise_init(MPL_AST_RANDOM, bbk->numtaxa, 10, &bbk->stepwise);
+    mpl_stepwise_init(MPL_AST_RANDOM, bbk->numtaxa, 1, &bbk->stepwise);
     
 //    bbk->numreps = 5;
     mpl_rng_set_seed(1); // TODO: Remove me!
     
     bbk->shortest = 0.0;
+    
+//    mpl_bbreak_print_status_header(bbk);
     
     for (i = 0; i < bbk->numreps; ++i) {
         
@@ -117,7 +135,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
         // If the buffer is empty get one or more trees by stepwise addition
         // Otheriwse, starttrees is the bbk buffer
 //        mpl_rng_set_seed(1);
-        printf("Random number seed: %u\n", mpl_rng_get_seed());
+//        printf("Random number seed: %u\n", mpl_rng_get_seed());
         mpl_stepwise_do_search(&bbk->stepwise);
         
         // Then get the trees from the stepwise struct
@@ -170,9 +188,12 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                         break;
                     }
     
+//                    mpl_bbreak_print_status(i + 1, bbk);
+                    
                 } while (current != NULL);
+                
             }
-
+//
             printf("\n\tReplicate completed.\n");
             printf("\tShortest tree found: %.0f steps\n", bbk->bestinrep);
             printf("\tNumber of trees saved: %li\n\n", bbk->treelist->rep_num_trees);
@@ -234,10 +255,11 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     bbk->doislandcheck = true;
     
     // Swap the starting tree
+//    bbk->bbktype = MPL_SPR_T;
     mpl_swap_all(t, bbk);
+//    bbk->bbktype = MPL_TBR_T;
     
     // Nixon 2:
-    bbk->nratchets = 50;
     
     mpl_treelist_reverse_head(bbk->treelist);
     current = mpl_treelist_get_next(bbk->treelist);
@@ -254,7 +276,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         bbk->savecount = 0;
         
-        printf("\tRatchet replication %i.\n", i + 1);
+        printf("\tRatchet iteration %i.\n", i + 1);
         
         mpl_treelist_newrep(false, t, bbk->treelist);
         
@@ -265,13 +287,14 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Swap the tree with new weights
         index = bbk->treelist->back->index; // for assert
         
-        bbk->bestinrep = /*current->score =*/ mpl_length_only_parsimony(-1.0, t);
+        bbk->bestinrep = 0.0;/*current->score =*/ //mpl_length_only_parsimony(-1.0, t);
         bbk->doislandcheck = false;
+
         mpl_swap_all(t, bbk);
+
         bbk->doislandcheck = true;
         
         // Nixon 5;
-        printf("Reset weights:\n");
         mpl_reset_std_weights();
         
         // Reset head to last tree in buffer
@@ -297,9 +320,10 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         }
 
         // Nixon 6
-        printf("\nBest tree found: %.0f steps.\n", bbk->shortest);
+//        printf("\n\tBest tree found: %.0f steps.\n", bbk->shortest);
     }
-    
+
+    printf("\n\tBest tree found: %.0f steps.\n", bbk->shortest);
     bbk->savelim = oldsavelim;
 }
 
@@ -318,28 +342,27 @@ void dbg_print_tree(mpl_node* n)
     printf(")");
 }
 
-
+/*
+ Performs all branch-swapping operations on the supplied tree, either using
+ SPR or TBR as set in the mpl_bbreak struct supplied.
+ */
 void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 {
-//    long ntax = 0; // The number of taxa in the tree
-    long nnodes = 0; // The number of nodes in the tree
-    long clipmax = 0;
-    long tgtnum = 0;
-    double score = 0.0;
-//    double bound = 0.0;
-    mpl_node* left;
-    mpl_node* right;
-    mpl_node* csite;
-    mpl_node* rtlef = NULL;
-    mpl_node* rtrig = NULL;
-    mpl_node** clips = NULL;
-    mpl_node** srcs = bbk->srcs;
-    mpl_node** src = srcs;
-    mpl_node** tgts;
-    long i = 0;
-    long j = 0;
     
-   // bound = t->score;//bbk->shortest;
+    long        clipmax = 0; // Limit for number of clippings to perform
+    long        tgtnum  = 0; // Limit for number of reconnection target sites
+    double      score   = 0.0; // Local storage for tree score
+    mpl_node*   left    = NULL;
+    mpl_node*   right   = NULL;
+    mpl_node*   csite   = NULL;
+    mpl_node*   rtlef   = NULL;
+    mpl_node*   rtrig   = NULL;
+    mpl_node**  clips   = NULL;
+    mpl_node**  srcs    = bbk->srcs;
+    mpl_node**  src     = srcs;
+    mpl_node**  tgts    = NULL;
+    long        i       = 0; // Iterator
+    long        j       = 0; // Iterator
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
@@ -349,10 +372,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             ++clipmax;
         }
     }
-//    memcpy(clips, t->postord_all, t->size * sizeof(mpl_node*));
-    nnodes = t->size;
-//    clipmax = nnodes-1; /*NOTE: leaving out base!!!*/
-//    clipmax = j;
+
     // TODO: clipmax-1 is temporary (root-adjacent clips need to be fixed)
     for (i = 0; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
         
@@ -592,10 +612,10 @@ static void mpl_swap_all(mpl_tree* t, mpl_bbreak* bbk)
     
     do {
         // Rebuild the tree according to the stored topology
-        printf("\r                                                                                ");
-        printf("\r\tShortest tree found: %.0f; swapping %li of %li trees saved.",
-               bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
-        fflush(stdout);
+//        printf("\r                                                                                ");
+//        printf("\r\tShortest tree found: %.0f; swapping %li of %li trees saved.",
+//               bbk->bestinrep, current->index+1, bbk->treelist->num_trees);
+//        fflush(stdout);
         
         mpl_tree_read_topol(t, current);
         //                t->score = mpl_fullpass_parsimony(t);
