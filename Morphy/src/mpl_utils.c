@@ -7,6 +7,7 @@
 //
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <assert.h>
 #include <string.h>
 #include <math.h>
@@ -148,14 +149,14 @@ char* mpl_str_c(mpl_str* s)
     return s->str;
 }
 
-unsigned mpl_rng_seed = MPL_DEFAULT_RSEED;
+uint32_t mpl_rng_seed = MPL_DEFAULT_RSEED;
 
-unsigned mpl_rng(void)
+uint32_t mpl_rng(void)
 {
-    return (mpl_rng_seed = (397204094 * mpl_rng_seed) % ((unsigned)pow(2, 31) - 1));
+    return (mpl_rng_seed = (397204094 * mpl_rng_seed) % ((uint32_t)pow(2, 31) - 1));
 }
 
-int mpl_rng_set_seed(const int seed)
+int mpl_rng_set_seed(const uint32_t seed)
 {
     assert(seed != MPL_RAND_MAX);
     
@@ -164,16 +165,15 @@ int mpl_rng_set_seed(const int seed)
     return 0;
 }
 
-unsigned mpl_rng_between(unsigned min, unsigned max)
+uint32_t mpl_rng_between(uint32_t min, uint32_t max)
 {
     return min + mpl_rng() / (MPL_RAND_MAX / (max - min + 1) + 1);
 }
 
-int mpl_rng_get_seed(void)
+uint32_t mpl_rng_get_seed(void)
 {
     return mpl_rng_seed;
 }
-
 
 inline int almost_equal(const double fl1, const double fl2, const double eps)
 {

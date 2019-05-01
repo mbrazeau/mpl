@@ -23,8 +23,8 @@ int mpl_str_append(const char c, mpl_str* s);
 int mpl_str_append_int(long i, mpl_str* s);
 int mpl_str_clear(mpl_str* s);
 char* mpl_str_c(mpl_str* s);
-unsigned mpl_rng(void);
-int mpl_rng_set_seed(const int seed);
-unsigned mpl_rng_between(unsigned min, unsigned max);
-int mpl_rng_get_seed(void);
+uint32_t mpl_rng(void);
+int mpl_rng_set_seed(const uint32_t seed);
+uint32_t mpl_rng_between(uint32_t min, uint32_t max);
+uint32_t mpl_rng_get_seed(void);
 #endif /* mpl_utils_h */
