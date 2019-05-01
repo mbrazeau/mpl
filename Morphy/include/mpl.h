@@ -24,10 +24,9 @@ mpl_handle* mpl_handle_new(void);
 int         mpl_handle_delete(mpl_handle** handl);
     
 // TODO: Use error codes
+int         mpl_set_dimensions(const long ntax, const long nchar, mpl_handle handl);
 long        mpl_get_ntax(const mpl_handle handl);
-int         mpl_set_ntax(const long ntax, mpl_handle handl);
 long        mpl_get_nchar(const mpl_handle handl);
-int         mpl_set_nchar(const long nchar, mpl_handle handl);
 int         mpl_load_matrix(char* matrix, mpl_handle handl);
 int         mpl_attach_rawdata(const char* rawmatrix, mpl_handle handl;
 int         mpl_attach_symbols(const char* symbols, mpl_handle handl);

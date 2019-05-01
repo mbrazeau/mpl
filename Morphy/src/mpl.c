@@ -44,16 +44,39 @@ static int mpl_check_init(mpl_handle* handl);
  *  PUBLIC FUNCTION DEFINITIONS                                                *
  *                                                                             *
  ******************************************************************************/
+
+/**
+ Creates a new instance of the mpl_handle. A program can generate as many of
+ these as it needs.
+ 
+ @return A pointer to an instance of an mpl_handle.
+ */
 mpl_handle* mpl_handle_new(void)
 {
     mpl_handle* newhandl = NULL;
     
     newhandl = (mpl_handle*)safe_calloc(1, sizeof(mpl_handle));
     
+    if (newhandl != NULL) {
+        newhandl->ntax      = 0;
+        newhandl->nchar     = 0;
+        newhandl->taxablock = NULL;
+        newhandl->search    = NULL;
+        newhandl->results   = NULL;
+        newhandl->matrix    = NULL;
+        newhandl->treebuf   = NULL;
+    }
+    
     return newhandl;
 }
 
-
+/**
+ Deletes an instance of the mpl_handle struct by freeing all of its memory and
+ setting the pointer to NULL.
+ 
+ @param handl Address of the pointer to the handle structure.
+ @return An mpl error code.
+ */
 int mpl_handle_delete(mpl_handle** handl)
 {
     RET_IF_NULL(handl);
@@ -69,6 +92,45 @@ int mpl_handle_delete(mpl_handle** handl)
     return ret;
 }
 
+/**
+ Resets the parameters in the handle to initial values. All objects and
+ allocated memory in the handle is freed/destroyed. This function is to be used
+ when changing the dimensions and input data.
+ 
+ @param handl A pointer to an instance of the mpl_handle struct.
+ @return An mpl error code.
+ */
+int mpl_reset_handle(mpl_handle* handl)
+{
+    //
+    return MPL_NOTIMPLEMENTED;
+}
+
+/**
+ Initialise the dimensions of the data set to be supplied to the mpl. This will
+ set the number of terminals (taxa) and characters. These values will be used
+ to check data inputs.
+ 
+ @param ntax The number of taxa (rows) in the dataset.
+ @param nchar The number of characters (columns) in the dataset.
+ @param handl A pointer to an instance of the mpl_handle struct.
+ @return An mpl error code.
+ */
+int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    
+    if (!mpl_check_init(handl)) {
+        
+        handl->ntax  = ntax;
+        handl->nchar = nchar;
+        
+        return MPL_SUCCESS;
+    
+    }
+    
+    return MPL_ILLEGOVERWRITE;
+}
 
 long mpl_get_ntax(const mpl_handle* handl)
 {
@@ -77,38 +139,11 @@ long mpl_get_ntax(const mpl_handle* handl)
     return handl->ntax;
 }
 
-
-int mpl_set_ntax(const long ntax, mpl_handle* handl)
-{
-    RET_IF_NULL(handl);
-    
-    if (!mpl_check_init(handl)) {
-        handl->ntax = ntax;
-        return MPL_SUCCESS;
-    }
-    
-    return -1; // TODO: This should have an error code.
-}
-
-
 long mpl_get_nchar(const mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
     return handl->nchar;
-}
-
-
-int mpl_set_nchar(const long nchar, mpl_handle* handl)
-{
-    RET_IF_NULL(handl);
-    
-    if (!mpl_check_init(handl)) {
-        handl->nchar = nchar;
-        return MPL_SUCCESS;
-    }
-    
-    return -1; // TODO: This should have an error code.
 }
 
 int mpl_attach_rawdata(const char* rawmatrix, mpl_handle* handl)
