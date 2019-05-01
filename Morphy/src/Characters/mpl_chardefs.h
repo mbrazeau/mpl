@@ -14,10 +14,10 @@
 
 #include "../mpl_defs.h"
 
-typedef unsigned long mpl_discr;
-#define MAXSTATES (CHAR_BIT * sizeof(mpl_discr) - 1UL)  // -1 for the NA reserved token
+typedef unsigned int mpl_discr;
+#define MAXSTATES (CHAR_BIT * sizeof(mpl_discr) - 1U)  // -1 for the NA reserved token
 
-#define NA       ((mpl_discr)1UL) // Bitwise representation of the inapplicable symbol
+#define NA       ((mpl_discr)1U) // Bitwise representation of the inapplicable symbol
 #define ISAPPLIC ((mpl_discr)~NA) // Bitmask for states that are applicable
 #define MISSING  ((mpl_discr)~0) // Bitmask for missing data (all state)
 #define UNKNOWN  ((mpl_discr)~NA) // Bitmask for missing data that's know to be logically applicable
