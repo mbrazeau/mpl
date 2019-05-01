@@ -21,14 +21,16 @@ extern "C" {
 typedef void* mpl_handle;
 
 mpl_handle* mpl_handle_new(void);
-void        mpl_handle_delete(mpl_handle** handl);
+int         mpl_handle_delete(mpl_handle** handl);
     
 // TODO: Use error codes
 long        mpl_get_ntax(const mpl_handle handl);
 int         mpl_set_ntax(const long ntax, mpl_handle handl);
-int         mpl_get_nchar(const mpl_handle handl);
-long        mpl_set_nchar(const long nchar, mpl_handle handl);
+long        mpl_get_nchar(const mpl_handle handl);
+int         mpl_set_nchar(const long nchar, mpl_handle handl);
 int         mpl_load_matrix(char* matrix, mpl_handle handl);
+int         mpl_attach_rawdata(const char* rawmatrix, mpl_handle handl;
+int         mpl_attach_symbols(const char* symbols, mpl_handle handl);
 //          Set character types
 //          Exclude character
 //          Include character
@@ -52,17 +54,18 @@ int         mpl_get_hold(const mpl_handle handl);
 //          Set maxtrees
 int         mpl_set_maxtrees(const long maxtrees, mpl_handle handle);
 //          Get maxtrees
-long        mpl_set_maxtrees(const mpl_handle handle);
+long        mpl_get_maxtrees(const mpl_handle handle);
 //          Set autoincrease value
 //          Get autoincrease value
 //          Set addition sequence type
 //          Get addition sequence type
 //          Set branch-swapping type
 //          Get branch-swapping type
-//          Get trees by stepwise addition
-//          Get trees AS+branch-swapping
 //          Set keep number (number of trees to keep per replicate)
 //          Get keep number (number of trees to keep per replicate)
+//          Do search according to parameters
+int         mpl_do_search(mpl_handle handle);
+char*       mpl_get_newick(const long tnum, mpl_handle handl);
 
 #ifdef __cplusplus
 } /* extern "C" */
