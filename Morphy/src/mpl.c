@@ -15,10 +15,7 @@
 #include "Analysis/mpl_search.h"
 #include "Results/mpl_results.h"
 #include "Characters/mpl_matrix.h"
-//typedef struct _taxablock   mpl_taxablock;
-//typedef struct _search      mpl_search;
-//typedef struct _results     mpl_results;
-//typedef struct _matrix      mpl_matrix;
+
 
 #define RET_IF_NULL(p) if (p == NULL) {return MPL_UNEXPNULLPTR;}
 
@@ -125,6 +122,24 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
         handl->ntax  = ntax;
         handl->nchar = nchar;
         
+        handl->matrix  = mpl_matrix_new();
+        if (handl->matrix == NULL) {
+            return MPL_NOMEM;
+        }
+        
+        // Add taxablock
+        handl->taxablock = mpl_taxablock_new(handl->ntax);
+        
+        // Add search
+        // handl->search
+        
+        // Add results
+        // handl->results
+        
+        handl->treebuf = mpl_treelist_new(handl->ntax, MPL_DEFAULT_MAXTREES, MPL_DEFAULT_AUTOINCR);
+        
+        // Check all returns. If any are NULL, then cleanup and return error
+        
         return MPL_SUCCESS;
     
     }
@@ -146,11 +161,11 @@ long mpl_get_nchar(const mpl_handle* handl)
     return handl->nchar;
 }
 
-int mpl_attach_rawdata(const char* rawmatrix, mpl_handle* handl)
+int mpl_attach_rawdata(const mpl_data_t datype, const char* rawmatrix, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
-    MPL_RETURN ret = MPL_SUCCESS;
+    MPL_RETURN ret = MPL_ERR;
     
     if (handl->nchar == 0 || handl->ntax == 0) {
         return MPL_NODIMENSIONS;
@@ -165,7 +180,7 @@ int mpl_attach_symbols(const char* symbols, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
-    MPL_RETURN ret = MPL_SUCCESS;
+    MPL_RETURN ret = MPL_ERR;
     
     // TODO: Attach the symbol set
     
@@ -210,4 +225,9 @@ static int mpl_check_init(mpl_handle* handl)
     }
     
     return 0;
+}
+
+static int mpl_handle_cleanup(mpl_handle handl)
+{
+    return MPL_ERR;
 }
