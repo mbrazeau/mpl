@@ -30,6 +30,9 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
 #define MPL_MAX_DEPENDECIES 2 // Maximum number of root characters
 
+#define MPL_DEFAULT_MAXTREES 5000
+#define MPL_DEFAULT_AUTOINCR 100
+
 typedef enum {
     
     MPL_SUCCESS         =  0,
