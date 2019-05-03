@@ -84,9 +84,11 @@ static const mpl_parsdat Wagner_Std = {
 
 // Data from the discrete character charbuf
 mpl_discr** restrict dnset          = NULL;
+mpl_discr** restrict prupset        = NULL;
 mpl_discr** restrict upset          = NULL;
 mpl_discr** restrict actives        = NULL;
 mpl_discr** restrict tempdn         = NULL;
+mpl_discr** restrict tempprup       = NULL;
 mpl_discr** restrict tempup         = NULL;
 mpl_discr** restrict tempact        = NULL;
 double*     restrict weights        = NULL;
@@ -108,9 +110,11 @@ long**      restrict nodechanges    = NULL;
 void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
 {
     dnset           = cb->dnset;
+    prupset         = cb->prupset;
     upset           = cb->upset;
     actives         = cb->actives;
     tempdn          = cb->tempdn;
+    tempprup        = cb->tempprup;
     tempup          = cb->tempup;
     tempact         = cb->tempact;
     weights         = cb->weights;
@@ -291,6 +295,7 @@ void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
             }
             else {
                 tempup[i][j] = tempdn[i][j] = upset[i][j] = dnset[i][j];
+                prupset[i][i] = tempprup[i][j] = dnset[i][j];
                 actives[i][j] = tempact[i][j] = (dnset[i][j] & ISAPPLIC);
             }
         }
@@ -468,12 +473,17 @@ void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd)
     const long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
+        
         upset[anc][i] = dnset[n][i];
+        
         if (upset[anc][i] & ISAPPLIC) {
             upset[anc][i] &= ISAPPLIC;
         }
         
+        prupset[anc][i] = upset[anc][i];
+        
         tempdn[anc][i] = dnset[anc][i];
+        tempprup[anc][i] = prupset[anc][i];
         tempup[anc][i] = upset[anc][i];
 //        assert(upset[anc][i]);
     }
@@ -491,28 +501,29 @@ void mpl_fitch_na_first_uppass
         
         if (dnset[n][i] & NA) {
             if (dnset[n][i] & ISAPPLIC) {
-                if (upset[anc][i] == NA) {
-                    upset[n][i] = NA;
+                if (prupset[anc][i] == NA) {
+                    prupset[n][i] = NA;
                 } else {
-                    upset[n][i] = dnset[n][i] & ISAPPLIC;
+                    prupset[n][i] = dnset[n][i] & ISAPPLIC;
                 }
             } else {
-                if (upset[anc][i] == NA) {
-                    upset[n][i] = NA;
+                if (prupset[anc][i] == NA) {
+                    prupset[n][i] = NA;
                 } else {
                     t = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
                     if (t != 0) {
-                        upset[n][i] = t;
+                        prupset[n][i] = t;
                     } else {
-                        upset[n][i] = NA;
+                        prupset[n][i] = NA;
                     }
                 }
             }
         }
         else {
-            upset[n][i] = dnset[n][i];
+            prupset[n][i] = dnset[n][i];
         }
         
+        tempprup[n][i] = prupset[n][i];
 //        tempup[n][i] = upset[n][i];
 //        assert(upset[n][i]);
     }
@@ -528,25 +539,28 @@ void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
     for (i = pd->start; i < end; ++i) {
         
 //        if (((dnset[tipn][i] - 1) & dnset[tipn][i]) != 0) {
-            if (dnset[tipn][i] & upset[anc][i]) {
-                actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
+            if (dnset[tipn][i] & prupset[anc][i]) {
+                actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
             } else {
                 actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
             }
             
-            upset[tipn][i] = dnset[tipn][i];
+            prupset[tipn][i] = dnset[tipn][i];
             
-            if (dnset[tipn][i] & upset[anc][i]) {
-                if (upset[anc][i] & ISAPPLIC) {
-                    upset[tipn][i] &= ISAPPLIC;
+            if (dnset[tipn][i] & prupset[anc][i]) {
+                if (prupset[anc][i] & ISAPPLIC) {
+                    prupset[tipn][i] &= ISAPPLIC;
                 }
             }
+        
+        upset[tipn][i] = prupset[tipn][i];
 //        } else {
 //            actives[tipn][i] = dnset[tipn][i] & ISAPPLIC;
 //        }
         
         tempdn[tipn][i]  = dnset[tipn][i];
-        tempup[tipn][i]  = upset[tipn][i];
+        tempup[tipn][i] = upset[tipn][i];
+        tempprup[tipn][i]  = prupset[tipn][i];
         tempact[tipn][i] = actives[tipn][i];
     }
 }
@@ -564,7 +578,7 @@ double mpl_fitch_na_second_downpass
         
         nodechanges[n][i] = 0L;
         
-        if (upset[n][i] & ISAPPLIC) {
+        if (prupset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
             if (t) {
                 if (t & ISAPPLIC) {
@@ -586,6 +600,7 @@ double mpl_fitch_na_second_downpass
                 }
             }
         } else {
+            upset[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
@@ -740,9 +755,9 @@ void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd)
     for (j = pd->nchars; j-- ; ) {
         
         i = pd->indexbuf[j];
-        upset[anc][i] = dnset[n][i];
-        if (upset[anc][i] & ISAPPLIC) {
-            upset[anc][i] &= ISAPPLIC;
+        prupset[anc][i] = dnset[n][i];
+        if (prupset[anc][i] & ISAPPLIC) {
+            prupset[anc][i] &= ISAPPLIC;
         }
     }
 }
@@ -766,30 +781,30 @@ int mpl_fitch_na_recalc_first_uppass
         
         if (dnset[n][i] & NA) {
             if (dnset[n][i] & ISAPPLIC) {
-                if (upset[anc][i] == NA) {
-                    upset[n][i] = NA;
+                if (prupset[anc][i] == NA) {
+                    prupset[n][i] = NA;
                 } else {
-                    upset[n][i] = dnset[n][i] & ISAPPLIC;
+                    prupset[n][i] = dnset[n][i] & ISAPPLIC;
                 }
             } else {
-                if (upset[anc][i] == NA) {
-                    upset[n][i] = NA;
+                if (prupset[anc][i] == NA) {
+                    prupset[n][i] = NA;
                 } else {
                     t = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
                     if (t != 0) {
-                        upset[n][i] = t;
+                        prupset[n][i] = t;
                     } else {
-                        upset[n][i] = NA;
+                        prupset[n][i] = NA;
                     }
                 }
             }
         }
         else {
-            upset[n][i] = dnset[n][i];
+            prupset[n][i] = dnset[n][i];
         }
 
-        if (tempup[n][i] != upset[n][i]) {
-            if (tempup[n][i] == NA || upset[n][i] == NA) {
+        if (tempprup[n][i] != prupset[n][i]) {
+            if (tempprup[n][i] == NA || prupset[n][i] == NA) {
                 ++chgs;
             }
         }
@@ -811,69 +826,15 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
         
         i = indices[j];
         
-        if (dnset[tipn][i] & upset[anc][i] && dnset[tipn][i] != upset[anc][i]) {
-            actives[tipn][i] = dnset[tipn][i] & upset[anc][i] & ISAPPLIC;
-            upset[tipn][i] = dnset[tipn][i];
-            if (upset[anc][i] & ISAPPLIC) {
-                upset[tipn][i] &= ISAPPLIC;
+        if (dnset[tipn][i] & prupset[anc][i] && dnset[tipn][i] != prupset[anc][i]) {
+            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
+            prupset[tipn][i] = dnset[tipn][i];
+            if (prupset[anc][i] & ISAPPLIC) {
+                prupset[tipn][i] &= ISAPPLIC;
             }
+            upset[tipn][i] = prupset[tipn][i];
         }
     }
-
-//    while (i < pd->nchars && j < pd->ntipinbufs[tipn] ) {
-//        r = indices[i] - pd->tipinbufs[tipn][j];
-//        if (r < 0) {
-//            r = -1;
-//        } else if (r > 0) {
-//            r = 1;
-//        }
-//        else {
-//            r = 0;
-//        }
-//
-//        switch (r) {
-//            case -1:
-//                ++i;
-//                break;
-//            case 1:
-//                ++j;
-//                break;
-//            default:
-//                k = indices[i];
-//
-//                if (dnset[tipn][k] & upset[anc][k]) {
-//                    actives[tipn][k] = dnset[tipn][k] & upset[anc][k] & ISAPPLIC;
-//                    upset[tipn][k] = dnset[tipn][k];
-//                    if (upset[anc][k] & ISAPPLIC) {
-//                        upset[tipn][k] &= ISAPPLIC;
-//                    }
-//                }
-//
-//                ++i;
-//                break;
-//        }
-    
-//        if (indices[i] < pd->tipinbufs[tipn][j]) {
-//            ++i;
-//        }
-//        else if (pd->tipinbufs[tipn][j] > indices[i]) {
-//            ++j;
-//        }
-//        else {
-//            k = indices[i];
-//
-//            if (dnset[tipn][k] & upset[anc][k]) {
-//                actives[tipn][k] = dnset[tipn][k] & upset[anc][k] & ISAPPLIC;
-//                upset[tipn][k] = dnset[tipn][k];
-//                if (upset[anc][k] & ISAPPLIC) {
-//                    upset[tipn][k] &= ISAPPLIC;
-//                }
-//            }
-//
-//            ++i;
-//        }
-//    }
-//
 }
 
 
@@ -894,11 +855,11 @@ double mpl_fitch_na_recalc_second_downpass
         i = indices[j];
         
 //        if (nodechanges[n][i] > 0) {
-//            cost -= (nodechanges[n][i] * weights[i]);
+//        cost -= (nodechanges[n][i] * weights[i]);
 //        }
 
         // More efficient implementation?
-        if (upset[n][i] & ISAPPLIC) {
+        if (prupset[n][i] & ISAPPLIC) {
             
             upset[n][i] = (upset[left][i] & upset[right][i]) & ISAPPLIC;
                            
@@ -915,6 +876,7 @@ double mpl_fitch_na_recalc_second_downpass
                 }
             }
         } else {
+            upset[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 //                ++pd->doeschange;
@@ -925,9 +887,11 @@ double mpl_fitch_na_recalc_second_downpass
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         dnset[left][i]    = tempdn[left][i];
+        prupset[left][i]  = tempprup[left][i];
         upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
         dnset[right][i]   = tempdn[right][i];
+        prupset[right][i] = tempprup[right][i];
         upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
         
@@ -1300,9 +1264,11 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             i = indices[j];
             
             dnset[n][i]     = tempdn[n][i];
+            prupset[n][i]   = tempprup[n][i];
             upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
             dnset[anc][i]   = tempdn[anc][i];
+            prupset[anc][i] = tempprup[anc][i];
             upset[anc][i]   = tempup[anc][i];
             actives[anc][i] = tempact[anc][i];
         }
@@ -1312,6 +1278,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             i = indices[j];
             
             dnset[n][i]     = tempdn[n][i];
+            prupset[n][i]   = tempprup[n][i];
             upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
         }
