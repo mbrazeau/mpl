@@ -17,7 +17,7 @@ static void mpl_charbuf_init_datatype(mpl_charbuf* cb);
 static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db);
 static mpl_discr** mpl_charbuf_alloc_discr_buffer(long nrows, long ncols);
 static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb);
-
+static long** mpl_charbuf_alloc_long_matrix(long nrows, long ncols);
 
 void mpl_charbuf_init
 (const mpl_data_t datype, const long nrows, const long ncols, mpl_charbuf* cb)
@@ -51,20 +51,24 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     long i = 0;
     
     safe_free(cb->weights);
-    safe_free(cb->orig_indices);
     safe_free(cb->preweight);
+    safe_free(cb->orig_indices);
     safe_free(cb->minchanges);
+    safe_free(cb->charchanges);
     safe_free(cb->appliccanges);
     
-    for (i = 0; i < cb->num_rows; ++i) {
+    for (i = 0; i < (2 * cb->num_rows); ++i) {
         // Free the index bufs
-        safe_free(cb->nodechanges);
+        safe_free(cb->nodechanges[i]);
     }
+    safe_free(cb->nodechanges);
     
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->upset);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->prupset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->actives);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdn);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempprup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempact);
     
@@ -91,6 +95,8 @@ void mpl_charbuf_add_data_column
         cb->dnset[i][colnum] = datcol[i];
         cb->tempdn[i][colnum] = datcol[i];
         cb->upset[i][colnum] = datcol[i];
+        cb->prupset[i][colnum] = datcol[i];
+        cb->tempprup[i][colnum] = datcol[i];
         cb->tempup[i][colnum] = datcol[i];
         cb->actives[i][colnum] = datcol[i] & ISAPPLIC;
         cb->tempact[i][colnum] = datcol[i] & ISAPPLIC;
@@ -179,15 +185,15 @@ int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb)
         for (j = 0; j < cb->char_max; ++j) {
             if (cb->dnset[i][j] != cb->tempdn[i][j]) {
                 printf("buffer mismatch: row: %li, col: %li\n", i, j);
-                printf("dnset: %lu, tmpdn: %lu\n", cb->dnset[i][j], cb->tempdn[i][j]);
+                printf("dnset: %u, tmpdn: %u\n", cb->dnset[i][j], cb->tempdn[i][j]);
             }
             if (cb->upset[i][j] != cb->tempup[i][j]) {
                 printf("buffer mismatch: row: %li, col: %li\n", i, j);
-                printf("upset: %lu, tempup: %lu\n", cb->upset[i][j], cb->tempup[i][j]);
+                printf("upset: %u, tempup: %u\n", cb->upset[i][j], cb->tempup[i][j]);
             }
             if (cb->actives[i][j] != cb->tempact[i][j]) {
                 printf("buffer mismatch: row: %li, col: %li\n", i, j);
-                printf("actives: %lu, tempact: %lu\n", cb->actives[i][j], cb->tempact[i][j]);
+                printf("actives: %u, tempact: %u\n", cb->actives[i][j], cb->tempact[i][j]);
             }
         }
     }
@@ -303,9 +309,11 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
     assert(cb->row_max && cb->char_max);
     
     cb->dnset   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->prupset = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->upset   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->actives = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempdn  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->tempprup = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempup  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempact = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     

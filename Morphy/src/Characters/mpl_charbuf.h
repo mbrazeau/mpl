@@ -37,9 +37,11 @@ typedef struct _charbuf {
     long**      nodechanges;
     mpl_data_t  datype;
     mpl_discr** dnset; // The set of downpass characters
+    mpl_discr** prupset;
     mpl_discr** upset; // The set of uppass characters
     mpl_discr** actives; // Applicable states encountered down to this node
     mpl_discr** tempdn; // Temporary storage of state sets
+    mpl_discr** tempprup;
     mpl_discr** tempup;
     mpl_discr** tempact;
     
