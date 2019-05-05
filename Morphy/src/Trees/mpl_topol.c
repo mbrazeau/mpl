@@ -193,21 +193,21 @@ int mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2)
 //    }
     
     max = t1->num_nodes;
-    long* e1 = &t1->edges[0];
-    long* e2 = &t2->edges[0];
-    long* end = &t1->edges[t1->num_nodes-1];
-
-    while (e1 != end) {
-        if (*e1++ != *e2++) {
-            return 1;
-        }
-    }
-    
-//    for (i = 0; i < max; ++i) {
-//        if (t1->edges[i] != t2->edges[i]) {
-//            return i+1;
+//    long* e1 = &t1->edges[0];
+//    long* e2 = &t2->edges[0];
+//    long* end = &t1->edges[t1->num_nodes-1];
+//
+//    while (e1 != end) {
+//        if (*e1++ != *e2++) {
+//            return 1;
 //        }
 //    }
+//
+    for (i = 0; i < max; ++i) {
+        if (t1->edges[i] != t2->edges[i]) {
+            return i+1;
+        }
+    }
     
     return 0;
 }
