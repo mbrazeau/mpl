@@ -25,6 +25,9 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
     >> (sizeof(unsigned long) - 1) * CHAR_BIT;
 #endif
 
+#define RET_IF_NULL(p) if (p == NULL) {return MPL_UNEXPNULLPTR;}
+
+
 #define MPL_RAND_MAX        2147483646U
 #define MPL_DEFAULT_RSEED   1U
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
@@ -100,6 +103,20 @@ typedef enum
     MPL_AST_MAX
     
 } mpl_stepw_t;
+
+typedef enum {
+    MPL_EXHAUSTIVE_T,
+    MPL_BANDB_T,
+    MPL_HEURISTIC_T
+} mpl_search_t;
+
+typedef enum {
+    
+    MPL_NNI_T,
+    MPL_SPR_T,
+    MPL_TBR_T
+    
+} mpl_bbreak_t;
 
 
 #endif /* mpl_defs_h */
