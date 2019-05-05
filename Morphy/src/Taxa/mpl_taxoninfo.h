@@ -16,8 +16,8 @@
 
 typedef struct _taxoninfo {
     
-    long index;
-    bool isincluded;
+    long  index;
+    bool  isincluded;
     char* name;
     
 } mpl_taxoninfo;
