@@ -306,6 +306,29 @@ MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
     return MPL_SUCCESS;
 }
 
+MPL_RETURN mpl_matrix_add_symbol(const char symb, mpl_matrix* m)
+{
+    MPL_RETURN ret = MPL_SUCCESS;
+    
+    RET_IF_NULL(m);
+    
+    if (symb == '\0') {
+        return MPL_BADSYMBOL;
+    }
+    
+    if (strchr(VALID_STATESYMB, symb) == NULL) {
+        return MPL_BADSYMBOL;
+    }
+    
+    if (strchr(m->symbols, symb) == NULL) {
+        m->symbols[m->nsymb] = symb;
+        ++m->nsymb;
+        m->symbols[m->nsymb] = '\0';
+    }
+
+    return ret;
+}
+
 
 /*******************************************************************************
  *                                                                             *
@@ -762,7 +785,6 @@ static mpl_discr mpl_rawcharptr2bitset
     
     return res;
 }
-
 
 /*
  *  TEST INTERFACE FUNCTION DEFINITIONS
