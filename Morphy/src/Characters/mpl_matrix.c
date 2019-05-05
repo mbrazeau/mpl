@@ -32,6 +32,7 @@ static inline mpl_discr mpl_convert_gapsymb(const mpl_gap_t gaptype);
 static mpl_discr mpl_char2bitset(const char c, const bool isNAtype, mpl_matrix* m);
 static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* m);
 static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m);
+static void mpl_matrix_setup_cell_ptrs(mpl_matrix* m);
 /*******************************************************************************
  *                                                                             *
  *  PUBLIC FUNCTION DEFINITIONS                                                *
@@ -198,29 +199,14 @@ MPL_RETURN  mpl_matrix_init
         return ret;
     }
     
-    m->rcells = (char***)safe_calloc(nrows, sizeof(char**));
-    if (m->rcells == NULL) {
-        // TODO: Cleanup matrix and exit;
-        return MPL_NOMEM;
-    }
-    
-    for (i = 0; i < nrows; ++i) {
-        m->rcells[i] = (char**)safe_calloc(ncols, sizeof(char*));
-        if (m->rcells[i] == NULL) {
-            for (j = 0; j < i; ++j) {
-                safe_free(m->rcells[j]);
-            }
-            safe_free(m->rcells);
-            return MPL_NOMEM;
-        }
-    }
-
     return ret;
 }
 
 MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
 {
     MPL_RETURN ret = MPL_SUCCESS;
+    long i = 0;
+    long j = 0;
     long matlen = 1;
     char* matcopy = NULL;
     
@@ -254,8 +240,26 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
         mpl_matrix_get_symbols_from_matrix(m);
     }
     
-    // Set up a string matrix for faster processing
+    m->rcells = (char***)safe_calloc(m->num_rows, sizeof(char**));
+    if (m->rcells == NULL) {
+        // TODO: Cleanup matrix and exit;
+        return MPL_NOMEM;
+    }
     
+    for (i = 0; i < m->num_rows; ++i) {
+        m->rcells[i] = (char**)safe_calloc(m->num_cols, sizeof(char*));
+        if (m->rcells[i] == NULL) {
+            for (j = 0; j < i; ++j) {
+                safe_free(m->rcells[j]);
+            }
+            safe_free(m->rcells);
+            return MPL_NOMEM;
+        }
+    }
+
+    // Set all the char pointers to the 'cells'
+    mpl_matrix_setup_cell_ptrs(m);
+
     return ret;
 }
 
@@ -675,6 +679,39 @@ char* mpl_matrix_get_rawdat_ptr(const long row, const long col, const mpl_matrix
     }
     
     return ret;
+}
+
+static void mpl_matrix_setup_cell_ptrs(mpl_matrix* m)
+{
+    int i = 0;
+    int j = 0;
+    char* c = m->rawdata;
+    
+    c = mpl_skip_whitespace(c);
+    
+    while (*c != ';' && *c != '\0') {
+        
+        if (strchr(VALID_WS, *c) == NULL) {
+            
+            if (strchr(VALID_MPL_MATPUNC, *c) == NULL) {
+                // The character is some symbol or other
+                m->rcells[i][j] = c;
+                ++j;
+            } else if (*c != ';') {
+                m->rcells[i][j] = c;
+                c = mpl_skip_closure(c, *c, mpl_get_opposite_bracket(*c));
+                ++j;
+            }
+        }
+        
+        if (j >= m->num_cols) {
+            ++i;
+            j = 0;
+        }
+        
+        ++c;
+    }
+    
 }
 
 static long mpl_matrix_count_gaps_in_column(const long col, const mpl_matrix* m)
