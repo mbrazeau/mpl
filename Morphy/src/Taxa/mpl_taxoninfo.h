@@ -24,6 +24,7 @@ typedef struct _taxoninfo {
 
 //mpl_taxoninfo* mpl_taxoninfo_new(void);
 //int     mpl_taxoninfo_delete(mpl_taxoninfo** ti);
+void    mpl_taxoninfo_cleanup(mpl_taxoninfo* ti);
 int     mpl_taxoninfo_set_name(mpl_taxoninfo* ti, const char* n);
 int     mpl_taxoninfo_get_name(char* dest, const mpl_taxoninfo* ti);
 int     mpl_taxoninfo_set_index(mpl_taxoninfo* ti, const long index);
