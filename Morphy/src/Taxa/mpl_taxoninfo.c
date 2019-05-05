@@ -9,15 +9,21 @@
 #include <stdlib.h>
 #include "mpl_taxoninfo.h"
 #include "../mpl_utils.h"
+void mpl_taxoninfo_cleanup(mpl_taxoninfo* ti)
+{
+    if (ti != NULL) {
+        safe_free(ti->name);
+    }
+}
 
 int mpl_taxoninfo_set_name(mpl_taxoninfo* ti, const char* n)
 {
-    if (!ti) {
+    if (ti == NULL) {
         return -1;
     }
     
     // Delete previous name as it will be overwritten
-    if (ti->name) {
+    if (ti->name != NULL) {
         free(ti->name);
         ti->name = NULL;
     }
@@ -37,15 +43,15 @@ int mpl_taxoninfo_get_name(char* dest, const mpl_taxoninfo* ti)
 {
     int ret = 0;
     
-    if (!ti) {
+    if (ti == NULL) {
         return -1;
     }
     
-    if (!dest) {
+    if (dest == NULL) {
         return -2;
     }
     
-    if (ti->name) {
+    if (ti->name != NULL) {
         strcpy(dest, ti->name);
         ret = 0;
     }
@@ -58,7 +64,7 @@ int mpl_taxoninfo_get_name(char* dest, const mpl_taxoninfo* ti)
 
 int mpl_taxoninfo_set_index(mpl_taxoninfo* ti, const long index)
 {
-    if (!ti) {
+    if (ti == NULL) {
         return -1;
     }
     
@@ -69,7 +75,7 @@ int mpl_taxoninfo_set_index(mpl_taxoninfo* ti, const long index)
 
 long mpl_taxoninfo_get_index(const mpl_taxoninfo* ti)
 {
-    if (ti) {
+    if (ti != NULL) {
         return ti->index;
     }
     
