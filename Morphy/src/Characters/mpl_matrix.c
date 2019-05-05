@@ -46,12 +46,25 @@ static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* 
  */
 mpl_matrix* mpl_matrix_new(void)
 {
+    int mxsymbstorage = 0;
     mpl_matrix* ret = NULL;
     
     ret = (mpl_matrix*)safe_calloc(1, sizeof(mpl_matrix));
     
     if (ret != NULL) {
+        
         mpl_set_matrix_defaults(ret);
+        
+        mxsymbstorage = strlen(VALID_STATESYMB);
+        
+        ret->symbols = (char*)safe_calloc(mxsymbstorage, sizeof(char) + 1);
+        ret->nsymb = 0;
+        
+        if (ret->symbols == NULL) {
+            mpl_matrix_delete(&ret);
+            ret = NULL;
+            return ret;
+        }
     }
     
     return ret;
@@ -321,7 +334,8 @@ static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
     
     char* c = NULL;
     
-    // Check for a terminal semicolon by finding the
+    // Check for a terminal semicolon by finding the end of the string
+    // (This isn't terribly safe).
     c = m->rawdata;
     while (*c) {
         ++c;
