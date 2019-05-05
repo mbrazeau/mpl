@@ -13,22 +13,25 @@
 
 #include "../mpl_defs.h"
 #include "mpl_chardefs.h"
+#include "mpl_charbuf.h"
 
 typedef struct _charinfo {
     
-    long            index;
-    int             num_states;
-    long            num_gaps;
-    mpl_data_t      datatype;
-    mpl_parsim_t    parsimtype;
-    bool            isincluded;
-    bool            isparsinform;
-    double          weight;
-    double*         wtptr; // Points to the weight in the derived char buf.
-    double          preweight; // Probability of reweighting
-    long            depends[MPL_MAX_DEPENDECIES];
-    long            nsubchars;
-    long*           subchars;
+    long         index;
+    int          num_states;
+    long         num_gaps;
+    mpl_data_t   datatype;
+    mpl_parsim_t parsimtype;
+    bool         isincluded;
+    bool         isparsinform;
+    double       weight;
+    double*      wtptr; // Points to the weight in the derived char buf.
+    double       preweight; // Probability of reweighting
+    long         depends[MPL_MAX_DEPENDECIES];
+    long         nsubchars;
+    long*        subchars;
+    mpl_charbuf* destbuf; // Buffer this character ended up in
+    long         bufindex; // Index in destination buffer
     
 } mpl_charinfo;
 
