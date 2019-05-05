@@ -31,7 +31,7 @@ static char* mpl_skip_whitespace(char *c);
 static inline mpl_discr mpl_convert_gapsymb(const mpl_gap_t gaptype);
 static mpl_discr mpl_char2bitset(const char c, const bool isNAtype, mpl_matrix* m);
 static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* m);
-
+static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m);
 /*******************************************************************************
  *                                                                             *
  *  PUBLIC FUNCTION DEFINITIONS                                                *
@@ -46,7 +46,6 @@ static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* 
  */
 mpl_matrix* mpl_matrix_new(void)
 {
-    int mxsymbstorage = 0;
     mpl_matrix* ret = NULL;
     
     ret = (mpl_matrix*)safe_calloc(1, sizeof(mpl_matrix));
@@ -54,17 +53,6 @@ mpl_matrix* mpl_matrix_new(void)
     if (ret != NULL) {
         
         mpl_set_matrix_defaults(ret);
-        
-        mxsymbstorage = strlen(VALID_STATESYMB);
-        
-        ret->symbols = (char*)safe_calloc(mxsymbstorage, sizeof(char) + 1);
-        ret->nsymb = 0;
-        
-        if (ret->symbols == NULL) {
-            mpl_matrix_delete(&ret);
-            ret = NULL;
-            return ret;
-        }
     }
     
     return ret;
@@ -193,6 +181,9 @@ long mpl_matrix_get_nnodes(const mpl_matrix* m)
 MPL_RETURN  mpl_matrix_init
 (const long nrows, const long ncols, const long nnodes, mpl_matrix* m)
 {
+    long i = 0;
+    long j = 0;
+    
     MPL_RETURN ret = MPL_SUCCESS;
     
     if ((ret = mpl_matrix_set_nrows(nrows, m))) {
@@ -205,6 +196,23 @@ MPL_RETURN  mpl_matrix_init
     
     if ((ret = mpl_matrix_set_nnodes(nnodes, m))) {
         return ret;
+    }
+    
+    m->rcells = (char***)safe_calloc(nrows, sizeof(char**));
+    if (m->rcells == NULL) {
+        // TODO: Cleanup matrix and exit;
+        return MPL_NOMEM;
+    }
+    
+    for (i = 0; i < nrows; ++i) {
+        m->rcells[i] = (char**)safe_calloc(ncols, sizeof(char*));
+        if (m->rcells[i] == NULL) {
+            for (j = 0; j < i; ++j) {
+                safe_free(m->rcells[j]);
+            }
+            safe_free(m->rcells);
+            return MPL_NOMEM;
+        }
     }
 
     return ret;
@@ -239,6 +247,14 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     if (ret != MPL_SUCCESS) {
         safe_free(m->rawdata);
     }
+    
+    // Check if symbols are loaded:
+    if (m->nsymb == 0) {
+        // Do a run through the matrix adding all the symbols
+        mpl_matrix_get_symbols_from_matrix(m);
+    }
+    
+    // Set up a string matrix for faster processing
     
     return ret;
 }
@@ -348,7 +364,8 @@ static void mpl_set_matrix_defaults(mpl_matrix* m)
     safe_free(m->symbols);
     
     m->symbols      = (char*)safe_calloc(1 + strlen(VALID_STATESYMB), sizeof(char));
-    strcpy(m->symbols, VALID_STATESYMB);
+    m->nsymb        = 0;
+    //strcpy(m->symbols, VALID_STATESYMB);
 }
 
 static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
@@ -731,7 +748,7 @@ static mpl_discr mpl_char2bitset
             }
             
             assert(m->symbols[i] != '\0');
-            assert(i >= m->nsymb);
+//            assert(i >= m->nsymb);
             
             return (mpl_discr)1 << (i + GAPPUSH);
         }
@@ -784,6 +801,20 @@ static mpl_discr mpl_rawcharptr2bitset
     }
     
     return res;
+}
+
+static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m)
+{
+    char *c = m->rawdata;
+    
+    while (*c != ';') {
+        if (strchr(VALID_STATESYMB, *c)) {
+            mpl_matrix_add_symbol(*c, m);
+        }
+        ++c;
+    }
+    
+    qsort(m->symbols, m->nsymb, sizeof(char), mpl_compchar);
 }
 
 /*
