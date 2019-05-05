@@ -27,4 +27,5 @@ uint32_t mpl_rng(void);
 int mpl_rng_set_seed(const uint32_t seed);
 uint32_t mpl_rng_between(uint32_t min, uint32_t max);
 uint32_t mpl_rng_get_seed(void);
+int mpl_compchar(const void* int1, const void* int2);
 #endif /* mpl_utils_h */

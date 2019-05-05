@@ -184,6 +184,11 @@ inline int almost_equal(const double fl1, const double fl2, const double eps)
     return 0;
 }
 
+int mpl_compchar(const void* int1, const void* int2)
+{
+    return (*(char*)int1) - (*(char*)int2);
+}
+
 
 /*
  * PRIVATE STRING FUNCTIONS
