@@ -25,6 +25,7 @@ typedef struct _matrix {
     int             nsymb;
     char*           symbols;
     char*           rawdata;
+    char***         rcells; // Raw input cells
     char            missingsymb;
     char            gapsymb;
     char            unknownsymb;
@@ -57,5 +58,6 @@ MPL_RETURN  mpl_matrix_set_parsim_t(const long ind, const mpl_parsim_t ptype, mp
 MPL_RETURN  mpl_matrix_get_parsim_t(mpl_parsim_t* r, const long ind, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_apply_data(mpl_matrix* m);
+MPL_RETURN  mpl_matrix_add_symbol(const char symb, mpl_matrix* m);
 
 #endif /* mpl_matrix_h */

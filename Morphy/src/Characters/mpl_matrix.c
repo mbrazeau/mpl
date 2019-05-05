@@ -86,6 +86,11 @@ void mpl_matrix_delete(mpl_matrix** m)
             mpl_parsim_cleanup_parsdat(&mi->parsets[i]);
         }
         
+        for (i = 0; i < mi->num_rows; ++i) {
+            safe_free(mi->rcells[i]);
+        }
+        safe_free(mi->rcells);
+        
         safe_free(mi->parsets);
         free(mi);
     }
@@ -527,7 +532,7 @@ static void mpl_matrix_convert_into_discrbuffer
     char* cp = NULL;
     
     for (i = 0; i < m->num_rows; ++i) {
-        cp = mpl_matrix_get_rawdat_ptr(i, coln, m);
+        cp = m->rcells[i][coln];//mpl_matrix_get_rawdat_ptr(i, coln, m);
         di[i] = mpl_rawcharptr2bitset(cp, coln, m);
     }
 }
@@ -723,7 +728,7 @@ static long mpl_matrix_count_gaps_in_column(const long col, const mpl_matrix* m)
     
     for (i = 0; i < m->num_rows; ++i) {
         c = 0;
-        c = *mpl_matrix_get_rawdat_ptr(i, col, m);
+        c = *m->rcells[i][col];//*mpl_matrix_get_rawdat_ptr(i, col, m);
         if (c == m->gapsymb) {
             ++ngaps;
         }
