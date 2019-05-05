@@ -16,10 +16,6 @@
 #include "Results/mpl_results.h"
 #include "Characters/mpl_matrix.h"
 
-
-#define RET_IF_NULL(p) if (p == NULL) {return MPL_UNEXPNULLPTR;}
-
-
 typedef struct _handle {
     
     long            ntax;
@@ -131,7 +127,7 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
         handl->taxablock = mpl_taxablock_new(handl->ntax);
         
         // Add search
-        // handl->search
+        handl->search    = mpl_search_new(handl->ntax);
         
         // Add results
         // handl->results
