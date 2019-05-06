@@ -29,10 +29,10 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 
 
 #define MPL_RAND_MAX        2147483646U
-#define MPL_DEFAULT_RSEED   1U
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
 #define MPL_MAX_DEPENDECIES 2 // Maximum number of root characters
 
+#define MPL_DEFAULT_RSEED    1U
 #define MPL_DEFAULT_MAXTREES 5000
 #define MPL_DEFAULT_AUTOINCR 100
 
@@ -89,32 +89,37 @@ typedef enum {
     GAP_MISSING     = 1,
     GAP_NEWSTATE    = 2,
     
-    GAP_MAX,
+    GAP_MAX
     
 } mpl_gap_t;
 
-typedef enum
-{
-    MPL_AST_SIMPLE,
+typedef enum {
+    
     MPL_AST_RANDOM,
     MPL_AST_ASIS,
-    MPL_AST_CLOSEST,
+    MPL_AST_INMEM,
     
     MPL_AST_MAX
     
 } mpl_stepw_t;
 
 typedef enum {
+    
     MPL_EXHAUSTIVE_T,
     MPL_BANDB_T,
-    MPL_HEURISTIC_T
+    MPL_HEURISTIC_T,
+    
+    MPL_SEARCH_MAX
+    
 } mpl_search_t;
 
 typedef enum {
     
     MPL_NNI_T,
     MPL_SPR_T,
-    MPL_TBR_T
+    MPL_TBR_T,
+    
+    MPL_BBREAK_MAX
     
 } mpl_bbreak_t;
 
