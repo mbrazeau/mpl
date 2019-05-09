@@ -6,6 +6,7 @@
 //  Copyright © 2019 Martin Brazeau. All rights reserved.
 //
 
+#include <stdio.h>
 #include <assert.h>
 
 #include "../mpl_utils.h"
@@ -42,6 +43,30 @@ void mpl_treelist_delete(mpl_treelist** tl)
     }
     
     safe_free((*tl)->trees);
+}
+
+void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
+{
+    if (maxtrees < tl->num_trees) {
+        tl->num_trees = tl->max_trees;
+        tl->back = &tl->trees[tl->num_trees-1];
+        
+        if (tl->head > tl->back) {
+            tl->head = NULL;
+        }
+    }
+    
+    if (maxtrees > tl->max_trees) {
+        mpl_treelist_resize(tl->num_taxa, maxtrees - tl->max_trees, tl);
+    }
+    
+    printf("Resize tree list to %lu trees for a total of: ", tl->max_trees);
+    size_t tlbytes = 0;
+    tlbytes += sizeof(mpl_topol);
+    tlbytes += tl->trees[0].num_nodes * sizeof(long);
+    tlbytes *= tl->max_trees;
+    printf("%lu bytypes\n", tlbytes);
+    
 }
 
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
@@ -209,7 +234,7 @@ mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
     long i = 0;
     double shortest;
     
-    mpl_topol* ret = 0;
+    mpl_topol* ret = NULL;
     ret = &tl->trees[0];
     shortest = ret->score;
     
@@ -360,67 +385,67 @@ static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
     return 0;
 }
 
-void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
-{
-    if (tl->back != NULL) {
-        mpl_topol_link(tl->back, top);
-        
-    }
-    else {
-        tl->front = top;
-        top->back = NULL;
-    }
-    
-    tl->back = top;
-}
+//void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
+//{
+//    if (tl->back != NULL) {
+//        mpl_topol_link(tl->back, top);
+//
+//    }
+//    else {
+//        tl->front = top;
+//        top->back = NULL;
+//    }
+//
+//    tl->back = top;
+//}
 
-void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
-{
-    
-    long i = 0;
-    long limit = 0;
-    mpl_topol* nt = NULL;
-    mpl_topol* en = NULL;
-    
-    // Check if the requested number of elements will exceed maxtrees
-    // and if that maximum is allowed to be extended.
-    if ((tl->num_trees + nelems) > tl->max_trees) {
-        if (tl->increase_rate == 0) {
-            limit = tl->max_trees - tl->num_trees;
-        }
-    }
-    else {
-        limit = nelems;
-        tl->max_trees += nelems;
-    }
-    
-    // If the request amounts to zero, then do nothing.
-    if (!limit) {
-        return;
-    }
-    
-    // Set up the start of the linked list
-    nt = mpl_topol_new(tl->num_taxa);
-    
-    // Check the list isn't empty
-    if (tl->back != NULL) {
-        mpl_topol_link(tl->back, nt);
-    }
-    else {
-        assert(tl->front == NULL);
-        tl->back = tl->front = nt;
-    }
-    
-    do {
-        en = mpl_topol_new(tl->num_taxa);
-        mpl_topol_init(tl->num_taxa, en);
-        mpl_topol_link(nt, en);
-        nt = en;
-        en = en->next;
-        tl->back = nt;
-        ++i;
-    } while (i < nelems);
-    
-    assert(en == NULL);
-
-}
+//void mpl_treelist_extend(const long nelems, mpl_treelist* tl)
+//{
+//    
+//    long i = 0;
+//    long limit = 0;
+//    mpl_topol* nt = NULL;
+//    mpl_topol* en = NULL;
+//    
+//    // Check if the requested number of elements will exceed maxtrees
+//    // and if that maximum is allowed to be extended.
+//    if ((tl->num_trees + nelems) > tl->max_trees) {
+//        if (tl->increase_rate == 0) {
+//            limit = tl->max_trees - tl->num_trees;
+//        }
+//    }
+//    else {
+//        limit = nelems;
+//        tl->max_trees += nelems;
+//    }
+//    
+//    // If the request amounts to zero, then do nothing.
+//    if (!limit) {
+//        return;
+//    }
+//    
+//    // Set up the start of the linked list
+//    nt = mpl_topol_new(tl->num_taxa);
+//    
+//    // Check the list isn't empty
+//    if (tl->back != NULL) {
+//        mpl_topol_link(tl->back, nt);
+//    }
+//    else {
+//        assert(tl->front == NULL);
+//        tl->back = tl->front = nt;
+//    }
+//    
+//    do {
+//        en = mpl_topol_new(tl->num_taxa);
+//        mpl_topol_init(tl->num_taxa, en);
+//        mpl_topol_link(nt, en);
+//        nt = en;
+//        en = en->next;
+//        tl->back = nt;
+//        ++i;
+//    } while (i < nelems);
+//    
+//    assert(en == NULL);
+//
+//}
