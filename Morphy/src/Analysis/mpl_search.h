@@ -14,54 +14,44 @@
 #include "../Trees/mpl_node.h"
 #include "../Trees/mpl_tree.h"
 #include "../Trees/mpl_treelist.h"
+#include "../Analysis/mpl_scoretree.h"
 
-#define DEFAUL_BBREAK MPL_TBR_T
-
-typedef enum {
-    MPL_STEPWISE,
-    MPL_INMEM
-} mpl_starttrees_t;
-
-//typedef enum {
-//    MPL_INPUTORDER_T,
-//    MPL_RANDOM_T,
-//    MPL_DISTANCE_T,
-//} mpl_stepwise_t;
-
-typedef enum {
-    MPL_EXHAUSTIVE_T,
-    MPL_BANDB_T,
-    MPL_HEURISTIC_T
-} mpl_search_t;
-
-typedef enum {
-    MPL_NNI_T,
-    MPL_SPR_T,
-    MPL_TBR_T
-} mpl_bbreak_t;
 
 typedef struct _search mpl_search;
-typedef void (*mpl_searchfxn)(mpl_search* s);
+typedef struct _bbreak mpl_bbreak;
+
+typedef int (*mpl_searchfxn)(mpl_search* s);
 
 typedef struct _search {
     
     long            num_taxa;
     mpl_search_t    search_type;
     mpl_bbreak_t    bbreak_type;
-    mpl_stepw_t     stepw_type;
-    long            hold;
+    mpl_addseq_t    stepw_type;
+    int             hold;
+    long            keep;
     long            num_reps;
+    int             ratch_iter;
+    bool            use_ratchet;
     mpl_treelist*   treelist;
+    mpl_bbreak*     bbreak;
     mpl_searchfxn   searchfxn;
+    mpl_tree*       tree;
     mpl_tree*       constraint;
     
 } mpl_search;
 
+mpl_search*     mpl_search_new(const long ntax, mpl_treelist* tl);
+void            mpl_search_delete(mpl_search** s);
+
 int             mpl_search_set_search_t(const mpl_search_t stype, mpl_search* s);
 int             mpl_search_set_bbreak_t(const mpl_bbreak_t bbkt, mpl_search* s);
-int             mpl_search_set_stepw_t(const mpl_stepw_t swtype, mpl_search* s);
+int             mpl_search_set_stepw_t(const mpl_addseq_t swtype, mpl_search* s);
 int             mpl_search_set_hold(const int hold, mpl_search* s);
 int             mpl_search_add_treelist(mpl_treelist* tl, mpl_search* s);
-mpl_results*    mpl_do_search(mpl_search* s);
+int             mpl_search_set_numreps(const long nreps, mpl_search* s);
+bool            mpl_search_is_reptype(mpl_search* s);
+int             mpl_search_use_ratchet(const bool useratchet, mpl_search* s);
+mpl_results*    mpl_search_execute(mpl_search* s);
 
 #endif /* mpl_search_h */
