@@ -191,8 +191,8 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd)
     long range = end-start;
     
 //    pd->nchanges = (long*)safe_calloc(range, sizeof(long));
-    pd->indexbuf = (long*)safe_calloc(range, sizeof(long));
-    pd->rindexbuf = (long*)safe_calloc(range, sizeof(long));
+    pd->indexbuf   = (long*)safe_calloc(range, sizeof(long));
+    pd->rindexbuf  = (long*)safe_calloc(range, sizeof(long));
     pd->minchanges = (long*)safe_calloc(range, sizeof(long));
 }
 
@@ -274,12 +274,18 @@ void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
     long j = 0;
     long end = pd->end;
     
-    pd->ntipinbufs = (long*)safe_calloc(m->num_rows, sizeof(long));
-    pd->tipinbufs = (long**)safe_calloc(m->num_rows, sizeof(long*));
-    for (i = 0; i < m->num_rows; ++i) {
-        pd->tipinbufs[i] = (long*)safe_calloc(m->num_cols, sizeof(long));
+    if (pd->ntipinbufs == NULL) {
+        pd->ntipinbufs = (long*)safe_calloc(m->num_rows, sizeof(long));
     }
     
+    if (pd->tipinbufs == NULL) {
+        pd->tipinbufs  = (long**)safe_calloc(m->num_rows, sizeof(long*));
+        for (i = 0; i < m->num_rows; ++i) {
+            pd->tipinbufs[i] = (long*)safe_calloc(m->num_cols, sizeof(long));
+        }
+        
+    }
+
     pd->ntips = m->num_rows;
     
     for (i = 0; i < m->num_rows; ++i) {
@@ -295,7 +301,7 @@ void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
             }
             else {
                 tempup[i][j] = tempdn[i][j] = upset[i][j] = dnset[i][j];
-                prupset[i][i] = tempprup[i][j] = dnset[i][j];
+                prupset[i][j] = tempprup[i][j] = dnset[i][j];
                 actives[i][j] = tempact[i][j] = (dnset[i][j] & ISAPPLIC);
             }
         }
