@@ -41,7 +41,7 @@ void mpl_charbuf_init
     // TODO: CHECK RETURN!!!
     
     for (i = 0; i < cb->char_max; ++i) {
-        cb->weights[i] = DEFAULT_WEIGHT;
+        cb->weights[i]   = DEFAULT_WEIGHT;
         cb->preweight[i] = DEFAULT_PREWEIGHT;
     }
 }
