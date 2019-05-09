@@ -15,22 +15,20 @@ extern "C" {
     
 #include "../src/mpl_defs.h"
     
-// TODO: Need error code defs
-// TODO: Need enums that are exposed to client program
-
 typedef void* mpl_handle;
 
 mpl_handle* mpl_handle_new(void);
-int         mpl_handle_delete(mpl_handle** handl);
+int         mpl_handle_delete(mpl_handle* handl);
     
 // TODO: Use error codes
 int         mpl_set_dimensions(const long ntax, const long nchar, mpl_handle handl);
 long        mpl_get_ntax(const mpl_handle handl);
 long        mpl_get_nchar(const mpl_handle handl);
 int         mpl_load_matrix(const mpl_data_t datype, char* matrix, mpl_handle handl);
-int         mpl_attach_rawdata(const char* rawmatrix, mpl_handle handl;
+int         mpl_attach_rawdata(const mpl_data_t datype,const char* rawmatrix, mpl_handle handl);
 int         mpl_attach_symbols(const char* symbols, mpl_handle handl);
 //          Set character types
+int         mpl_set_gap_handl(const mpl_gap_t gaphandl, mpl_handle handl);
 //          Exclude character
 //          Include character
 //          Add taxon label
@@ -57,13 +55,17 @@ long        mpl_get_maxtrees(const mpl_handle handle);
 //          Set autoincrease value
 //          Get autoincrease value
 //          Set addition sequence type
+int         mpl_set_addseq(const mpl_addseq_t as, mpl_handle handle);
 //          Get addition sequence type
 //          Set branch-swapping type
 //          Get branch-swapping type
 //          Set keep number (number of trees to keep per replicate)
 //          Get keep number (number of trees to keep per replicate)
+int         mpl_set_numreps(const unsigned long nreps, mpl_handle handle);
 //          Do search according to parameters
+int         mpl_use_ratchet(const bool useratchet, mpl_handle handl);
 int         mpl_do_search(mpl_handle handle);
+long        mpl_get_num_trees(mpl_handle handl);
 char*       mpl_get_newick(const long tnum, mpl_handle handl);
 
 #ifdef __cplusplus
