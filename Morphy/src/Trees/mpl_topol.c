@@ -29,6 +29,8 @@ mpl_topol*  mpl_topol_new(long num_taxa)
     newtop = (mpl_topol*)safe_calloc(1, sizeof(mpl_topol));
     
     if (newtop) {
+        newtop->edges = NULL;
+        newtop->newick = NULL;
         if (mpl_topol_init(num_taxa, newtop)) {
             // If this fails, then delete new topology and exit.
             mpl_topol_delete(&newtop);
@@ -67,6 +69,7 @@ int mpl_topol_delete(mpl_topol** top)
 int mpl_topol_cleanup(mpl_topol* top)
 {
     safe_free(top->edges);
+    safe_free(top->newick);
     return 0;
 }
 
@@ -76,7 +79,7 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
         
         int i = 0;
         
-        top->num_polys = 0;
+//        top->num_polys = 0;
         top->root = -1;
         top->lock = -1;
         
@@ -95,9 +98,9 @@ int mpl_topol_reset(long num_taxa, mpl_topol* top)
             top->edges[i] = -1;
         }
         
-        top->next = NULL;
-        top->back = NULL;
-        
+//        top->next = NULL;
+//        top->back = NULL;
+//
         return 0;
     }
         
@@ -167,18 +170,18 @@ int mpl_topol_rebase(const long newb, mpl_topol* top)
     return 0;
 }
 
-int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
-{
-    if (parent && child) {
-        
-        parent->next = child;
-        child->back = parent;
-        
-        return 0;
-    }
-    
-    return -1;
-}
+//int mpl_topol_link(mpl_topol* parent, mpl_topol* child)
+//{
+//    if (parent && child) {
+//        
+//        parent->next = child;
+//        child->back = parent;
+//        
+//        return 0;
+//    }
+//    
+//    return -1;
+//}
 
 int mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2)
 {
@@ -260,26 +263,26 @@ int mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest)
     }
     
     dest->num_nodes = src->num_nodes;
-    dest->num_polys = src->num_polys;
+//    dest->num_polys = src->num_polys;
     dest->root      = src->root;
     dest->lock      = src->lock;
     dest->score     = src->score;
-    dest->compressed  = src->compressed;
+//    dest->compressed  = src->compressed;
     memcpy(dest->edges, src->edges, dest->num_nodes * sizeof(long));
     
     return 0;
 }
 
-void mpl_topol_compress(mpl_topol* top)
-{
-    long i = 0;
-    
-    top->compressed = 0UL;
-    
-    for (i = 0; i < top->num_nodes-1; ++i) {
-        // Compress fxn
-    }
-}
+//void mpl_topol_compress(mpl_topol* top)
+//{
+//    long i = 0;
+//
+//    top->compressed = 0UL;
+//
+//    for (i = 0; i < top->num_nodes-1; ++i) {
+//        // Compress fxn
+//    }
+//}
 
 /*
  *  PRIVATE FUNCTION DEFINITIONS
