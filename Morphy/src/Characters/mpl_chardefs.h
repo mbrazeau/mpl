@@ -23,15 +23,6 @@ typedef unsigned int mpl_discr;
 #define UNKNOWN  ((mpl_discr)~NA) // Bitmask for missing data that's know to be logically applicable
 #define GAPPUSH  1 // Shift value for the position of the gap
 
-#define DEFAULT_MISSING_SYMB '?'
-#define DEFAULT_UNKNOWN_SYMB '+'
-#define DEFAULT_GAP_SYMB     '-'
-#define DEFAULT_DATA_T       MPL_DISCR_T
-#define DEFAULT_PARSIM_T     MPL_FITCH_T
-#define DEFAULT_GAP_T        GAP_INAPPLIC
-#define DEFAULT_WEIGHT       1.0000000000
-#define DEFAULT_PREWEIGHT    0.2000000000
-
 #define VALID_NEXMAT_PUNC   "{}();"
 #define VALID_XREAD_MATPUNC "[];"
 #define VALID_MPL_MATPUNC   "{}[]();"
