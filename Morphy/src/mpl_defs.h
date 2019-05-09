@@ -32,9 +32,24 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
 #define MPL_MAX_DEPENDECIES 2 // Maximum number of root characters
 
+// Define all defaults:
 #define MPL_DEFAULT_RSEED    1U
 #define MPL_DEFAULT_MAXTREES 5000
 #define MPL_DEFAULT_AUTOINCR 100
+#define DEFAULT_NREPS        10
+#define DEFAULT_RATCHITER    50
+#define DEFAULT_MISSING_SYMB '?'
+#define DEFAULT_UNKNOWN_SYMB '+'
+#define DEFAULT_GAP_SYMB     '-'
+#define DEFAULT_DATA_T       MPL_DISCR_T
+#define DEFAULT_PARSIM_T     MPL_FITCH_T
+#define DEFAULT_GAP_T        GAP_INAPPLIC
+#define DEFAULT_WEIGHT       1.0000000000
+#define DEFAULT_PREWEIGHT    0.2000000000
+#define DEFAULT_BBREAK       MPL_TBR_T
+#define DEFAULT_ASTYPE       MPL_AST_ASIS
+#define DEFAULT_HOLD         ((int)1)
+
 
 typedef enum {
     
@@ -101,7 +116,7 @@ typedef enum {
     
     MPL_AST_MAX
     
-} mpl_stepw_t;
+} mpl_addseq_t;
 
 typedef enum {
     
