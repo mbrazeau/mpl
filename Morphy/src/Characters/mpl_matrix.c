@@ -265,6 +265,15 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     // Set all the char pointers to the 'cells'
     mpl_matrix_setup_cell_ptrs(m);
 
+    // TODO: This becomes more important with  other data  types
+    mpl_count_chartypes(m);
+    // Set up the databuffers needed: discrete, continuous, and "model"-based
+    // For each type, set up enough memory to handle the characters
+    for (i = 0; i < m->ndatypes; ++i) {
+        // TODO: create a return from this and check it
+        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
+    }
+    
     return ret;
 }
 
@@ -303,14 +312,6 @@ MPL_RETURN mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m)
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {
     int i = 0;
-    
-    mpl_count_chartypes(m);
-    // Set up the databuffers needed: discrete, continuous, and "model"-based
-    // For each type, set up enough memory to handle the characters
-    for (i = 0; i < m->ndatypes; ++i) {
-        // TODO: create a return from this and check it
-        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
-    }
     
     // Everything after here needs to be re-done if character parameters are
     // changed, in particular the parsimony type. This could be moved to its
