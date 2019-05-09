@@ -15,7 +15,7 @@ typedef struct mpl_topol {
     long            index;
     long            num_taxa;
     long            num_nodes;
-    long            num_polys;
+//    long            num_polys;
     long            root; // If rooted, then give the index, otherwise -1
     long            lock; // If a node is locked, set its index here, otherwise -1
     
@@ -23,11 +23,12 @@ typedef struct mpl_topol {
      * positive integer is the memory index of the ancestor. -1 is
      * used by convention to indicate no ancestor in the tree (i.e.
      * refers to a node not included in the tree. */
-    unsigned long   compressed;
+//    unsigned long   compressed;
     long*           edges;
+    char*           newick;
     double          score;
-    mpl_topol*      next;
-    mpl_topol*      back;
+//    mpl_topol*      next;
+//    mpl_topol*      back;
 } mpl_topol;
 
 mpl_topol*  mpl_topol_new(long num_taxa);
