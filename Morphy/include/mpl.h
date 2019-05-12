@@ -58,6 +58,7 @@ long        mpl_get_maxtrees(const mpl_handle handle);
 int         mpl_set_addseq(const mpl_addseq_t as, mpl_handle handle);
 //          Get addition sequence type
 //          Set branch-swapping type
+int         mpl_set_brswap(const mpl_bbreak_t bbkt, mpl_handle handle);
 //          Get branch-swapping type
 //          Set keep number (number of trees to keep per replicate)
 //          Get keep number (number of trees to keep per replicate)
