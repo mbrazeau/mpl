@@ -65,7 +65,8 @@ typedef enum {
     MPL_NOSEMICOLON     = -9,
     MPL_PARENTHMSM      = -10,
     MPL_BADDIMENSIONS   = -11,
-    MPL_BADSYMBOL       = -12
+    MPL_BADSYMBOL       = -12,
+    MPL_NOTREES         = -13
     
 } MPL_RETURN;
 
