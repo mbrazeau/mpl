@@ -74,16 +74,6 @@ int main(int argc, const char * argv[]) {
     fails += test_buffer_clearing();
     fails += test_basic_replication();
     
-    // Test mpl_taxablock.c
-//    fails += test_taxa_block_basic(argc, argv);
-    
-    // Test mpl_bbreak.c
-//    fails += test_bbreak_reroot_all_for_subtree();
-//    fails += test_bbreak_store_allswaps();
-//    fails += test_bbreak_store_TBR_allswaps();
-    fails += test_single_rep_hsearch();
-    fails += test_mutliple_replicate_heuristic_search();
-    
     // Test mpl_matrix.c
     fails += test_basic_matrix();
     fails += test_skip_closure();
@@ -106,7 +96,18 @@ int main(int argc, const char * argv[]) {
     fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
-    fails += test_find_char_by_char_mismatches();
+//    fails += test_find_char_by_char_mismatches();
+    
+    // Test mpl_taxablock.c
+    //    fails += test_taxa_block_basic(argc, argv);
+    
+    // Test mpl_bbreak.c
+    //    fails += test_bbreak_reroot_all_for_subtree();
+    //    fails += test_bbreak_store_allswaps();
+    //    fails += test_bbreak_store_TBR_allswaps();
+    fails += test_single_rep_hsearch();
+    fails += test_mutliple_replicate_heuristic_search();
+    fails += test_ratchet_search();
     
     printf("\n\nTest summary:\n\n");
     if (fails) {

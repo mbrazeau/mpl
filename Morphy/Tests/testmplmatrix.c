@@ -329,7 +329,7 @@ int test_parsimony_data_setup (void)
     
     for (i = 0; i < nrows; ++i) {
         for (j = 0; j < ncols; ++j) {
-            printf("%lu", m->cbufs[0].dnset[i][j]);
+            printf("%u", m->cbufs[0].dnset[i][j]);
             if (j < ncols - 1) {
                 printf(",\t");
             }
@@ -337,16 +337,16 @@ int test_parsimony_data_setup (void)
         printf("\n");
     }
     
-    unsigned long expected[nrows][ncols] =
+    unsigned int expected[nrows][ncols] =
 //   0  1  2  3  4  5  6  7  8  9  0  1  2  3  4
     {
         {4,  2, 2, 2, 2, 2, 2, 2, 2, 2,          2, 4, 2,          2, 2},
         {2,  2, 2, 2, 4, 8, 8, 8, 2, 2,          4, 4, 2,          1, 1},
         {2,  2, 2, 2, 4, 8, 8, 8, 2, 2,          4, 4, 2,          1, 1},
-        {12, 2, 2, 2, 4, 8, 8, 8, 2, 18446744073709551615uL, 4, 4, 2,          2, 1},
+        {12, 2, 2, 2, 4, 8, 8, 8, 2, UINT_MAX, 4, 4, 2,          2, 1},
         {2,  2, 2, 2, 4, 2, 8, 8, 2, 2,          4, 4, 2,          2, 1},
         {2,  2, 2, 2, 4, 2, 8, 8, 2, 2,          4, 4, 2,          1, 1},
-        {2,  2, 2, 4, 2, 2, 2, 2, 2, 2,          2, 2, 18446744073709551615uL, 2, 2}
+        {2,  2, 2, 4, 2, 2, 2, 2, 2, 2,          2, 2, UINT_MAX, 2, 2}
     };
    
     for (i = 0; i < nrows; ++i) {

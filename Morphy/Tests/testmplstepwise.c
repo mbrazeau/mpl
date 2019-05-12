@@ -31,6 +31,9 @@ int test_initial_fork (void)
     int ntax = 10;
     
     mpl_stepwise sw;
+    sw.addseq = NULL;
+    sw.held = NULL;
+    sw.sites = NULL;
     mpl_stepwise_init(MPL_AST_ASIS, ntax, 1, &sw);
     
     mpl_test_setup_first_fork(&sw);

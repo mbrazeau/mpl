@@ -184,6 +184,7 @@ int test_worst_case_polytomy (void)
     mpl_topol top;
     top.num_taxa = 1;
     top.edges = NULL;
+    top.newick = NULL;
     
     mpl_newick_rdr_init(numtaxa, &nwkrdr);
     
@@ -375,6 +376,7 @@ int test_perform_all_rerootings_small (void)
     mpl_topol top;
     top.num_taxa = 1;
     top.edges = NULL;
+    top.newick = NULL;
     mpl_topol_reset(numtaxa, &top);
     
     mpl_newick_rdr_init(numtaxa, &nwkrdr);
@@ -432,6 +434,7 @@ int test_perform_all_rerootings_large (void)
     mpl_topol top;
     top.num_taxa = 1;
     top.edges = NULL;
+    top.newick =  NULL;
     mpl_topol_reset(numtaxa, &top);
     
     mpl_newick_rdr_init(numtaxa, &nwkrdr);
