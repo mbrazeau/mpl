@@ -16,7 +16,7 @@
 
 typedef struct mpl_stepwise {
     
-    mpl_stepw_t     astype;
+    mpl_addseq_t    astype;
     long            num_tips;
     long            tips_added;
     long*           addseq;
@@ -32,14 +32,12 @@ typedef struct mpl_stepwise {
     
 } mpl_stepwise;
 
-#define DEFAULT_ASTYPE MPL_AST_ASIS
-#define DEFAULT_HOLD   ((int)1)
 
 void mpl_stepwise_init
-(const mpl_stepw_t astype, const long num_taxa, const int hold, mpl_stepwise* sw);
+(const mpl_addseq_t astype, const long num_taxa, const int hold, mpl_stepwise* sw);
 void mpl_stepwise_reset(mpl_stepwise* sw);
-void mpl_stepwise_set_type(const mpl_stepw_t astype, mpl_stepwise* sw);
-mpl_stepw_t mpl_stepwise_get_type(mpl_stepwise* sw);
+void mpl_stepwise_set_type(const mpl_addseq_t astype, mpl_stepwise* sw);
+mpl_addseq_t mpl_stepwise_get_type(mpl_stepwise* sw);
 void mpl_stepwise_do_search(mpl_stepwise* sw);
 
 #endif /* mpl_stepwise_h */
