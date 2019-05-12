@@ -52,6 +52,6 @@ int             mpl_search_add_treelist(mpl_treelist* tl, mpl_search* s);
 int             mpl_search_set_numreps(const long nreps, mpl_search* s);
 bool            mpl_search_is_reptype(mpl_search* s);
 int             mpl_search_use_ratchet(const bool useratchet, mpl_search* s);
-mpl_results*    mpl_search_execute(mpl_search* s);
+MPL_RETURN      mpl_search_execute(mpl_search* s);
 
 #endif /* mpl_search_h */
