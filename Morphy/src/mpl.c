@@ -17,6 +17,7 @@
 #include "Characters/mpl_matrix.h"
 #include "Analysis/mpl_scoretree.h"
 #include "Trees/mpl_newick_rdr.h"
+#include "Analysis/mpl_bbreak.h"
 
 typedef struct _handle {
     
@@ -232,6 +233,19 @@ int mpl_set_addseq(const mpl_addseq_t as, mpl_handle* handl)
     return MPL_SUCCESS;
 }
 
+int mpl_set_brswap(const mpl_bbreak_t bbkt, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    
+    if (!(bbkt > MPL_BBREAK_MAX)) {
+        return MPL_BADPARAM;
+    }
+    
+    mpl_bbreak_set_type(bbkt, handl->search->bbreak);
+    
+    return MPL_SUCCESS;
+}
+
 int mpl_set_numreps(const unsigned long nreps, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
@@ -258,13 +272,15 @@ int mpl_use_ratchet(const bool useratchet, mpl_handle* handl)
 int mpl_do_search(mpl_handle* handl)
 {
     RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+    
     mpl_matrix_apply_data(handl->matrix);
     mpl_init_parsimony(handl->matrix);
     
-    mpl_search_execute(handl->search);
+    ret = mpl_search_execute(handl->search);
 
     // TODO: Check return
-    return MPL_SUCCESS;
+    return ret;
 }
 
 char* mpl_get_newick(const long tnum, mpl_handle* handl)
