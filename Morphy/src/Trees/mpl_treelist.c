@@ -332,7 +332,7 @@ static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
             ihdead = tl->head->index;
         }
         if (tl->back != NULL) {
-            iback = tl->head->index;
+            iback = tl->back->index;
         }
         mpl_topol* extlist = NULL;
         
