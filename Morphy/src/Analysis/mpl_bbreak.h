@@ -51,8 +51,10 @@ typedef struct _bbreak {
 mpl_bbreak* mpl_bbreak_new(long num_nodes);
 void        mpl_bbreak_delete(mpl_bbreak** bbk);
 int         mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk);
-void        mpl_bbreak_reset(mpl_bbreak* bbk);
+int         mpl_bbreak_search(mpl_search* s);
+void        mpl_bbreak_cleanup(mpl_bbreak* bbk);
 void        mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk);
+void        mpl_bbreak_set_type(const mpl_bbreak_t bbkt, mpl_bbreak* bbk);
 void        mpl_do_bbreak(mpl_bbreak* bbk);
 
 #endif /* mpl_bbreak_h */
