@@ -268,7 +268,7 @@ static void mpl_part_parsim_uppass
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
         if (!n->marked && n->anc != ostart && n != ostart && n->anc != ostart->anc) {
-//            return;
+            return;
         }
     }
     
@@ -318,6 +318,7 @@ void mpl_src_root_parsimony(mpl_node* src)
     }
 }
 
+
 double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t)
 {
     double len = 0.0;
@@ -326,6 +327,8 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     double chgs = 0.0;
     
     mpl_tree_traverse(t);
+    
+    mpl_parsim_zero_na_nodal_changes(start->anc->mem_index, glmatrix);
     
     if (start->tip > 0) {
         n = start->anc;
@@ -355,27 +358,44 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
    
-// Second local check:
-//    double localchk = 0.0;
-//    mpl_node* tgt1 = mpl_node_get_sib(start);
-//    assert(tgt1 != start);
-//    mpl_node* tgt2 = start->anc->anc;
-////
-//    len = mpl_parsim_local_recheck(-1.0, -1.0, start->mem_index, tgt1->mem_index, tgt2->mem_index, t->base->mem_index, glmatrix);
-//
-//    if (lim > -1.0) {
-//        if (localchk > lim) {
-//            for (i = 0; i < t->nintern; ++i) {
-//                n = t->postord_intern[i];
-//                mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
-//            }
-//            mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
-//            mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
-//            return localchk;
-//        }
-//    }
     
-    // Downpass for inapplicables
+//    for (i = 0; i < t->nsubnodes; ++i) {
+//        n = t->partial_pass[i];
+//        len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
+//                                                  n->right->mem_index,
+//                                                  n->mem_index, glmatrix);
+////        if (lim > -1.0) {
+////            if (len > lim) {
+////                for (; i < t->nsubnodes; ++i) {
+////                    n = t->postord_intern[i];
+////                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+////                }
+////                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+////
+////                return len;
+//////                break;
+////            }
+////        }
+//    }
+//
+//    n = t->partial_pass[t->nsubnodes-1];
+////    mpl_node* p = NULL;
+////    if (n != t->base) {
+////        n = n->anc;
+////        while (n != t->base->anc) {
+////            len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
+////                                                      n->right->mem_index,
+////                                                      n->mem_index, glmatrix);
+////
+////            p = n;
+////            n = n->anc;
+////        }
+////        n = p;
+////    }
+//
+//    mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+    
+//    Downpass for inapplicables
     for (i = 0; i < t->nintern; ++i) {
 
         n = t->postord_intern[i];
@@ -385,7 +405,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                                   n->mem_index, glmatrix);
         if (lim > -1.0) {
             if (len > lim) {
-                for (; i < t->nintern; ++i) {
+                for ( ; i < t->nintern; ++i) {
                     n = t->postord_intern[i];
                     mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
                 }
@@ -399,7 +419,6 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
     }
 
-    
     return len;
 }
 
