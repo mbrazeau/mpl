@@ -48,6 +48,14 @@ int mpl_bbreak_search(mpl_search* s)
 {
     assert(s != NULL);
     mpl_bbreak_init(s, s->bbreak);
+    
+    // Check that search can happen
+    if (mpl_treelist_get_numtrees(s->treelist) < 1) {
+        if (s->stepw_type == MPL_AST_INMEM) {
+            return MPL_NOTREES;
+        }
+    }
+    
     mpl_do_bbreak(s->bbreak);
     mpl_bbreak_cleanup(s->bbreak);
     
@@ -417,10 +425,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             return;
         }
         
-//        if (clips[i]->lock == true) {
-//            clips[i]->lock = false;
-//            continue;
-//        }
+        if (clips[i]->lock == true) {
+            clips[i]->lock = false;
+            continue;
+        }
         
         clips[i]->clipmark = true;
         
@@ -590,7 +598,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                                         bbk->treelist);
                             clips[i]->lock = false;
                             
-                            if (ret != NULL && bbk->doislandcheck == true) {
+                            if (ret != NULL
+                                && bbk->doislandcheck == true) {
                                 if (t->score == bbk->shortest) {
                                     bbk->hitisland = true;
                                     return;
@@ -603,7 +612,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         return;
                     }
                     else if (bbk->savelim > 0) {
-                        if (bbk->treelist->rep_num_trees < bbk->savelim)  {
+                        if (bbk->treelist->rep_num_trees
+                            < bbk->savelim)  {
                             mpl_treelist_add_tree(true, t, bbk->treelist);
                         }
                     }
