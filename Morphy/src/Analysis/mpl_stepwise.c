@@ -22,6 +22,7 @@ static void mpl_setup_first_fork(mpl_stepwise* sw);
 static void mpl_switch_tree_buffers(mpl_stepwise* sw);
 static void mpl_store_starttree_nodes(mpl_tree* t, mpl_stepwise *sw);
 static void mpl_try_all_sites(mpl_node* n, mpl_tree* t, mpl_stepwise *sw);
+static void mpl_stepwise_apply_asis(mpl_stepwise* sw);
 
 /*******************************************************************************
  *                                                                             *
@@ -29,20 +30,25 @@ static void mpl_try_all_sites(mpl_node* n, mpl_tree* t, mpl_stepwise *sw);
  *                                                                             *
  ******************************************************************************/
 void mpl_stepwise_init
-(const mpl_stepw_t astype, const long num_taxa, const int hold, mpl_stepwise* sw)
+(const mpl_addseq_t astype, const long num_taxa, const int hold, mpl_stepwise* sw)
 {
-    long i = 0;
+//    long i = 0;
     
     sw->astype      = astype;
     sw->num_tips    = num_taxa;
     sw->hold        = hold;
     
-    sw->addseq      = (long*)safe_calloc(num_taxa, sizeof(long));
-    sw->sites       = (mpl_node**)safe_calloc(2 * num_taxa, sizeof(mpl_node*));
-    
-    for (i = 0; i < num_taxa; ++i) {
-        sw->addseq[i] = i;
+    if (sw->addseq == NULL) {
+        sw->addseq = (long*)safe_calloc(num_taxa, sizeof(long));
     }
+    if (sw->sites == NULL) {
+        sw->sites = (mpl_node**)safe_calloc(2 * num_taxa, sizeof(mpl_node*));
+    }
+
+    mpl_stepwise_apply_asis(sw);
+//    for (i = 0; i < num_taxa; ++i) {
+//        sw->addseq[i] = i;
+//    }
     
     // TODO: Check these returns:
     sw->tree    = mpl_new_tree(num_taxa);
@@ -57,17 +63,20 @@ void mpl_stepwise_reset(mpl_stepwise* sw)
     sw->num_tips    = 0;
     sw->hold        = DEFAULT_HOLD;
     safe_free(sw->addseq);
+    safe_free(sw->sites);
     mpl_delete_tree(&sw->tree);
+    mpl_treelist_delete(&sw->queued);
+    mpl_treelist_delete(&sw->held);
 }
 
 
-void mpl_stepwise_set_type(const mpl_stepw_t astype, mpl_stepwise* sw)
+void mpl_stepwise_set_type(const mpl_addseq_t astype, mpl_stepwise* sw)
 {
     sw->astype = astype;
 }
 
 
-mpl_stepw_t mpl_stepwise_get_type(mpl_stepwise* sw)
+mpl_addseq_t mpl_stepwise_get_type(mpl_stepwise* sw)
 {
     return sw->astype;
 }
@@ -123,6 +132,7 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
     mpl_set_addition_sequence(sw);
     mpl_treelist_clear_all(sw->held);
     mpl_treelist_clear_all(sw->queued);
+    
     for (i = 0; i < sw->queued->max_trees; ++i) {
         for (j = 0; j < sw->queued->trees[i].num_nodes; ++j) {
             sw->queued->trees[i].edges[j] = -1;
@@ -211,6 +221,7 @@ static void mpl_shuffle_addseq(mpl_stepwise* sw)
         sw->addseq[j] = sw->addseq[i];
         sw->addseq[i] = t;
     }
+    
 }
 
 static void mpl_set_addition_sequence(mpl_stepwise* sw)
@@ -218,6 +229,9 @@ static void mpl_set_addition_sequence(mpl_stepwise* sw)
     switch (sw->astype) {
         case MPL_AST_RANDOM:
             mpl_shuffle_addseq(sw);
+            break;
+        case MPL_AST_ASIS:
+            mpl_stepwise_apply_asis(sw);
             break;
         default:
             break;
@@ -340,6 +354,14 @@ static void mpl_try_all_sites
         }
 
         mpl_node_bin_clip(n);
+    }
+}
+
+static void mpl_stepwise_apply_asis(mpl_stepwise* sw)
+{
+    long i = 0;
+    for (i = 0; i < sw->num_tips; ++i) {
+        sw->addseq[i] = i;
     }
 }
 
