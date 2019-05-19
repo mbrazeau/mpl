@@ -372,17 +372,25 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 //
     if (lim > -1.0) {
         if (len > lim) {
+            // TODO: This needs a wrapper function if it's going to be more permanent
+            long end = 0;
+            if (glmatrix->parsets[1].nchars > 0) {
+                end = glmatrix->parsets[1].indexbuf[glmatrix->parsets[1].nchars-1] + 1;
+                assert(end > glmatrix->parsets[1].start);
+            }
+            mpl_charbuf_restore_discr_states(glmatrix->parsets[1].start, end, &glmatrix->cbufs[MPL_DISCR_T]);
+            return len;
 //            for (i = 0; i < t->nintern; ++i) {
 //                n = t->postord_intern[i];
 //                mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
 //            }
 //            mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
 //            return len;
-            goto resetchars;
         }
     }
 
 
+    len = 0;
 //    Downpass for inapplicables
     for (i = 0; i < t->nintern; ++i) {
 
@@ -407,14 +415,12 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 //        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
 //    }
     // TODO: This needs a wrapper function if it's going to be more permanent
-resetchars: {
     long end = 0;
     if (glmatrix->parsets[1].nchars > 0) {
         end = glmatrix->parsets[1].indexbuf[glmatrix->parsets[1].nchars-1] + 1;
         assert(end > glmatrix->parsets[1].start);
     }
     mpl_charbuf_restore_discr_states(glmatrix->parsets[1].start, end, &glmatrix->cbufs[MPL_DISCR_T]);
-}
 
     return len;
 }
