@@ -195,7 +195,7 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
     
     mpl_tree_mark_uniquely(t);
     
-    top->lock = 0;
+    top->lock = 0; // TODO: This might need to be -1
     // Then copy into the topology record
     int i = 0;
     for (i = 0; i < t->num_nodes; ++i) {
@@ -203,7 +203,7 @@ int mpl_tree_record_topol(mpl_topol* top, mpl_tree* t)
             if (t->nodes[i].anc != NULL) {
                 top->edges[i] = t->nodes[i].anc->copy_index;
                 if (t->nodes[i].clipmark == true) {
-                    top->lock = i + 1;
+                    top->lock = t->nodes[i].copy_index + 1;
                 }
             }
         } else {
