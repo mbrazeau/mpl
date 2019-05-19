@@ -25,6 +25,9 @@ static void mpl_bbreak_trav_targets
 static long mpl_bbreak_get_target_list(const mpl_tree* t, const mpl_node* site, mpl_bbreak* bbk);
 static void mpl_swap_all(mpl_tree* t, mpl_bbreak* bbk);
 void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk);
+void mpl_bbreak_incr_rearrangs(mpl_bbreak* bbk);
+void mpl_bbreak_reset_rearrangs(mpl_bbreak* bbk);
+double mpl_bbreak_get_rearrangs(mpl_bbreak* bbk);
 
 void do_interrupt(int signal)
 {
@@ -75,6 +78,9 @@ int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
     bbk->numtaxa        = s->num_taxa;
     bbk->num_nodes      = 2 * s->num_taxa - 1;
     bbk->doislandcheck  = true;
+    bbk->limit          = 0.0;
+    bbk->bestinrep      = 0.0;
+    bbk->shortest       = 0.0;
     
     // Check if bbreak is a replication type and set numreps
     if (mpl_search_is_reptype(s) == true) {
@@ -346,8 +352,16 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         current = bbk->treelist->back;
         mpl_tree_read_topol(t, current);
         mpl_treelist_reverse_head(bbk->treelist);
-        bbk->bestinrep = current->score = mpl_length_only_parsimony(-1.0, t);
+        current->score = mpl_length_only_parsimony(-1.0, t);
         
+        // TODO: The routine needs to be smart enough here to reset the buffer
+        // etc. if this modified current tree is in fact best overall.
+        if (current->score < bbk->shortest) {
+            mpl_treelist_clear_all(bbk->treelist);
+            mpl_treelist_add_tree(false, t, bbk->treelist);
+            bbk->shortest = bbk->bestinrep = oldbest = current->score;
+        }
+
         assert(current->index == index);
         
         mpl_swap_all(t, bbk);
@@ -470,7 +484,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 //        }
         // If the branch is zero-length, no need to continue. All swaps will
         // result in redundant trees after collapsing.
-//        if ((srclen + tgtlen) == bound) {
+//        if ((srclen + tgtlen) == bbk->bestinrep) {
 //            mpl_node_bin_connect(left, right, clips[i]);
 //            clips[i]->lock = false;
 //            clips[i]->clipmark = false;
@@ -563,9 +577,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                                 clips[i],
                                                 tgts[j],
                                                 t);
-                
-                t->score = (score + tgtlen + srclen);
 
+                t->score = (score + tgtlen + srclen);
+//
 //                t->score = mpl_fullpass_parsimony(t);
 //                t->score = mpl_length_only_parsimony(bbk->shortest, t);
                 
@@ -581,6 +595,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             
                             bbk->shortest   = t->score;
                             bbk->bestinrep  = t->score;
+                            bbk->hitisland  = false;
                             mpl_treelist_clear_all(bbk->treelist);
                             clips[i]->clipmark = false;
                             mpl_treelist_add_tree(false, t, bbk->treelist);
