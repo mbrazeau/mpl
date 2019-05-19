@@ -85,10 +85,12 @@ static const mpl_parsdat Wagner_Std = {
 // Data from the discrete character charbuf
 mpl_discr** restrict dnset          = NULL;
 mpl_discr** restrict prupset        = NULL;
+mpl_discr** restrict dnsetf         = NULL;
 mpl_discr** restrict upset          = NULL;
 mpl_discr** restrict actives        = NULL;
 mpl_discr** restrict tempdn         = NULL;
 mpl_discr** restrict tempprup       = NULL;
+mpl_discr** restrict tempdnf        = NULL;
 mpl_discr** restrict tempup         = NULL;
 mpl_discr** restrict tempact        = NULL;
 double*     restrict weights        = NULL;
@@ -111,9 +113,11 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
 {
     dnset           = cb->dnset;
     prupset         = cb->prupset;
+    dnsetf          = cb->dnsetf;
     upset           = cb->upset;
     actives         = cb->actives;
     tempdn          = cb->tempdn;
+    tempdnf         = cb->tempdnf;
     tempprup        = cb->tempprup;
     tempup          = cb->tempup;
     tempact         = cb->tempact;
@@ -411,6 +415,7 @@ double mpl_fitch_local_check
     double score = 0.0;
     
 //    if (lim < 0.0) {
+#pragma clang loop vectorize(enable)
         for (i = pd->start; i < end; ++i) {
             if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
                 score += weights[i];
@@ -892,15 +897,15 @@ double mpl_fitch_na_recalc_second_downpass
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
-        dnset[left][i]    = tempdn[left][i];
-        prupset[left][i]  = tempprup[left][i];
-        upset[left][i]    = tempup[left][i];
-        actives[left][i]  = tempact[left][i];
-        dnset[right][i]   = tempdn[right][i];
-        prupset[right][i] = tempprup[right][i];
-        upset[right][i]   = tempup[right][i];
-        actives[right][i] = tempact[right][i];
-        
+//        dnset[left][i]    = tempdn[left][i];
+//        prupset[left][i]  = tempprup[left][i];
+//        upset[left][i]    = tempup[left][i];
+//        actives[left][i]  = tempact[left][i];
+//        dnset[right][i]   = tempdn[right][i];
+//        prupset[right][i] = tempprup[right][i];
+//        upset[right][i]   = tempup[right][i];
+//        actives[right][i] = tempact[right][i];
+//
     }
     
     return cost;
@@ -943,7 +948,6 @@ double mpl_fitch_na_local_check
     const long end = pd->end;
     double score = 0.0;
     
-#pragma simd
     for (i = pd->start; i < end; ++i) {
         
         if (upset[src][i] & ISAPPLIC) {
@@ -964,6 +968,11 @@ double mpl_fitch_na_local_check
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
             }
+//            else if (!(dnset[src][i] & NA)) {
+//                if (tempact[troot][i]) {
+//                    score += weights[i];
+//                }
+//            }
             else if (upset[src][i] < MISSING) {
                 
                 pd->indexbuf[pd->nchars] = i;
@@ -991,8 +1000,10 @@ double mpl_fitch_na_local_check
             }
         }
         
+        // NOTE: It's possible that the complexity of checking this offsets the
+        // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            if ((score + base - pd->scorerecall) > lim) {
+            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
                 return score;
             }
         }
@@ -1020,28 +1031,23 @@ double mpl_fitch_na_local_recheck
     long* restrict indices = pd->indexbuf;
     pd->rnchars = 0;
     
-#pragma simd
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
         
-        if ((tempup[src][i] & ISAPPLIC) && (upset[src][i] & ISAPPLIC)) {
-            
-            if (upset[tgt1][i] == NA && upset[tgt2][i] == NA) {
-                score += (changes[i] * weights[i]);
-                
-                if (tempact[troot][i]) {
+        // Some stuff that could be checked at this point in light of
+        // partial pass optimisation
+        if (upset[src][i] & (upset[tgt1][i] | upset[tgt2][i])) {
+            if (upset[src][i] == NA) {
+                if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
                     score += weights[i];
                 }
             }
-            else {
-                pd->rindexbuf[pd->rnchars] = i;
-                ++pd->rnchars;
+        }
+        else if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
+            if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
+                score += weights[i];
             }
-            
-        } else {
-            pd->rindexbuf[pd->rnchars] = i;
-            ++pd->rnchars;
         }
     }
     
@@ -1265,6 +1271,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long* restrict indices = pd->indexbuf;
     
     if (anc > -1) {
+#pragma clang loop vectorize(enable)
         for (j = pd->nchars; j-- ; ) {
             
             i = indices[j];
@@ -1279,6 +1286,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             actives[anc][i] = tempact[anc][i];
         }
     } else {
+#pragma clang loop vectorize(enable)
         for (j = pd->nchars; j-- ; ) {
             
             i = indices[j];
