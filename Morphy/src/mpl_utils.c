@@ -5,6 +5,17 @@
 //  Created by Martin Brazeau on 29/12/2018.
 //  Copyright © 2018 Martin Brazeau. All rights reserved.
 //
+
+/*
+
+ This file contains general-purpose utilities used throughout the morphy library
+ including memory managment convencience functions, basic dynamic string struct
+ definition and functions, a pseudorandom number generator, the random number
+ generator's seed variable, floating point comparison function, and integer
+ comparison functions for use by sorting algorithms.
+ 
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
