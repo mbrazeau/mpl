@@ -66,9 +66,11 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->upset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->prupset);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnsetf);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->actives);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdn);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempprup);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdnf);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempact);
     
@@ -92,14 +94,14 @@ void mpl_charbuf_add_data_column
     
     for (i = 0; i < cb->row_max; ++i) {
 //        cb->upset[i][colnum] =
-        cb->dnset[i][colnum] = datcol[i];
-        cb->tempdn[i][colnum] = datcol[i];
-        cb->upset[i][colnum] = datcol[i];
-        cb->prupset[i][colnum] = datcol[i];
+        cb->dnset[i][colnum]    = datcol[i];
+        cb->tempdn[i][colnum]   = datcol[i];
+        cb->upset[i][colnum]    = datcol[i];
+        cb->prupset[i][colnum]  = datcol[i];
         cb->tempprup[i][colnum] = datcol[i];
-        cb->tempup[i][colnum] = datcol[i];
-        cb->actives[i][colnum] = datcol[i] & ISAPPLIC;
-        cb->tempact[i][colnum] = datcol[i] & ISAPPLIC;
+        cb->tempup[i][colnum]   = datcol[i];
+        cb->actives[i][colnum]  = datcol[i] & ISAPPLIC;
+        cb->tempact[i][colnum]  = datcol[i] & ISAPPLIC;
 //        cb->tempup[i][colnum] = datcol[i];
 //        if (((datcol[i] - 1) & datcol[i]) == 0) {
 //            cb->actives[i][colnum] = cb->tempact[i][colnum];
@@ -144,35 +146,48 @@ void mpl_charbuf_store_discr_states(mpl_charbuf* cb)
     }
 }
 
-void mpl_charbuf_restore_discr_states(mpl_charbuf* cb)
+void mpl_charbuf_restore_discr_states
+(const long start, const long end, mpl_charbuf* cb)
 {
-    long i;
-    long j;
-    for (i = 2 * cb->row_max; i-- ;) {
-        for (j = cb->char_max; j-- ;) {
-            cb->dnset[i][j]     = cb->tempdn[i][j] ;
-            cb->upset[i][j]     = cb->tempup[i][j] ;
-            cb->actives[i][j]   = cb->tempact[i][j] ;
-        }
+    size_t i;
+    size_t j;
+    size_t lend = end;
+    
+    if (end == 0) {
+        lend = cb->char_max;
+    }
+    
+    for (i = 0; i < (2 * cb->row_max); ++i) {
+        memcpy(&cb->dnset[i][start], &cb->tempdn[i][start], (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->prupset[i][start], &cb->tempprup[i][start], (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->upset[i][start], &cb->tempup[i][start], (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->actives[i][start], &cb->tempact[i][start], (lend - start) * sizeof(mpl_discr));
+//#pragma clang loop vectorizfe(enable)
+//        for (j = start; j < lend; ++j) {
+//            cb->dnset[i][j]     = cb->tempdn[i][j];
+//            cb->prupset[i][j]   = cb->tempprup[i][j];
+//            cb->upset[i][j]     = cb->tempup[i][j] ;
+//            cb->actives[i][j]   = cb->tempact[i][j] ;
+//        }
     }
 }
 
-void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb)
-{
-    long i = 0;
-    long rowmax = 2 * cb->row_max;
-    long j = 0;
-    long k = 0;
-    
-    for (i = 0; i < rowmax; ++i) {
-        for (j = 0; j < nchar; ++j) {
-//            k = inds[j];
-            cb->dnset[i][k]   =  cb->tempdn[i][k];
-            cb->upset[i][k]   =  cb->tempup[i][k];
-            cb->actives[i][k]  = cb->tempact[i][k];
-        }
-    }
-}
+//void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb)
+//{
+//    long i = 0;
+//    long rowmax = 2 * cb->row_max;
+//    long j = 0;
+//    long k = 0;
+//
+//    for (i = 0; i < rowmax; ++i) {
+//        for (j = 0; j < nchar; ++j) {
+////            k = inds[j];
+//            cb->dnset[i][k]   =  cb->tempdn[i][k];
+//            cb->upset[i][k]   =  cb->tempup[i][k];
+//            cb->actives[i][k]  = cb->tempact[i][k];
+//        }
+//    }
+//}
 
 int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb)
 {
@@ -308,14 +323,16 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
 {
     assert(cb->row_max && cb->char_max);
     
-    cb->dnset   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->prupset = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->upset   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->actives = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->tempdn  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->dnset    = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->prupset  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->dnsetf   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->upset    = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->actives  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->tempdn   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempprup = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->tempup  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
-    cb->tempact = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->tempdnf  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->tempup   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->tempact  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     
     cb->nodechanges = mpl_charbuf_alloc_long_matrix(cb->row_max, cb->char_max);
     

@@ -38,10 +38,12 @@ typedef struct _charbuf {
     mpl_data_t  datype;
     mpl_discr** dnset; // The set of downpass characters
     mpl_discr** prupset;
+    mpl_discr** dnsetf; // second downpass set
     mpl_discr** upset; // The set of uppass characters
     mpl_discr** actives; // Applicable states encountered down to this node
     mpl_discr** tempdn; // Temporary storage of state sets
     mpl_discr** tempprup;
+    mpl_discr** tempdnf; 
     mpl_discr** tempup;
     mpl_discr** tempact;
     
@@ -53,7 +55,7 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb);
 void mpl_charbuf_add_data_column
 (const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb);
 void mpl_charbuf_store_discr_states(mpl_charbuf* cb);
-void mpl_charbuf_restore_discr_states(mpl_charbuf* cb);
+void mpl_charbuf_restore_discr_states(const long start, const long end, mpl_charbuf* cb);
 void mpl_charbuf_fast_restore_discr_states(const long nchar, const long* inds, mpl_charbuf* cb);
 int mpl_charbuf_assert_temps_equal_bufs(mpl_charbuf* cb);
 long mpl_charbuf_analyze_discr_minchanges(const long i, bool gapmissing, mpl_charbuf* cb);
