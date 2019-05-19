@@ -158,10 +158,18 @@ void mpl_charbuf_restore_discr_states
     }
     
     for (i = 0; i < (2 * cb->row_max); ++i) {
-        memcpy(&cb->dnset[i][start], &cb->tempdn[i][start], (lend - start) * sizeof(mpl_discr));
-        memcpy(&cb->prupset[i][start], &cb->tempprup[i][start], (lend - start) * sizeof(mpl_discr));
-        memcpy(&cb->upset[i][start], &cb->tempup[i][start], (lend - start) * sizeof(mpl_discr));
-        memcpy(&cb->actives[i][start], &cb->tempact[i][start], (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->dnset[i][start],
+               &cb->tempdn[i][start],
+               (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->prupset[i][start],
+               &cb->tempprup[i][start],
+               (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->upset[i][start],
+               &cb->tempup[i][start],
+               (lend - start) * sizeof(mpl_discr));
+        memcpy(&cb->actives[i][start],
+               &cb->tempact[i][start],
+               (lend - start) * sizeof(mpl_discr));
 //#pragma clang loop vectorizfe(enable)
 //        for (j = start; j < lend; ++j) {
 //            cb->dnset[i][j]     = cb->tempdn[i][j];
