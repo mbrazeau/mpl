@@ -64,17 +64,19 @@ int mpl_reset_node(mpl_node* n)
 #endif
 
     // TODO: Deal with label
-    n->left = NULL;
+    n->left  = NULL;
     n->right = NULL;
+    
     memset(n->descs, 0, n->ndescs * sizeof(mpl_node*));
-    n->ndescs = 0;
+    n->ndescs       = 0;
+    
     // Don't touch n->capacity unless freeing the node
-    n->anc = NULL;
-    n->po_index = 0;
-    n->copy_index = 0;
-    n->weight = 0;
-    n->clipmark = false;
-    n->lock = false;
+    n->anc          = NULL;
+    n->po_index     = 0;
+    n->copy_index   = 0;
+    n->weight       = 0;
+    n->clipmark     = false;
+    n->lock         = false;
     
     return 0;
 }
