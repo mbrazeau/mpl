@@ -10,6 +10,7 @@
 #define mpl_utils_h
 
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef void* mpl_str;
 
