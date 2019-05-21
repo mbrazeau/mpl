@@ -356,11 +356,11 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         // TODO: The routine needs to be smart enough here to reset the buffer
         // etc. if this modified current tree is in fact best overall.
-        if (current->score < bbk->shortest) {
-            mpl_treelist_clear_all(bbk->treelist);
-            mpl_treelist_add_tree(false, t, bbk->treelist);
-            bbk->shortest = bbk->bestinrep = oldbest = current->score;
-        }
+//        if (current->score < bbk->shortest) {
+//            mpl_treelist_clear_all(bbk->treelist);
+//            mpl_treelist_add_tree(false, t, bbk->treelist);
+//            bbk->shortest = bbk->bestinrep = oldbest = current->score;
+//        }
 
         assert(current->index == index);
         
@@ -439,10 +439,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             return;
         }
         
-        if (clips[i]->lock == true) {
-            clips[i]->lock = false;
-            continue;
-        }
+//        if (clips[i]->lock == true) {
+//            clips[i]->lock = false;
+//            continue;
+//        }
         
         clips[i]->clipmark = true;
         
@@ -590,12 +590,13 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 if (t->score <= bbk->bestinrep) {
                     
                     if (t->score < bbk->bestinrep) {
+
+                        bbk->hitisland = false;
                         
                         if (t->score < bbk->shortest) {
                             
                             bbk->shortest   = t->score;
                             bbk->bestinrep  = t->score;
-                            bbk->hitisland  = false;
                             mpl_treelist_clear_all(bbk->treelist);
                             clips[i]->clipmark = false;
                             mpl_treelist_add_tree(false, t, bbk->treelist);
@@ -622,20 +623,16 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             }
                         }
                         
-                        bbk->savecount = 1;
-                        
                         return;
                     }
                     else if (bbk->savelim > 0) {
-                        if (bbk->treelist->rep_num_trees
-                            < bbk->savelim)  {
+                        if (bbk->treelist->rep_num_trees < bbk->savelim) {
                             mpl_treelist_add_tree(true, t, bbk->treelist);
                         }
                     }
                     else {
                         mpl_treelist_add_tree(true, t, bbk->treelist);
                     }
-                    
                 }
             
                 //  Put the src tree back in its original spot
