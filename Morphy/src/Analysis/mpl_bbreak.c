@@ -15,7 +15,7 @@
 #include "mpl_bbreak.h"
 #include "mpl_scoretree.h"
 
-sig_atomic_t search_interrupt = 0;
+int search_interrupt = 0;
 
 static void mpl_bbreak_print_status_header(mpl_bbreak* bbk);
 static void mpl_bbreak_print_status(long rep, mpl_bbreak* bbk);
