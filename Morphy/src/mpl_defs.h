@@ -12,6 +12,11 @@
 //#include "Taxa/mpl_taxblock.h"
 //#include "Search/mpl_search.h"
 //#include "Results/mpl_results.h"
+#ifdef _WIN32
+#define restrict __declspec(restrict)
+#else
+#define restrict restrict
+#endif
 
 #if defined(__GNUC__)
 #define MPL_POPCOUNTLL(c, v) (c = __builtin_popcountl(v))
