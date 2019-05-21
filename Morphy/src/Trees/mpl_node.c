@@ -344,7 +344,7 @@ void mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc)
  @param n a pointer to a node.
  @return a pointer to the base of the clipped node.
  */
-inline mpl_node* mpl_node_bin_clip(mpl_node* n)
+mpl_node* mpl_node_bin_clip(mpl_node* n)
 {
 //    if (n->lock == true) {
 //        return NULL;
@@ -390,7 +390,7 @@ inline mpl_node* mpl_node_bin_clip(mpl_node* n)
  branch being inserted.
  @param n the top node of the branch being inserted.
  */
-inline void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* n)
+void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* n)
 {
 #ifdef DEBUG
     assert(!(toleft && toright)); // Should not pass in both
