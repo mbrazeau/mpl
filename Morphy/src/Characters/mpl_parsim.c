@@ -956,32 +956,17 @@ double mpl_fitch_na_local_check
                     score += weights[i];
                 }
             }
-            else if (dnset[src][i] & NA && upset[src][i] < UNKNOWN) {
-                if (tempact[troot][i]) {
-                    score += weights[i];
-                }
-            }
-//            else if (dnset[src][i] < MISSING) {
             else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
             }
-//            else if (!(dnset[src][i] & NA)) {
-//                if (tempact[troot][i]) {
-//                    score += weights[i];
-//                }
-//            }
             else if (upset[src][i] < MISSING) {
-                
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
-//                if (!(tempact[troot][i] & tempact[src][i]) && tempact[troot][i]) {
-//                    pd->minscore += weights[i];
-//                }
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -994,9 +979,6 @@ double mpl_fitch_na_local_check
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
-//                if (!(tempact[troot][i] & tempact[src][i]) && tempact[src][i]) {
-//                    pd->minscore += weights[i];
-//                }
             }
         }
         
@@ -1037,18 +1019,37 @@ double mpl_fitch_na_local_recheck
         
         // Some stuff that could be checked at this point in light of
         // partial pass optimisation
-        if (upset[src][i] & (upset[tgt1][i] | upset[tgt2][i])) {
-            if (upset[src][i] == NA) {
+        if (upset[src][i] & ISAPPLIC) {
+            if (upset[tgt1][i] & NA && upset[tgt2][i] & NA) {
+                if (tempact[troot][i]) {
+                    score += weights[i];
+                }
+            }
+//            else if (!(upset[src][i] & (upset[tgt1][i] | upset[tgt2][i]))) {
+//                score += weights[i];
+//            }
+        } else if (upset[src][i] & NA) {
+            if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
                 if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
                     score += weights[i];
                 }
             }
-        }
-        else if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
-            if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
+            else if (tempact[src][i]) {
                 score += weights[i];
             }
         }
+//        if (upset[src][i] & (upset[tgt1][i] | upset[tgt2][i])) {
+//            if (upset[src][i] == NA) {
+//                if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
+//                    score += weights[i];
+//                }
+//            }
+//        }
+//        else if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
+//            if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
+//                score += weights[i];
+//            }
+//        }
     }
     
     return score;
