@@ -170,7 +170,7 @@ void mpl_charbuf_restore_discr_states
         memcpy(&cb->actives[i][start],
                &cb->tempact[i][start],
                (lend - start) * sizeof(mpl_discr));
-//#pragma clang loop vectorizfe(enable)
+//#pragma clang loop vectorize(enable)
 //        for (j = start; j < lend; ++j) {
 //            cb->dnset[i][j]     = cb->tempdn[i][j];
 //            cb->prupset[i][j]   = cb->tempprup[i][j];
