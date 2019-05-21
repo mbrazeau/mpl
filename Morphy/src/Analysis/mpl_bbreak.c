@@ -11,6 +11,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+#include <signal.h>
 
 #include "mpl_bbreak.h"
 #include "mpl_scoretree.h"
