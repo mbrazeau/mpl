@@ -147,7 +147,7 @@ double mpl_parsim_local_recheck
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
 
 double mpl_fitch_na_recalc_second_downpass
-(const long left, const long right, const long n, mpl_parsdat* pd);
+(const long left, const long right, const long n, mpl_parsdat* restrict pd);
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);

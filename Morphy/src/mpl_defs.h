@@ -13,7 +13,7 @@
 //#include "Search/mpl_search.h"
 //#include "Results/mpl_results.h"
 #ifdef _WIN32
-#define restrict __declspec(restrict)
+#define restrict __restrict
 #else
 #define restrict restrict
 #endif
