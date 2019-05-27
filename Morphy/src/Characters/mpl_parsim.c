@@ -815,9 +815,9 @@ int mpl_fitch_na_recalc_first_uppass
         }
 
         if (tempprup[n][i] != prupset[n][i]) {
-            if (tempprup[n][i] == NA || prupset[n][i] == NA) {
+//            if (tempprup[n][i] == NA || prupset[n][i] == NA) {
                 ++chgs;
-            }
+//            }
         }
     }
     
@@ -1436,7 +1436,7 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
         if (m->parsets[i].isNAtype == true) {
             mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
             mpl_fitch_na_second_downpass(left, right, n, &m->parsets[i]);
-//            mpl_update_active_sets(left, right, n, &m->parsets[i]);
+            mpl_update_active_sets(left, right, n, &m->parsets[i]);
         }
     }
 }
