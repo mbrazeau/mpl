@@ -12,5 +12,6 @@
 #include "mpltest.h"
 
 int test_parsimony_shortcut (void);
+int test_parsimony_shortcut_with_rerooting (void);
 
 #endif /* testparsshortcut_h */
