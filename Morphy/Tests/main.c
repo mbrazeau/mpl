@@ -19,6 +19,7 @@
 #include "testmplmatrix.h"
 #include "testmplparsimony.h"
 #include "testmplstepwise.h"
+#include "testparsshortcut.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -96,6 +97,13 @@ int main(int argc, const char * argv[]) {
     fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
+    
+    
+    // Test shortcut parsimony
+    fails += test_parsimony_shortcut();
+    fails += test_parsimony_shortcut_with_rerooting();
+    
+    
 //    fails += test_find_char_by_char_mismatches();
     
     // Test mpl_taxablock.c
