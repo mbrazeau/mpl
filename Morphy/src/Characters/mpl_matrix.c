@@ -209,6 +209,9 @@ MPL_RETURN  mpl_matrix_init
 
 MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
 {
+    RET_IF_NULL(rawdat);
+    RET_IF_NULL(m);
+
     MPL_RETURN ret = MPL_SUCCESS;
     long i = 0;
     long j = 0;
@@ -311,6 +314,8 @@ MPL_RETURN mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m)
 
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {
+    RET_IF_NULL(m);
+    
     int i = 0;
     
     // Everything after here needs to be re-done if character parameters are
