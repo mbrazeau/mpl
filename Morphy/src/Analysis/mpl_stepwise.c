@@ -39,12 +39,12 @@ void mpl_stepwise_init
     sw->num_tips    = num_taxa;
     sw->hold        = hold;
     
-    if (sw->addseq == NULL) {
+    //if (sw->addseq == NULL) {
         sw->addseq = (long*)safe_calloc(num_taxa, sizeof(long));
-    }
-    if (sw->sites == NULL) {
+    //}
+    //if (sw->sites == NULL) {
         sw->sites = (mpl_node**)safe_calloc(2 * num_taxa, sizeof(mpl_node*));
-    }
+    //}
 
     mpl_stepwise_apply_asis(sw);
 //    for (i = 0; i < num_taxa; ++i) {
