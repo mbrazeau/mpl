@@ -237,6 +237,7 @@ int test_newick_writing (void)
     mpl_topol top;
     top.num_taxa = 1;
     top.edges = NULL;
+    top.newick = NULL;
     mpl_topol_reset(numtaxa, &top);
     
     mpl_newick_rdr_init(numtaxa, &nwkrdr);
