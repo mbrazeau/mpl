@@ -353,7 +353,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         current = bbk->treelist->back;
         mpl_tree_read_topol(t, current);
         mpl_treelist_reverse_head(bbk->treelist);
-        current->score = mpl_length_only_parsimony(-1.0, t);
+        current->score = oldbest;//mpl_length_only_parsimony(-1.0, t);
         
         // TODO: The routine needs to be smart enough here to reset the buffer
         // etc. if this modified current tree is in fact best overall.

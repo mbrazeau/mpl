@@ -77,6 +77,14 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 double mpl_fitch_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
+double mpl_fitch_na_tip2tip_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd);
 void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd);
 double mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
@@ -132,6 +140,8 @@ void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl
 void mpl_parsim_do_src_tip(const long n, mpl_matrix* m);
 void mpl_parsim_update_active_sets(const long left, const long right, const long n, mpl_matrix* m);
 double mpl_parsim_local_check
+(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
+double mpl_parsim_tip2tip_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
 
 double mpl_fitch_na_local_recheck

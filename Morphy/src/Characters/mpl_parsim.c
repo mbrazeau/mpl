@@ -587,7 +587,7 @@ double mpl_fitch_na_second_downpass
     
     for (i = pd->start; i < end; ++i) {
         
-        nodechanges[n][i] = 0L;
+//        nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
             t = upset[left][i] & upset[right][i];
@@ -603,11 +603,11 @@ double mpl_fitch_na_second_downpass
                     cost += weights[i];
                     ++changes[i];
                     ++applicchgs[i];
-                    nodechanges[n][i] = 1L;
+//                    nodechanges[n][i] = 1L;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                     ++changes[i];
-                    nodechanges[n][i] = 1L;
+//                    nodechanges[n][i] = 1L;
                 }
             }
         } else {
@@ -615,7 +615,7 @@ double mpl_fitch_na_second_downpass
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
-                nodechanges[n][i] = 1L;
+//                nodechanges[n][i] = 1L;
             }
         }
 //        assert(upset[n][i]);
@@ -751,9 +751,6 @@ mpl_fitch_na_recalc_first_downpass
         dnset[n][i] = t;
     }
     
-    // Only returns a value because it's regular fitch counterpart does but
-    // could be changed during program optimisation to get some step changes
-    // at this point in the analysis
     return chgs;
 }
 
@@ -815,9 +812,9 @@ int mpl_fitch_na_recalc_first_uppass
         }
 
         if (tempprup[n][i] != prupset[n][i]) {
-            if (tempprup[n][i] == NA || prupset[n][i] == NA) {
+//            if (tempprup[n][i] == NA || prupset[n][i] == NA) {
                 ++chgs;
-            }
+//            }
         }
     }
     
@@ -865,9 +862,10 @@ double mpl_fitch_na_recalc_second_downpass
         
         i = indices[j];
         
-//        if (nodechanges[n][i] > 0) {
-//        cost -= (nodechanges[n][i] * weights[i]);
-//        }
+//        assert(!(nodechanges[n][i] < 0));
+////        if (nodechanges[n][i] > 0) {
+//            cost -= (nodechanges[n][i] * weights[i]);
+////        }
 
         // More efficient implementation?
         if (prupset[n][i] & ISAPPLIC) {
@@ -897,10 +895,12 @@ double mpl_fitch_na_recalc_second_downpass
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
+        // Reset the left buffers
         dnset[left][i]    = tempdn[left][i];
         prupset[left][i]  = tempprup[left][i];
         upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
+        // Reset the right buffers
         dnset[right][i]   = tempdn[right][i];
         prupset[right][i] = tempprup[right][i];
         upset[right][i]   = tempup[right][i];
@@ -951,6 +951,73 @@ double mpl_fitch_na_local_check
     for (i = pd->start; i < end; ++i) {
         
         if (upset[src][i] & ISAPPLIC) {
+            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
+                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+                    score += weights[i];
+                }
+            }
+            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (applicchgs[i] * weights[i]);
+            }
+            else if (upset[src][i] < MISSING) {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+            }
+        } else {
+            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
+                if (tempact[troot][i] && tempact[src][i]) {
+                    score += weights[i];
+//                    if (tempdn[tgt1][i] & tempact[src][i]) {
+//                        score += weights[i];
+//                    }
+                }
+            }
+            else {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+            }
+        }
+        
+        // NOTE: It's possible that the complexity of checking this offsets the
+        // efficiency of terminating the loop early.
+        if (lim > -1.0) {
+            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
+                return score;
+            }
+        }
+    }
+    
+    return score;
+}
+
+double mpl_fitch_na_tip2tip_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd)
+{
+    // For any characters that can be checked without direct reopt at this point
+    // calculate the length and check if it exceeds the limit. If limit is
+    // never hit, then the calling function may need to perform a full check
+    // on inapplicable characters.
+    
+   size_t i;
+    const long end = pd->end;
+    double score = 0.0;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        if (dnset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
                 if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
@@ -1084,6 +1151,7 @@ void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m)
 void mpl_parsim_reset_scores(mpl_matrix* m)
 {
     int i = 0;
+    int j = 0;
     
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].score = 0.0;
@@ -1431,6 +1499,38 @@ double mpl_parsim_local_check
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
         score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        cscore += score;
+        
+        if (lim > -1.0) {
+            if (score > lim) {
+                return score;
+            }
+        }
+//      m->parsets[i].tryscore = score;
+    }
+    
+    return score;
+}
+
+double mpl_parsim_tip2tip_check
+(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
+{
+    double score = 0.0;
+    double cscore = base;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+//      m->parsets[i].tryscore = 0.0;
+        m->parsets[i].scorerecall = 0.0;
+        m->parsets[i].nchars = 0;
+        m->parsets[i].minscore = 0.0;
+        
+        if (m->parsets[i].isNAtype == true) {
+            score += mpl_fitch_na_tip2tip_check(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        }
+        else {
+            score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        }
         cscore += score;
 //      m->parsets[i].tryscore = score;
     }

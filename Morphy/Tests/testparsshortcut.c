@@ -234,6 +234,7 @@ int test_parsimony_shortcut_with_rerooting (void)
         
         // Set up the src pointers
         if (src->tip == 0) {
+            printf("working on fork\n");
             rtlef = src->left;
             rtrig = src->right;
             *srcs = src->left;
@@ -246,6 +247,7 @@ int test_parsimony_shortcut_with_rerooting (void)
             }
         }
         else {
+            printf("working on tip: %li\n", src->tip);
             *srcs = src;
             ++srcs;
         }
@@ -310,6 +312,6 @@ int test_parsimony_shortcut_with_rerooting (void)
     }
     
     //printf("\nScores: %i", c);
-    
+    printf("Failed %i times\n", failn);
     return failn;
 }
