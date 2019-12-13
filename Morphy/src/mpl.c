@@ -277,6 +277,8 @@ int mpl_do_search(mpl_handle* handl)
     mpl_matrix_apply_data(handl->matrix);
     mpl_init_parsimony(handl->matrix);
     
+    mpl_matrix_report(handl->matrix);
+    
     ret = mpl_search_execute(handl->search);
 
     // TODO: Check return

@@ -360,6 +360,30 @@ MPL_RETURN mpl_matrix_add_symbol(const char symb, mpl_matrix* m)
     return ret;
 }
 
+MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
+{
+    MPL_RETURN ret = MPL_SUCCESS;
+    
+    RET_IF_NULL(m);
+    
+    printf("Dataset has %li characters\n", m->num_cols);
+    printf("\t %li characters are parsimony uninformative\n", -1L);
+    
+    long nNA = 0;
+    
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            nNA += (m->parsets[i].end - m->parsets[i].start);
+        }
+    }
+    
+    printf("\t %li characters are treated as type \"inapplicable\"\n", nNA);
+    
+    
+    return ret;
+}
+
 
 /*******************************************************************************
  *                                                                             *
