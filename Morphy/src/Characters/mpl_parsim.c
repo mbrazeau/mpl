@@ -535,8 +535,7 @@ void mpl_fitch_na_first_uppass
         }
         
         tempprup[n][i] = prupset[n][i];
-//        tempup[n][i] = upset[n][i];
-//        assert(upset[n][i]);
+
     }
 }
 
@@ -548,31 +547,28 @@ void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 //    mpl_discr t = 0;
     
     for (i = pd->start; i < end; ++i) {
+
+        if (dnset[tipn][i] & prupset[anc][i]) {
+            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
+        } else {
+            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+        }
         
-//        if (((dnset[tipn][i] - 1) & dnset[tipn][i]) != 0) {
-            if (dnset[tipn][i] & prupset[anc][i]) {
-                actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
-            } else {
-                actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+        prupset[tipn][i] = dnset[tipn][i];
+        
+        if (dnset[tipn][i] & prupset[anc][i]) {
+            if (prupset[anc][i] & ISAPPLIC) {
+                prupset[tipn][i] &= ISAPPLIC;
             }
-            
-            prupset[tipn][i] = dnset[tipn][i];
-            
-            if (dnset[tipn][i] & prupset[anc][i]) {
-                if (prupset[anc][i] & ISAPPLIC) {
-                    prupset[tipn][i] &= ISAPPLIC;
-                }
-            }
+        }
         
-        upset[tipn][i] = prupset[tipn][i];
-//        } else {
-//            actives[tipn][i] = dnset[tipn][i] & ISAPPLIC;
-//        }
+        dnsetf[tipn][i] = prupset[tipn][i];
         
-        tempdn[tipn][i]  = dnset[tipn][i];
-        tempup[tipn][i] = upset[tipn][i];
-        tempprup[tipn][i]  = prupset[tipn][i];
-        tempact[tipn][i] = actives[tipn][i];
+        tempdn[tipn][i]   = dnset[tipn][i];
+        tempdnf[tipn][i]  = dnsetf[tipn][i];
+//        tempup[tipn][i] = upset[tipn][i];
+        tempprup[tipn][i] = prupset[tipn][i];
+        tempact[tipn][i]  = actives[tipn][i];
     }
 }
 
