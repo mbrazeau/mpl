@@ -132,6 +132,8 @@ void mpl_parsim_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 double mpl_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
+double mpl_fitch_na_second_downpass2
+(const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_parsim_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m);

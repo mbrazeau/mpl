@@ -6,6 +6,7 @@
 //  Copyright © 2019 Martin Brazeau. All rights reserved.
 //
 
+#include <stdio.h>
 #include <assert.h>
 
 #include "../Characters/mpl_matrix.h"
@@ -175,7 +176,7 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
     long i = 0;
     mpl_node* n;
     
-    long internnds = t->nintern;
+    long internnds = t->nintern; // TODO: This is unsafe. Needs to know prior call to full traversal
     long alln = t->size;
 
     mpl_traverse_subtree
@@ -248,6 +249,7 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
     return len;
 }
 
+bool hittop = 0;
 bool srcflag = 0;
 /**
  This function  does a partial uppass on the tree and should be called first
@@ -269,14 +271,14 @@ static void mpl_part_parsim_uppass
         return;
     }
     
-    if (n == ostart) {
-        srcflag = true;
-    }
+//    if (n == ostart) {
+//        srcflag = true;
+//    }
 
     if (!mpl_na_only_parsim_first_uppass (n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-        if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) && srcflag == false) {
+       if ((!n->marked) && (n->anc != ostart) && (n != ostart) /*&& (n->anc != ostart->anc) && srcflag == false*/) {
             return;
         }
     }
@@ -287,9 +289,9 @@ static void mpl_part_parsim_uppass
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
     
-    if (n == ostart) {
-        srcflag = false;
-    }
+//    if (n == ostart) {
+//        srcflag = false;
+//    }
     
     t->partial_pass[*i] = n;
     ++(*i);
@@ -344,8 +346,8 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     
     mpl_tree_traverse(t);
     
-    mpl_parsim_zero_na_nodal_changes(start->anc->mem_index, glmatrix);
-//    mpl_parsim_zero_na_nodal_changes(start->mem_index, glmatrix);
+    // TODO: Remove and test
+//    mpl_parsim_zero_na_nodal_changes(start->anc->mem_index, glmatrix);
     
     t1 = mpl_node_get_sib(start);
     t2 = start->anc->anc;
@@ -354,11 +356,11 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         n = start->anc;
     }
     else {
-//        mpl_src_redo_downpass(start);
         n = start;
     }
 
     while (n->anc != NULL) {
+        
         chgs = mpl_na_only_parsim_first_downpass(n->left->mem_index,
                                           n->right->mem_index,
                                           n->mem_index, glmatrix);
@@ -367,6 +369,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
             break;
         }
         n = n->anc;
+        
     };
 
     if (n == t->base->anc) {
@@ -375,11 +378,12 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     }
 
     t->nsubnodes = 0;
-//    mpl_part_parsim_uppass(t->base, start, &t->nsubnodes, t);
     srcflag = false;
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
 
+//    printf("reoptimising %i of %i nodes\n", (int)t->nsubnodes, (int)t->nintern);
+    
     len = 0.0;
     for (i = 0; i < t->nsubnodes; ++i) {
 
@@ -392,12 +396,18 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
         if (lim > -1.0) {
             if (len > lim) {
+
                 for ( ; i < t->nsubnodes; ++i) {
                     n = t->partial_pass[i];
-                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+                    mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                                        n->right->mem_index,
+                                                        glmatrix);
                 }
-                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
-//                goto  leavecheck;
+
+//                mpl_parsim_reset_root_state_buffers(n->mem_index,
+//                                                    n->anc->mem_index,
+//                                                    glmatrix);
+
                 break;
             }
         }
@@ -405,12 +415,26 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
     n = n->anc;
     while (n != t->base->anc) {
+        // TODO: Jump out of this when the length is exceeded, but clean up state sets
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
-        n->right->mem_index,
-        n->mem_index,
-        glmatrix);
+                                                  n->right->mem_index,
+                                                  n->mem_index,
+                                                  glmatrix);
+        
+        if (lim > -1.0) {
+            if (len > lim) {
+                while (n != t->base) {
+                    n = n->anc;
+                mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                                    n->right->mem_index,
+                                                    glmatrix);
+                }
+                break;
+            }
+        }
+        
         n = n->anc;
-    }
+    };
     
     n = t->base;
     mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
@@ -440,8 +464,6 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 //    if (i == t->nintern) {
 //        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
 //    }
-    
-//leavecheck:
     
     return len;
 }
@@ -529,24 +551,16 @@ double mpl_score_try_parsimony
         diff = lim-sttlen;
     }
     
-//    if ((src->tip > 0) && (tgt->tip > 0)) {
-//        score = mpl_parsim_tip2tip_check(lim, sttlen, src->mem_index,
-//                                            tgt->mem_index,
-//                                            tgt->anc->anc->mem_index,
-//                                            t->base->mem_index, glmatrix);
-//    }
-//    else {
-        score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
-                                        tgt->mem_index,
-                                        tgt->anc->anc->mem_index,
-                                        t->base->mem_index, glmatrix);
-//    }
+    // This gives a minimum number of steps added with a quick check.
+    score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
+                                   tgt->mem_index,
+                                   tgt->anc->anc->mem_index,
+                                   t->base->mem_index, glmatrix);
 
     if (glmatrix->gaphandl == GAP_INAPPLIC) {
         
-        // Get the number of characters whose total score on the tree
-        // needs to be recalled (as these characters will have a full-pass
-        // length calculation.
+        // Get the score of all characters whose lengths can't be checked during
+        // a local insertion.
         scorerecall = mpl_parsim_get_score_recall(glmatrix);
 
         score -= scorerecall;
@@ -561,8 +575,8 @@ double mpl_score_try_parsimony
             diff = lim - (score + sttlen);
         }
         
+        scorerecall += mpl_fullpass_parsimony_na_only(diff, src, t);
         score += scorerecall;
-        score += mpl_fullpass_parsimony_na_only(diff, src, t);
         
     }
     

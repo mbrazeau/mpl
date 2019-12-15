@@ -255,9 +255,18 @@ int test_parsimony_shortcut_with_rerooting (void)
         // Perform all rerootings
         
 
+        int rroots = 0;
+        
         for (rt = srcbuf; rt < srcs; ++rt) {
             
-            mpl_test_bbreak_tbr_reroot(*rt, src);
+//            rroots = 0;
+            
+            rroots = mpl_test_bbreak_tbr_reroot(*rt, src);
+            
+            if (rroots == 0) {
+                printf("rerooting\n");
+            }
+            
             
             newnbr = *rt;
             
@@ -291,9 +300,10 @@ int test_parsimony_shortcut_with_rerooting (void)
             reclen += tgtlen + srclen;
             // Compare with test length
             //printf("%.1f, ", mpl_fullpass_parsimony(t));
+            
             if (reclen != testscores[c]) {
                 ++failn;
-                if (site->tip > 0) {
+                if (src->tip > 1) {
                     printf("Yeehaw!\n");
                 }
                 pfail;
@@ -305,7 +315,7 @@ int test_parsimony_shortcut_with_rerooting (void)
             ++c;
             
             mpl_node_bin_clip(src);
-                                       
+        
         }
         
         mpl_node_bin_connect(left, right, src);

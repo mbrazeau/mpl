@@ -638,7 +638,9 @@ double mpl_fitch_na_second_downpass2
 //        nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
+            
             t = dnsetf[left][i] & dnsetf[right][i];
+            
             if (t) {
                 if (t & ISAPPLIC) {
                     dnsetf[n][i] = t & ISAPPLIC;
@@ -647,17 +649,17 @@ double mpl_fitch_na_second_downpass2
                 }
             } else {
                 dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
-                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-//                    nodechanges[n][i] = 1L;
-                } else if (actives[left][i] && actives[right][i]) {
-//                    nodechanges[n][i] = 1L;
-                }
+//                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+////                    nodechanges[n][i] = 1L;
+//                } else if (actives[left][i] && actives[right][i]) {
+////                    nodechanges[n][i] = 1L;
+//                }
             }
         } else {
             dnsetf[n][i] = prupset[n][i];
-            if (actives[left][i] && actives[right][i]) {
-//                nodechanges[n][i] = 1L;
-            }
+//            if (actives[left][i] && actives[right][i]) {
+////                nodechanges[n][i] = 1L;
+//            }
         }
         
 //        assert(upset[n][i]);
@@ -836,7 +838,7 @@ int mpl_fitch_na_recalc_first_uppass
         
         i = indices[j];
         
-//        t = upset[n][i];
+        t = 0;
         
         if (dnset[n][i] & NA) {
             if (dnset[n][i] & ISAPPLIC) {
@@ -928,11 +930,8 @@ double mpl_fitch_na_recalc_second_downpass
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
-        
-//        assert(!(nodechanges[n][i] < 0));
-////        if (nodechanges[n][i] > 0) {
-            cost -= (nodechanges[n][i] * weights[i]);
-////        }
+
+        cost -= (nodechanges[n][i] * weights[i]);
 
         // More efficient implementation?
         if (prupset[n][i] & ISAPPLIC) {
@@ -1041,9 +1040,6 @@ double mpl_fitch_na_local_check
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
-//                    if (tempdn[tgt1][i] & tempact[src][i]) {
-//                        score += weights[i];
-//                    }
                 }
             }
             else {
@@ -1468,6 +1464,7 @@ double mpl_do_src_root(const long left, const long right, const long n, mpl_pars
     
     return 0.0;
 }
+
 
 double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
