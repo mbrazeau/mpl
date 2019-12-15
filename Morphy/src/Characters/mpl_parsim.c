@@ -495,7 +495,7 @@ void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd)
         
         tempdn[anc][i] = dnset[anc][i];
         tempprup[anc][i] = prupset[anc][i];
-        tempup[anc][i] = upset[anc][i];
+//        tempup[anc][i] = upset[anc][i];
 //        assert(upset[anc][i]);
     }
 }
