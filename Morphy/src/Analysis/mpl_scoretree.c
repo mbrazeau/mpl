@@ -248,7 +248,7 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
     return len;
 }
 
-
+bool srcflag = 0;
 /**
  This function  does a partial uppass on the tree and should be called first
  on the deepest node in the tree to be affected by a branch insertion. The
@@ -268,11 +268,15 @@ static void mpl_part_parsim_uppass
         mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
         return;
     }
+    
+    if (n == ostart) {
+        srcflag = true;
+    }
 
     if (!mpl_na_only_parsim_first_uppass (n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-        if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc)) {
+        if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) && srcflag == false) {
             return;
         }
     }
@@ -283,6 +287,10 @@ static void mpl_part_parsim_uppass
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
     
+    if (n == ostart) {
+        srcflag = false;
+    }
+    
     t->partial_pass[*i] = n;
     ++(*i);
 }
@@ -291,10 +299,11 @@ static void mpl_part_parsim_uppass
 void mpl_update_src_actives(mpl_node* start, const mpl_node* end)
 {
     mpl_node* n = start;
-    while (n != end) {
+    
+    do {
         mpl_parsim_update_active_sets(n->left->mem_index, n->right->mem_index, n->mem_index, glmatrix);
         n = n->anc;
-    }
+    } while (n != end->anc);
 }
 
 
@@ -367,10 +376,11 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
     t->nsubnodes = 0;
 //    mpl_part_parsim_uppass(t->base, start, &t->nsubnodes, t);
+    srcflag = false;
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
 
-//    len = 0.0;
+    len = 0.0;
     for (i = 0; i < t->nsubnodes; ++i) {
 
         n = t->partial_pass[i];
@@ -392,7 +402,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
             }
         }
     }
-    
+
     n = n->anc;
     while (n != t->base->anc) {
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
@@ -402,6 +412,8 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         n = n->anc;
     }
     
+    n = t->base;
+    mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
    
 //    Downpass for inapplicables
 //    len = 0.0;
@@ -424,10 +436,10 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 //            }
 //        }
 //    }
-
-    if (i == t->nintern) {
-        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
-    }
+//
+//    if (i == t->nintern) {
+//        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
+//    }
     
 //leavecheck:
     

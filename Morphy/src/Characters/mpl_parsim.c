@@ -635,7 +635,7 @@ double mpl_fitch_na_second_downpass2
     
     for (i = pd->start; i < end; ++i) {
         
-        nodechanges[n][i] = 0L;
+//        nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
             t = dnsetf[left][i] & dnsetf[right][i];
@@ -648,17 +648,18 @@ double mpl_fitch_na_second_downpass2
             } else {
                 dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-                    nodechanges[n][i] = 1L;
+//                    nodechanges[n][i] = 1L;
                 } else if (actives[left][i] && actives[right][i]) {
-                    nodechanges[n][i] = 1L;
+//                    nodechanges[n][i] = 1L;
                 }
             }
         } else {
             dnsetf[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
-                nodechanges[n][i] = 1L;
+//                nodechanges[n][i] = 1L;
             }
         }
+        
 //        assert(upset[n][i]);
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
@@ -969,7 +970,7 @@ double mpl_fitch_na_recalc_second_downpass
         actives[left][i]  = tempact[left][i];
         // Reset the right buffers
         dnset[right][i]   = tempdn[right][i];
-        dnsetf[right][i]    = tempdnf[right][i];
+        dnsetf[right][i]  = tempdnf[right][i];
         prupset[right][i] = tempprup[right][i];
         upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
@@ -1018,48 +1019,48 @@ double mpl_fitch_na_local_check
     
     for (i = pd->start; i < end; ++i) {
         
-//        if (upset[src][i] & ISAPPLIC) {
-//            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-//                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
-//                    score += weights[i];
-//                }
-//            }
-//            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+        if (upset[src][i] & ISAPPLIC) {
+            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
+                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+                    score += weights[i];
+                }
+            }
+            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
-//            }
-//            else if (upset[src][i] < MISSING) {
-//                pd->indexbuf[pd->nchars] = i;
-//                ++pd->nchars;
-//                pd->scorerecall += (changes[i] * weights[i]);
-//                pd->minscore    += (changes[i] * weights[i]);
-//            }
-//        } else {
-//            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
-//                if (tempact[troot][i] && tempact[src][i]) {
-//                    score += weights[i];
-////                    if (tempdn[tgt1][i] & tempact[src][i]) {
-////                        score += weights[i];
-////                    }
-//                }
-//            }
-//            else {
-//                pd->indexbuf[pd->nchars] = i;
-//                ++pd->nchars;
-//                pd->scorerecall += (changes[i] * weights[i]);
-//                pd->minscore    += (changes[i] * weights[i]);
-//            }
-//        }
-//
-//        // NOTE: It's possible that the complexity of checking this offsets the
-//        // efficiency of terminating the loop early.
-//        if (lim > -1.0) {
-//            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
-//                return score;
-//            }
-//        }
+            }
+            else if (upset[src][i] < MISSING) {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+            }
+        } else {
+            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
+                if (tempact[troot][i] && tempact[src][i]) {
+                    score += weights[i];
+//                    if (tempdn[tgt1][i] & tempact[src][i]) {
+//                        score += weights[i];
+//                    }
+                }
+            }
+            else {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+            }
+        }
+
+        // NOTE: It's possible that the complexity of checking this offsets the
+        // efficiency of terminating the loop early.
+        if (lim > -1.0) {
+            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
+                return score;
+            }
+        }
     }
     
     return score;
@@ -1483,11 +1484,12 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
             upset[n][i] &= ISAPPLIC;
         }
         
-        tempdn[n][i] = dnset[n][i];
-        tempup[n][i] = upset[n][i];
+        tempdn[n][i]  = dnset[n][i];
+//        tempdnf[n][i] = dnset[n][i];
+        tempup[n][i]  = upset[n][i];
         
-        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
-        tempact[n][i] = actives[n][i];
+//        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+//        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
@@ -1500,10 +1502,11 @@ double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
     
     for (i = pd->start; i < end; ++i) {
         
-        upset[n][i] = dnset[n][i];
+        upset[n][i] = dnsetf[n][i] =dnset[n][i];
         
-        tempdn[n][i] = dnset[n][i];
-        tempup[n][i] = upset[n][i];
+        tempdn[n][i]  = dnset[n][i];
+        tempdnf[n][i] = dnsetf[n][i];
+        tempup[n][i]  = upset[n][i];
         
 //        actives[n][i] = dnset[n][i] & ISAPPLIC;
 //        tempact[n][i] = actives[n][i];
@@ -1552,7 +1555,8 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
             mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
-            mpl_update_active_sets(left, right, n, &m->parsets[i]);
+            mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]);
+//            mpl_update_active_sets(left, right, n, &m->parsets[i]);
         }
     }
 }
@@ -1740,7 +1744,7 @@ void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m)
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
             for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
-                nodechanges[n][j] = 0;
+                nodechanges[n][j] = 0L;
             }
         }
     }

@@ -293,6 +293,9 @@ int test_parsimony_shortcut_with_rerooting (void)
             //printf("%.1f, ", mpl_fullpass_parsimony(t));
             if (reclen != testscores[c]) {
                 ++failn;
+                if (site->tip > 0) {
+                    printf("Yeehaw!\n");
+                }
                 pfail;
             }
             else {
