@@ -654,10 +654,11 @@ void mpl_fitch_na_second_uppass
     mpl_discr t = 0;
     for (i = pd->start; i < end; ++i) {
         
-        if (upset[n][i] & ISAPPLIC) {
+        if (dnsetf[n][i] & ISAPPLIC) {
+            
             if (upset[anc][i] & ISAPPLIC) {
                
-                t = upset[anc][i] & upset[n][i];
+                t = upset[anc][i] & dnsetf[n][i];
                 
                 if (t == upset[anc][i]) {
                     
@@ -665,22 +666,28 @@ void mpl_fitch_na_second_uppass
                     
                 }
                 else {
-                    if (upset[left][i] & upset[right][i]) {
-                        upset[n][i] = (upset[n][i] | (upset[anc][i] & (upset[left][i] | upset[right][i])));// B2
+                    if (dnsetf[left][i] & dnsetf[right][i]) {
+                        upset[n][i] = (dnsetf[n][i] | (upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i])));// B2
                     } else {
-                        if ((upset[left][i] | upset[right][i]) & NA) {
-                            if ((upset[anc][i] & (upset[left][i] | upset[right][i]))) {
+                        if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
+                            if ((upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i]))) {
                                 upset[n][i] = upset[anc][i]; // B3
                             }
                             else {
-                                upset[n][i] = (upset[anc][i] | upset[left][i] | upset[right][i]) & ISAPPLIC; // B4
+                                upset[n][i] = (upset[anc][i] | dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC; // B4
                             }
                         } else {
-                            upset[n][i] = upset[anc][i] | upset[n][i]; // B5
+                            upset[n][i] = upset[anc][i] | dnsetf[n][i]; // B5
                         }
                     }
                 }
             }
+            else {
+                upset[n][i] = dnsetf[n][i];
+            }
+        }
+        else {
+            upset[n][i] = dnsetf[n][i];
         }
         
         tempup[n][i] = upset[n][i];
