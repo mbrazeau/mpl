@@ -583,7 +583,7 @@ double mpl_fitch_na_second_downpass
     
     for (i = pd->start; i < end; ++i) {
         
-//        nodechanges[n][i] = 0L;
+        nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
             t = dnsetf[left][i] & dnsetf[right][i];
@@ -599,11 +599,11 @@ double mpl_fitch_na_second_downpass
                     cost += weights[i];
                     ++changes[i];
                     ++applicchgs[i];
-//                    nodechanges[n][i] = 1L;
+                    nodechanges[n][i] = 1L;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                     ++changes[i];
-//                    nodechanges[n][i] = 1L;
+                    nodechanges[n][i] = 1L;
                 }
             }
         } else {
@@ -611,7 +611,7 @@ double mpl_fitch_na_second_downpass
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
-//                nodechanges[n][i] = 1L;
+                nodechanges[n][i] = 1L;
             }
         }
 //        assert(upset[n][i]);
@@ -886,7 +886,7 @@ double mpl_fitch_na_recalc_second_downpass
         
 //        assert(!(nodechanges[n][i] < 0));
 ////        if (nodechanges[n][i] > 0) {
-//            cost -= (nodechanges[n][i] * weights[i]);
+            cost -= (nodechanges[n][i] * weights[i]);
 ////        }
 
         // More efficient implementation?
