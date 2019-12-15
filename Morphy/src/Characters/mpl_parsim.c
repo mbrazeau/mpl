@@ -632,14 +632,16 @@ void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd)
     const long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        upset[anc][i] = upset[n][i];
+        
+        upset[anc][i] = dnsetf[n][i];
+        
         if (upset[anc][i] & ISAPPLIC) {
             upset[anc][i] &= ISAPPLIC;
         }
         
         tempdn[anc][i] = dnset[anc][i];
         tempup[anc][i] = upset[anc][i];
-        //        assert(upset[anc][i]);
+        
     }
 }
 
