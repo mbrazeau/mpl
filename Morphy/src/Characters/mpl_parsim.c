@@ -625,6 +625,50 @@ double mpl_fitch_na_second_downpass
     return cost;
 }
 
+double mpl_fitch_na_second_downpass2
+(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i;
+    long end = pd->end;
+    mpl_discr t = 0;
+    double cost = 0.0;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        nodechanges[n][i] = 0L;
+        
+        if (prupset[n][i] & ISAPPLIC) {
+            t = dnsetf[left][i] & dnsetf[right][i];
+            if (t) {
+                if (t & ISAPPLIC) {
+                    dnsetf[n][i] = t & ISAPPLIC;
+                } else {
+                    dnsetf[n][i] = t;
+                }
+            } else {
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+                    nodechanges[n][i] = 1L;
+                } else if (actives[left][i] && actives[right][i]) {
+                    nodechanges[n][i] = 1L;
+                }
+            }
+        } else {
+            dnsetf[n][i] = prupset[n][i];
+            if (actives[left][i] && actives[right][i]) {
+                nodechanges[n][i] = 1L;
+            }
+        }
+//        assert(upset[n][i]);
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
+        tempdnf[n][i] = dnsetf[n][i];
+    }
+    
+//    pd->score += cost;
+    
+    return cost;
+}
 
 void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd)
 {
