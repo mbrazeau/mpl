@@ -840,14 +840,29 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
         
         i = indices[j];
         
-        if (dnset[tipn][i] & prupset[anc][i] && dnset[tipn][i] != prupset[anc][i]) {
+        if (dnset[tipn][i] & prupset[anc][i]) {
             actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
-            prupset[tipn][i] = dnset[tipn][i];
+        } else {
+            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+        }
+        
+        prupset[tipn][i] = dnset[tipn][i];
+        
+        if (dnset[tipn][i] & prupset[anc][i]) {
             if (prupset[anc][i] & ISAPPLIC) {
                 prupset[tipn][i] &= ISAPPLIC;
             }
-            upset[tipn][i] = prupset[tipn][i];
         }
+        
+        dnsetf[tipn][i] = prupset[tipn][i];
+//        if (dnset[tipn][i] & prupset[anc][i] && dnset[tipn][i] != prupset[anc][i]) {
+//            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
+//            prupset[tipn][i] = dnset[tipn][i];
+//            if (prupset[anc][i] & ISAPPLIC) {
+//                prupset[tipn][i] &= ISAPPLIC;
+//            }
+//            upset[tipn][i] = prupset[tipn][i];
+//        }
     }
 }
 
