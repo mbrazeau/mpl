@@ -1376,10 +1376,12 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             i = indices[j];
             
             dnset[n][i]     = tempdn[n][i];
+            dnsetf[n][i]    = tempdnf[n][i];
             prupset[n][i]   = tempprup[n][i];
             upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
             dnset[anc][i]   = tempdn[anc][i];
+            dnsetf[anc][i]  = tempdnf[anc][i];
             prupset[anc][i] = tempprup[anc][i];
             upset[anc][i]   = tempup[anc][i];
             actives[anc][i] = tempact[anc][i];
@@ -1391,6 +1393,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             i = indices[j];
             
             dnset[n][i]     = tempdn[n][i];
+            dnsetf[n][i]    = tempdnf[n][i];
             prupset[n][i]   = tempprup[n][i];
             upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
