@@ -855,6 +855,7 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
         }
         
         dnsetf[tipn][i] = prupset[tipn][i];
+        
 //        if (dnset[tipn][i] & prupset[anc][i] && dnset[tipn][i] != prupset[anc][i]) {
 //            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
 //            prupset[tipn][i] = dnset[tipn][i];
@@ -891,13 +892,13 @@ double mpl_fitch_na_recalc_second_downpass
         // More efficient implementation?
         if (prupset[n][i] & ISAPPLIC) {
             
-            upset[n][i] = (upset[left][i] & upset[right][i]) & ISAPPLIC;
+            dnsetf[n][i] = (dnsetf[left][i] & dnsetf[right][i]) & ISAPPLIC;
                            
-            if (!upset[n][i]) {
+            if (!dnsetf[n][i]) {
                 
-                upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 
-                if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     cost += weights[i];
                     //                    ++pd->doeschange;
                 } else if (actives[left][i] && actives[right][i]) {
@@ -906,7 +907,7 @@ double mpl_fitch_na_recalc_second_downpass
                 }
             }
         } else {
-            upset[n][i] = prupset[n][i];
+            dnsetf[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 //                ++pd->doeschange;
@@ -918,11 +919,13 @@ double mpl_fitch_na_recalc_second_downpass
         
         // Reset the left buffers
         dnset[left][i]    = tempdn[left][i];
+        dnsetf[left][i]    = tempdnf[left][i];
         prupset[left][i]  = tempprup[left][i];
         upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
         // Reset the right buffers
         dnset[right][i]   = tempdn[right][i];
+        dnsetf[right][i]    = tempdnf[right][i];
         prupset[right][i] = tempprup[right][i];
         upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
