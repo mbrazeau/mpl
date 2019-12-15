@@ -950,48 +950,48 @@ double mpl_fitch_na_local_check
     
     for (i = pd->start; i < end; ++i) {
         
-        if (upset[src][i] & ISAPPLIC) {
-            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
-                    score += weights[i];
-                }
-            }
-            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+//        if (upset[src][i] & ISAPPLIC) {
+//            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
+//                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+//                    score += weights[i];
+//                }
+//            }
+//            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (applicchgs[i] * weights[i]);
-            }
-            else if (upset[src][i] < MISSING) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
-            }
-        } else {
-            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
-                if (tempact[troot][i] && tempact[src][i]) {
-                    score += weights[i];
-//                    if (tempdn[tgt1][i] & tempact[src][i]) {
-//                        score += weights[i];
-//                    }
-                }
-            }
-            else {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
-            }
-        }
-        
-        // NOTE: It's possible that the complexity of checking this offsets the
-        // efficiency of terminating the loop early.
-        if (lim > -1.0) {
-            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
-                return score;
-            }
-        }
+//            }
+//            else if (upset[src][i] < MISSING) {
+//                pd->indexbuf[pd->nchars] = i;
+//                ++pd->nchars;
+//                pd->scorerecall += (changes[i] * weights[i]);
+//                pd->minscore    += (changes[i] * weights[i]);
+//            }
+//        } else {
+//            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
+//                if (tempact[troot][i] && tempact[src][i]) {
+//                    score += weights[i];
+////                    if (tempdn[tgt1][i] & tempact[src][i]) {
+////                        score += weights[i];
+////                    }
+//                }
+//            }
+//            else {
+//                pd->indexbuf[pd->nchars] = i;
+//                ++pd->nchars;
+//                pd->scorerecall += (changes[i] * weights[i]);
+//                pd->minscore    += (changes[i] * weights[i]);
+//            }
+//        }
+//
+//        // NOTE: It's possible that the complexity of checking this offsets the
+//        // efficiency of terminating the loop early.
+//        if (lim > -1.0) {
+//            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
+//                return score;
+//            }
+//        }
     }
     
     return score;
