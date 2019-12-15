@@ -586,16 +586,16 @@ double mpl_fitch_na_second_downpass
 //        nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
-            t = upset[left][i] & upset[right][i];
+            t = dnsetf[left][i] & dnsetf[right][i];
             if (t) {
                 if (t & ISAPPLIC) {
-                    upset[n][i] = t & ISAPPLIC;
+                    dnsetf[n][i] = t & ISAPPLIC;
                 } else {
-                    upset[n][i] = t;
+                    dnsetf[n][i] = t;
                 }
             } else {
-                upset[n][i] = (upset[left][i] | upset[right][i]) & ISAPPLIC;
-                if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     cost += weights[i];
                     ++changes[i];
                     ++applicchgs[i];
@@ -607,7 +607,7 @@ double mpl_fitch_na_second_downpass
                 }
             }
         } else {
-            upset[n][i] = prupset[n][i];
+            dnsetf[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
@@ -617,6 +617,7 @@ double mpl_fitch_na_second_downpass
 //        assert(upset[n][i]);
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
+        tempdnf[n][i] = dnsetf[n][i];
     }
     
     pd->score += cost;
