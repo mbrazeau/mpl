@@ -540,7 +540,7 @@ double mpl_score_try_parsimony
             diff = lim - (score + sttlen);
         }
         
-//        score += scorerecall;
+        score += scorerecall;
         score += mpl_fullpass_parsimony_na_only(diff, src, t);
         
     }
