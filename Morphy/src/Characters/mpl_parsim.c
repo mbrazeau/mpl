@@ -961,20 +961,19 @@ double mpl_fitch_na_recalc_second_downpass
             }
         }
         
-        
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         // Reset the left buffers
-        dnset[left][i]    = tempdn[left][i];
+//        dnset[left][i]    = tempdn[left][i];
         dnsetf[left][i]   = tempdnf[left][i];
         prupset[left][i]  = tempprup[left][i];
-        upset[left][i]    = tempup[left][i];
+//        upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
         // Reset the right buffers
-        dnset[right][i]   = tempdn[right][i];
+//        dnset[right][i]   = tempdn[right][i];
         dnsetf[right][i]  = tempdnf[right][i];
         prupset[right][i] = tempprup[right][i];
-        upset[right][i]   = tempup[right][i];
+//        upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
 
     }
@@ -1065,136 +1064,6 @@ double mpl_fitch_na_local_check
     return score;
 }
 
-double mpl_fitch_na_tip2tip_check
-(const double lim,
- const double base,
- const long src,
- const long tgt1,
- const long tgt2,
- const long troot,
- mpl_parsdat* pd)
-{
-    // For any characters that can be checked without direct reopt at this point
-    // calculate the length and check if it exceeds the limit. If limit is
-    // never hit, then the calling function may need to perform a full check
-    // on inapplicable characters.
-    
-   size_t i;
-    const long end = pd->end;
-    double score = 0.0;
-    
-    for (i = pd->start; i < end; ++i) {
-        
-        if (dnset[src][i] & ISAPPLIC) {
-            if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
-                    score += weights[i];
-                }
-            }
-            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]);
-            }
-            else if (upset[src][i] < MISSING) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
-            }
-        } else {
-            if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
-                if (tempact[troot][i] && tempact[src][i]) {
-                    score += weights[i];
-                }
-            }
-            else {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
-            }
-        }
-        
-        // NOTE: It's possible that the complexity of checking this offsets the
-        // efficiency of terminating the loop early.
-        if (lim > -1.0) {
-            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
-                return score;
-            }
-        }
-    }
-    
-    return score;
-}
-
-double mpl_fitch_na_local_recheck
-(const double lim,
- const double base,
- const long src,
- const long tgt1,
- const long tgt2,
- const long troot,
- mpl_parsdat* pd)
-{
-    // After reoptimisation, some characters can now be checked for updates
-    // contingent on whether the root of the source tree has changed from
-    // applicable to inapplicable or vice-versa.
-    
-    size_t i;
-    size_t j;
-    double score = 0.0;
-    long* restrict indices = pd->indexbuf;
-    pd->rnchars = 0;
-    
-    for (j = pd->nchars; j-- ; ) {
-        
-        i = indices[j];
-        
-        // Some stuff that could be checked at this point in light of
-        // partial pass optimisation
-        
-        if (upset[src][i] & NA || ((upset[tgt2][i] | upset[tgt1][i])) ) {
-            if (tempact[src][i] && tempact[troot][i]) {
-                score += weights[i];
-            }
-        }
-        else if (upset[src][i] & ISAPPLIC) {
-            if (upset[tgt1][i] & NA && upset[tgt2][i] & NA) {
-                if (tempact[troot][i]) {
-                    score += weights[i];
-                }
-            }
-//            else if (!(upset[src][i] & (upset[tgt1][i] | upset[tgt2][i]))) {
-//                score += weights[i];
-//            }
-        } //else if (upset[src][i] & NA) {
-//            if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
-//                if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
-//                    score += weights[i];
-//                }
-//            }
-//            else if (tempact[src][i]) {
-//                score += weights[i];
-//            }
-//        }
-//        if (upset[src][i] & (upset[tgt1][i] | upset[tgt2][i])) {
-//            if (upset[src][i] == NA) {
-//                if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
-//                    score += weights[i];
-//                }
-//            }
-//        }
-//        else if (upset[tgt1][i] == NA || upset[tgt2][i] == NA) {
-//            if (tempdn[src][i] & ISAPPLIC && tempdn[troot][i] & ISAPPLIC) {
-//                score += weights[i];
-//            }
-//        }
-    }
-    
-    return score;
-}
 
 /// External interface functions
 
@@ -1610,83 +1479,6 @@ double mpl_parsim_local_check
     
     return score;
 }
-
-double mpl_parsim_tip2tip_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
-{
-    double score = 0.0;
-    double cscore = base;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-//      m->parsets[i].tryscore = 0.0;
-        m->parsets[i].scorerecall = 0.0;
-        m->parsets[i].nchars = 0;
-        m->parsets[i].minscore = 0.0;
-        
-        if (m->parsets[i].isNAtype == true) {
-            score += mpl_fitch_na_tip2tip_check(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
-        }
-        else {
-            score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
-        }
-        cscore += score;
-//      m->parsets[i].tryscore = score;
-    }
-    
-    return score;
-}
-
-double mpl_parsim_local_recheck
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
-{
-    double score = 0.0;
-    double cscore = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-            score += mpl_fitch_na_local_recheck(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
-        }
-        
-    }
-    
-    return score;
-}
-
-
-//double mpl_parsim_local_check_fork2fork
-//(const double lim,
-// const long src,
-// const long srclef,
-// const long srcrig,
-// const long tgt1lef,
-// const long tgt1rig,
-// const long tgt1,
-// const long tgt2,
-// const long tgt2anc,
-// const long tgt2sib,
-// const long troot, mpl_matrix* m)
-//{
-//    double score = 0.0;
-//    int i;
-//    
-//    for (i = 0; i < m->nparsets; ++i) {
-//        //      m->parsets[i].tryscore = 0.0;
-//        m->parsets[i].scorerecall = 0.0;
-//        m->parsets[i].nchars = 0;
-//        m->parsets[i].minscore = 0.0;
-//        if (m->parsets[i].isNAtype == false) {
-//            score += m->parsets[i].locfxn(lim, src, tgt1, tgt2, troot, &m->parsets[i]);
-//        }
-//        else {
-//            score += mpl_fitch_na_local_fork2fork(lim, src, srclef, srcrig, tgt1lef, tgt1rig, tgt1, tgt2, tgt2anc, tgt2sib, troot, &m->parsets[i]);
-//        }
-//        //      m->parsets[i].tryscore = score;
-//    }
-//    
-//    return score;
-//}
 
 
 double mpl_parsim_get_score_recall(mpl_matrix* m)
