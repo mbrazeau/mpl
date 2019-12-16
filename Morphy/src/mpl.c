@@ -237,7 +237,7 @@ int mpl_set_brswap(const mpl_bbreak_t bbkt, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
-    if (!(bbkt > MPL_BBREAK_MAX)) {
+    if (bbkt > MPL_BBREAK_MAX) {
         return MPL_BADPARAM;
     }
     
