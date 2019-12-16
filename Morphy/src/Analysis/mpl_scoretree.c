@@ -249,8 +249,6 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
     return len;
 }
 
-bool hittop = 0;
-bool srcflag = 0;
 /**
  This function  does a partial uppass on the tree and should be called first
  on the deepest node in the tree to be affected by a branch insertion. The
@@ -270,15 +268,12 @@ static void mpl_part_parsim_uppass
         mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
         return;
     }
-    
-//    if (n == ostart) {
-//        srcflag = true;
-//    }
+
 
     if (!mpl_na_only_parsim_first_uppass (n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-       if ((!n->marked) && (n->anc != ostart) && (n != ostart) /*&& (n->anc != ostart->anc) && srcflag == false*/) {
+       if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) /*&& srcflag == false*/) {
             return;
         }
     }
@@ -289,23 +284,41 @@ static void mpl_part_parsim_uppass
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
     
-//    if (n == ostart) {
-//        srcflag = false;
-//    }
-    
     t->partial_pass[*i] = n;
     ++(*i);
+}
+
+
+void mpl_partial_update_uppass(mpl_node* n)
+{
+    if (n->tip > 0) {
+
+        // TODO: Only need to call the inapplicable function
+        mpl_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
+        return;
+    }
+    
+    // TODO: Only need to call the inapplicable function
+    mpl_parsim_first_uppass(n->left->mem_index, n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix);
+    
+    mpl_partial_update_uppass(n->left);
+    mpl_partial_update_uppass(n->right);
 }
 
 
 void mpl_update_src_actives(mpl_node* start, const mpl_node* end)
 {
     mpl_node* n = start;
-    
+
+    // Update the root:
+    // TODO: Write a function to update the prupset of the new root
+    mpl_parsim_update_root_prupset(end->left->mem_index, end->right->mem_index, end->mem_index, glmatrix);
+    // Then do this crap:
     do {
         mpl_parsim_update_active_sets(n->left->mem_index, n->right->mem_index, n->mem_index, glmatrix);
         n = n->anc;
     } while (n != end->anc);
+
 }
 
 
@@ -347,7 +360,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     mpl_tree_traverse(t);
     
     // TODO: Remove and test
-//    mpl_parsim_zero_na_nodal_changes(start->anc->mem_index, glmatrix);
+    mpl_parsim_zero_na_nodal_changes(start->anc->mem_index, glmatrix);
     
     t1 = mpl_node_get_sib(start);
     t2 = start->anc->anc;
@@ -378,7 +391,6 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     }
 
     t->nsubnodes = 0;
-    srcflag = false;
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
 
@@ -404,9 +416,9 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                                         glmatrix);
                 }
 
-//                mpl_parsim_reset_root_state_buffers(n->mem_index,
-//                                                    n->anc->mem_index,
-//                                                    glmatrix);
+                mpl_parsim_reset_root_state_buffers(n->mem_index,
+                                                    n->anc->mem_index,
+                                                    glmatrix);
 
                 break;
             }
@@ -415,55 +427,32 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
     n = n->anc;
     while (n != t->base->anc) {
-        // TODO: Jump out of this when the length is exceeded, but clean up state sets
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                   n->right->mem_index,
                                                   n->mem_index,
                                                   glmatrix);
-        
+
         if (lim > -1.0) {
             if (len > lim) {
+                // Clean up the state sets
                 while (n != t->base) {
                     n = n->anc;
-                mpl_parsim_reset_root_state_buffers(n->left->mem_index,
-                                                    n->right->mem_index,
-                                                    glmatrix);
+                    mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                                        n->right->mem_index,
+                                                        glmatrix);
                 }
+                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
                 break;
             }
         }
-        
+
         n = n->anc;
     };
-    
-    n = t->base;
-    mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
-   
-//    Downpass for inapplicables
-//    len = 0.0;
-//    for (i = 0; i < t->nintern; ++i) {
-//
-//        n = t->postord_intern[i];
-//
-//        len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
-//                                                  n->right->mem_index,
-//                                                  n->mem_index, glmatrix);
-//        if (lim > -1.0) {
-//            if (len > lim) {
-//                for ( ; i < t->nintern; ++i) {
-//                    n = t->postord_intern[i];
-//                    mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
-//                }
-//                mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
-////                goto leavecheck;
-//                break;
-//            }
-//        }
-//    }
-//
-//    if (i == t->nintern) {
-//        mpl_parsim_reset_root_state_buffers(t->base->mem_index, t->base->anc->mem_index, glmatrix);
-//    }
+
+    if (n == t->base->anc) {
+        n = t->base;
+        mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+    }
     
     return len;
 }
@@ -575,8 +564,8 @@ double mpl_score_try_parsimony
             diff = lim - (score + sttlen);
         }
         
-        scorerecall += mpl_fullpass_parsimony_na_only(diff, src, t);
         score += scorerecall;
+        score += mpl_fullpass_parsimony_na_only(diff, src, t);
         
     }
     
