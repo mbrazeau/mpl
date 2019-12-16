@@ -10,6 +10,7 @@
 #include "testutils.h"
 
 #include "testmplbbreak.h"
+#include "testharddat.h"
 #include "../src/Trees/mpl_node.h"
 #include "../src/Trees/mpl_tree.h"
 #include "../src/Trees/mpl_topol.h"
@@ -366,6 +367,85 @@ int test_mutliple_replicate_heuristic_search (void)
     00000001001111001110100120020011110001001010110001111121-?010110102121102110001112111011022001010100000000010?010010-01100001?\
     100?0?0??00011011010011100020000-000001000101000111?11?1-110???010310010000000100400000-02301010001010101001000000010111101010\
     101?10-10010110010101?0?20020001110001001000110001111121-101110011?12110211000111?1110110?20010101000000000101010110-011000010;";
+    
+    mpl_rng_set_seed(1);
+
+    mpl_matrix* m = mpl_matrix_new();
+    mpl_matrix_set_nrows(ntax, m);
+    mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_set_nnodes(2 * ntax, m);
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+//        mpl_matrixi_set_gap_handle(GAP_MISSING, m);
+    mpl_matrix_apply_data(m);
+    mpl_init_parsimony(m);
+    
+    mpl_search s;
+    s.treelist = mpl_treelist_new(ntax, 100000, 0);
+    s.num_taxa = ntax;
+    s.bbreak_type = MPL_TBR_T;
+    
+    mpl_bbreak bbk;
+    memset(&bbk, 0, sizeof(mpl_bbreak));
+    // The number of nodes in the bbreak will be the size of the tree
+    bbk.num_nodes = 2 * ntax-1;
+    // Now the bbkreak struct can be initialised
+    mpl_bbreak_init(&s, &bbk);
+    bbk.bbktype = MPL_TBR_T;
+    bbk.numreps = 10;
+    //    bbk.bbktype = MPL_SPR_T;
+    mpl_stepwise_init(MPL_AST_RANDOM, bbk.numtaxa, hold, &bbk.stepwise);
+    mpl_do_bbreak(&bbk);
+    
+    mpl_tree* t  = mpl_new_tree(ntax);
+    mpl_topol* top = NULL;
+    char* nwkresult = NULL;
+    int i = 0;
+    
+    for (i = 0; i < bbk.treelist->num_trees; ++i) {
+        top =  mpl_treelist_get_topol(i, bbk.treelist);
+        mpl_tree_read_topol(t, top);
+
+        mpl_tree_write_newick(&nwkresult, t);
+        printf("TREE Morphy_%i = [&U] %s [length: %.0f]\n", i+1, nwkresult, top->score);
+        free(nwkresult);
+    }
+    
+    if (bbk.shortest != 345.0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    if (bbk.treelist->num_trees != 31) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_matrix_delete(&m);
+    mpl_treelist_delete(&s.treelist);
+    
+    return failn;
+}
+
+
+int test_mutliple_replicate_heuristic_search_large (void)
+{
+    theader("Test multiple addition sequence searches with large matrix");
+    
+    int failn = 0;
+
+    long ntax = Miyashita.ntax;
+    long nchar = Miyashita.nchar;
+    double testscore = 0.0;
+    
+    int hold = 1; // Hold up to 3 trees
+    
+    char* rawmatrix = Miyashita.chardat;
     
     mpl_rng_set_seed(1);
 
