@@ -964,13 +964,13 @@ double mpl_fitch_na_recalc_second_downpass
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         // Reset the left buffers
-//        dnset[left][i]    = tempdn[left][i];
+        dnset[left][i]    = tempdn[left][i];
         dnsetf[left][i]   = tempdnf[left][i];
         prupset[left][i]  = tempprup[left][i];
 //        upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
         // Reset the right buffers
-//        dnset[right][i]   = tempdn[right][i];
+        dnset[right][i]   = tempdn[right][i];
         dnsetf[right][i]  = tempdnf[right][i];
         prupset[right][i] = tempprup[right][i];
 //        upset[right][i]   = tempup[right][i];
@@ -1479,7 +1479,6 @@ double mpl_parsim_local_check
     
     return score;
 }
-
 
 double mpl_parsim_get_score_recall(mpl_matrix* m)
 {
