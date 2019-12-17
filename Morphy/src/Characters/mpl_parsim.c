@@ -930,6 +930,7 @@ double mpl_fitch_na_recalc_second_downpass
     
     // Reset the doeschange counter
 //    pd->doeschange = 0;
+    
     for (j = pd->nchars; j-- ; ) {
         
         i = indices[j];
@@ -960,6 +961,10 @@ double mpl_fitch_na_recalc_second_downpass
                 //                ++pd->doeschange;
             }
         }
+        
+//        if (dnsetf[n][i] != tempdnf[n][i]) {
+//            ++pd->doeschange;
+//        }
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
@@ -1357,8 +1362,8 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
 //        tempdnf[n][i] = dnset[n][i];
         tempup[n][i]  = upset[n][i];
         
-        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
-        tempact[n][i] = actives[n][i];
+//        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+//        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
@@ -1528,15 +1533,43 @@ void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd)
     long i = 0;
     long j = 0;
     long k = 0;
+    long* restrict indices = pd->indexbuf;
     
-    for (i = nrows; i--; ) {
-        for (j = pd->nchars; j-- ;) {
-            k = pd->indexbuf[j];
-            dnset[i][k]     = tempdn[i][k];
-            upset[i][k]     = tempup[i][k];
-            actives[i][k]   = tempact[i][k];
-        }
+    if (pd->nchars > 0) {
+//        if ((pd->indexbuf[pd->nchars-1] - pd->indexbuf[0] + 1) % 2) {
+            for (i = 0; i < nrows; ++i) {
+//                for (j = pd->indexbuf[0]; j <= pd->indexbuf[pd->nchars-1]; ++j) {
+                    for (k = pd->nchars; k-- ; ) {
+                    
+                    j = indices[k];
+                    dnset[i][j]   = tempdn[i][j];
+                    prupset[i][j] = tempprup[i][j];
+                    dnsetf[i][j]  = tempdnf[i][j];
+                    upset[i][j]   = tempup[i][j];
+                    actives[i][j] = tempact[i][j];
+                }
+            }
+//        }
+//        else {
+//            for (i = 0; i < nrows; ++i) {
+//                for (j = pd->indexbuf[0]; j <= pd->indexbuf[pd->nchars-1]; j += 2) {
+//
+//                    dnset[i][j]   = tempdn[i][j];
+//                    prupset[i][j] = tempprup[i][j];
+//                    dnsetf[i][j]  = tempdnf[i][j];
+//                    upset[i][j]   = tempup[i][j];
+//                    actives[i][j] = tempact[i][j];
+//
+//                    dnset[i][j+1]   = tempdn[i][j+1];
+//                    prupset[i][j+1] = tempprup[i][j+1];
+//                    dnsetf[i][j+1]  = tempdnf[i][j+1];
+//                    upset[i][j+1]   = tempup[i][j+1];
+//                    actives[i][j+1] = tempact[i][j+1];
+//                }
+//            }
+//        }
     }
+    
 }
 
 
@@ -1546,7 +1579,7 @@ void mpl_parsim_reset_state_buffers(mpl_matrix *m)
 
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            mpl_reset_state_buffs(m->num_nodes, &m->parsets[i]);
+            mpl_reset_state_buffs(2 * m->num_rows, &m->parsets[i]);
         }
     }
 }
