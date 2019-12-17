@@ -242,6 +242,8 @@ int mpl_set_brswap(const mpl_bbreak_t bbkt, mpl_handle* handl)
     }
     
     mpl_bbreak_set_type(bbkt, handl->search->bbreak);
+    // TODO: Don't keep doing it like this:
+    handl->search->bbreak_type = bbkt;
     
     return MPL_SUCCESS;
 }
