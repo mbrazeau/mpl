@@ -24,7 +24,7 @@ double  mpl_partpass_parsimony(mpl_node* start, mpl_tree* t);
 void    mpl_src_root_parsimony(mpl_node* src);
 double  mpl_score_try_parsimony(const double, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t);
 void    mpl_scoretree_copy_original_characters(void);
-void    mpl_scoretree_restore_original_characters(void);
+void    mpl_scoretree_restore_original_characters(mpl_matrix* m, mpl_tree* t);
 void    mpl_tempset_stdtype(void);
 void    mpl_tempreset_natype(void);
 void    mpl_parsim_update_root_prupset(const long left, const long right, const long n, mpl_matrix* m);
