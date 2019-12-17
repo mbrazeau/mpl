@@ -410,6 +410,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long        clipmax = 0; // Limit for number of clippings to perform
     long        tgtnum  = 0; // Limit for number of reconnection target sites
     double      score   = 0.0;  // Local storage for tree score
+    double      diff    = 0.0;
     mpl_node*   left    = NULL;
     mpl_node*   right   = NULL;
     mpl_node*   csite   = NULL;
@@ -431,7 +432,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         }
     }
 
-    // TODO: clipmax-1 is temporary (root-adjacent clips need to be fixed)
     for (i = 0; i < clipmax; ++i) { // NOTE: Assumes 'unrooted' tree!!!
         
         signal(SIGINT, do_interrupt);
@@ -440,10 +440,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             return;
         }
         
-//        if (clips[i]->lock == true) {
-//            clips[i]->lock = false;
-//            continue;
-//        }
+        if (clips[i]->lock == true) {
+            clips[i]->lock = false;
+            continue;
+        }
         
         clips[i]->clipmark = true;
         
@@ -477,20 +477,40 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
-//        if ((srclen + tgtlen) >= bbk->shortest) {
-//            mpl_node_bin_connect(left, right, clips[i]);
-//            clips[i]->lock = false;
-//            clips[i]->clipmark = false;
-//            continue;
-//        }
+        
         // If the branch is zero-length, no need to continue. All swaps will
         // result in redundant trees after collapsing.
-//        if ((srclen + tgtlen) == bbk->bestinrep) {
+//        mpl_node_bin_connect(left, right, clips[i]);
+//        mpl_node* site = NULL;
+//        if (left == NULL) {
+//            site = right;
+//        }
+//        else {
+//            site = left;
+//        }
+//        diff = mpl_score_try_parsimony(tgtlen + srclen,
+//                                        -1.0,
+//                                        clips[i],
+//                                        site,
+//                                        t);
+//        mpl_node_bin_clip(clips[i]);
+//
+//        if (clips[i]->anc->left == clips[i]) {
+//            right = csite;
+//            left = NULL;
+//        }
+//        else {
+//            left = csite;
+//            right = NULL;
+//        }
+//        
+//        if (diff == 0) {
 //            mpl_node_bin_connect(left, right, clips[i]);
 //            clips[i]->lock = false;
 //            clips[i]->clipmark = false;
 //            continue;
 //        }
+        
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
@@ -545,7 +565,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 ++srcs;
             }
             
-            // The first time round, the subtree won't get rerooted, so only
+            // The first time around, the subtree won't get rerooted, so only
             // move around to sites that don't neighbor the original clipsite
             if (src == bbk->srcs) {
                 tgtnum = bbk->nshorttgts;
