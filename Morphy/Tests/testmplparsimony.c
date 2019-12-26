@@ -119,6 +119,7 @@ int test_parsimony_on_tree (void)
     return failn;
 }
 
+
 int test_fullpass_parsimony (void)
 {
     theader("Test full-pass Fitch parsimony");
@@ -168,6 +169,73 @@ int test_fullpass_parsimony (void)
     len = mpl_fullpass_parsimony(t);
     
     if (len != 53.0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_matrix_delete(&m);
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
+
+int test_wagner_fullpass_parsimony (void)
+{
+    theader("Test full-pass Wagner parsimony");
+    
+    int failn = 0;
+    
+    long ntax = 10;
+    long nchar = 10;
+    
+    char *rawmatrix =
+    "1010312231\
+     2130233203\
+     3001210203\
+     2131111202\
+     3302222312\
+     2231202332\
+     1023203131\
+     1123103001\
+     2222213220\
+     3203321302;";
+    
+    char* newick = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    int i = 0;
+    
+    mpl_matrix* m = mpl_matrix_new();
+    mpl_matrix_set_nrows(ntax, m);
+    mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+    // Set all characters to type wagner:
+    for (i = 0; i < nchar; ++i) {
+        mpl_matrix_set_parsim_t(i, MPL_WAGNER_T, m);
+    }
+    mpl_matrix_apply_data(m);
+    
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(newick, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_tree_traverse(t);
+    
+    double len = 0.0;
+    
+    mpl_init_parsimony(m);
+    
+    len = mpl_fullpass_parsimony(t);
+    
+    if (len != 68.0) {
         ++failn;
         pfail;
     }
