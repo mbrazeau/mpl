@@ -30,11 +30,14 @@ typedef struct mpl_parsdat {
     size_t          nchars;
     size_t          rnchars;
     size_t          ntips;
+    long            nnodes;
     long*           nchanges;
     long*           indexbuf;
     long*           rindexbuf;
     long*           ntipinbufs;
     long**          tipinbufs; // Characters in
+    long*           nndindices;
+    long**          ndindexbufs;
     double          minscore;
     long*           minchanges;
     int             doeschange; // Number of times a character changes
@@ -61,6 +64,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb);
 void mpl_parsim_swap_stateset_ptrs(mpl_charbuf* cb);
 void mpl_parsim_set_range(const long start, const long end, mpl_parsdat* pd);
 void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd);
+void mpl_parsim_setup_nodal_index_buffers(const long nnodes, mpl_parsdat* pd);
 void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd);
 void mpl_parsim_reset_nchanges(mpl_parsdat* pd);
 void mpl_parsim_set_type
@@ -174,6 +178,8 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m);
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
 void mpl_parsim_reset_all_weights(mpl_charbuf* cb);
 void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m);
+void mpl_parsim_reset_indexbufs(const long n, mpl_matrix *m);
+void mpl_parsim_reset_nodal_indexbufs(mpl_matrix *m);
 
 // TODO: remove these when you don't need them anymore
 void reset_temporary_changebuf(void);
