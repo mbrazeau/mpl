@@ -78,9 +78,33 @@ static const mpl_parsdat Wagner_Std = {
 
     .parstype   = MPL_WAGNER_T,
     .isNAtype   = false,
+    // TODO: CHANGE THESE
+    .downfxn1   = &mpl_wagner_downpass,
+    .upfxn1     = &mpl_wagner_uppass,
+    .downfxn2   = NULL,
+    .upfxn2     = NULL,
+    .tipfxn1    = &mpl_fitch_tip_update,
+    .tipfxn2    = NULL,
+    .rootfxn    = &mpl_fitch_root,
+    .locfxn     = &mpl_wagner_local_check,
+    .srcroot    = &mpl_do_src_root
     
 };
 
+static const mpl_parsdat Wagner_NA = {
+    
+    .parstype   = MPL_WAGNER_T,
+    .isNAtype   = true,
+    .downfxn1   = &mpl_fitch_na_first_downpass,     // Keep same
+    .upfxn1     = &mpl_fitch_na_first_uppass,       // Keep same
+    .downfxn2   = &mpl_fitch_na_second_downpass,    // New fxn
+    .upfxn2     = &mpl_fitch_na_second_uppass,      // New fxn
+    .tipfxn1    = &mpl_fitch_na_tip_update,         // Keep same
+    .tipfxn2    = &mpl_fitch_na_tip_finalize,       // TODO: Check if this needs new fxn
+    .rootfxn    = &mpl_fitch_na_root,               // Keep same
+    .locfxn     = &mpl_fitch_na_local_check,        // Keep same
+    .srcroot    = &mpl_na_do_src_root               // Keep same
+};
 
 // Data from the discrete character charbuf
 mpl_discr** restrict dnset          = NULL;
@@ -266,10 +290,10 @@ void mpl_parsim_set_type
             break;
         case (MPL_WAGNER_T):
             if (gaphandl == GAP_INAPPLIC) {
-//                *pd = Wagner_NA; // Doesn't exist yet
+                *pd = Wagner_NA; // TODO: Doesn't exist yet
             }
             else {
-                *pd = Wagner_Std; // Doesn't exist yet
+                *pd = Wagner_Std; // TODO: Doesn't exist yet
             }
             break;
         default:
@@ -1109,6 +1133,165 @@ double mpl_fitch_na_local_check
     }
     
     return score;
+}
+
+/// Wagner parsimony functions
+
+static inline unsigned int mpl_parsim_closed_interval
+(mpl_discr* res, mpl_discr a, mpl_discr b)
+{
+    unsigned int steps = 0;
+    mpl_discr c = 0;
+    mpl_discr d = 0;
+    
+    if (b > a) {
+        c = b;
+        b = a;
+        a = c;
+    }
+    
+    d = a & (-a);
+    
+    while(!(d & b)) {
+        ++steps;
+        d |= a >> steps;
+    }
+    
+    if (res != NULL) {
+        *res = d;
+    }
+    
+    return steps;
+}
+
+double mpl_wagner_downpass
+(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    double cost = 0.0;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        dnset[n][i] = dnset[left][i] & dnset[right][i];
+        
+        if (!dnset[n][i]) {
+            cost += (weights[i] * mpl_parsim_closed_interval(&dnset[n][i],
+                                                             dnset[left][i],
+                                                             dnset[right][i]));
+            ++changes[i];
+        }
+    }
+    
+    pd->score += cost;
+    
+    return cost;
+}
+
+void mpl_wagner_uppass
+(const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    mpl_discr fin = 0;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        if ((dnset[left][i] & dnset[right][i]) == upset[anc][i]) {
+            fin = upset[anc][i] & dnset[n][i];
+        }
+        else {
+            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
+            fin = (fin & upset[anc][i]) | dnset[n][i];
+        }
+        
+        upset[n][i] = fin;
+    }
+}
+
+double mpl_wagner_local_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    double score = 0.0;
+    
+//    if (lim < 0.0) {
+#pragma clang loop vectorize(enable)
+        for (i = pd->start; i < end; ++i) {
+            if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+                score += (weights[i] * mpl_parsim_closed_interval(NULL,
+                                       upset[tgt1][i] | upset[tgt2][i],
+                                       dnset[src][i]));
+            }
+        }
+//    }
+//    else {
+//        TODO: Version allowing break from loop
+//    }
+    
+    return score;
+}
+
+double mpl_wagner_na_second_downpass
+(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i;
+    long end = pd->end;
+    mpl_discr t = 0;
+    double cost = 0.0;
+    
+//    pd->nndindices[n] = 0L;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        nodechanges[n][i] = 0L;
+        
+        if (prupset[n][i] & ISAPPLIC) {
+            t = dnsetf[left][i] & dnsetf[right][i];
+            if (t) {
+                if (t & ISAPPLIC) {
+                    dnsetf[n][i] = t & ISAPPLIC;
+                } else {
+                    dnsetf[n][i] = t;
+                }
+            } else {
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+                    cost += weights[i];
+                    ++changes[i];
+                    ++applicchgs[i];
+                    nodechanges[n][i] = 1L;
+                } else if (actives[left][i] && actives[right][i]) {
+                    cost += weights[i];
+                    ++changes[i];
+                    nodechanges[n][i] = 1L;
+                }
+            }
+        } else {
+            dnsetf[n][i] = prupset[n][i];
+            if (actives[left][i] && actives[right][i]) {
+                cost += weights[i];
+                ++changes[i];
+                nodechanges[n][i] = 1L;
+            }
+        }
+//        assert(upset[n][i]);
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        
+        tempact[n][i] = actives[n][i];
+        tempdnf[n][i] = dnsetf[n][i];
+    }
+    
+    pd->score += cost;
+    
+    return cost;
 }
 
 

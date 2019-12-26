@@ -165,6 +165,24 @@ double mpl_parsim_local_recheck
 double mpl_fitch_na_recalc_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* restrict pd);
 
+static inline unsigned int mpl_parsim_closed_interval
+ (mpl_discr* res, mpl_discr a, mpl_discr b);
+double mpl_wagner_downpass
+ (const long left, const long right, const long n, mpl_parsdat* pd);
+void mpl_wagner_uppass
+ (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+double mpl_wagner_local_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd);
+double mpl_wagner_na_second_downpass
+ (const long left, const long right, const long n, mpl_parsdat* pd);
+
+
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
