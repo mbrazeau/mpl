@@ -439,13 +439,13 @@ int test_mutliple_replicate_heuristic_search_large (void)
     
     int failn = 0;
 
-    long ntax = Miyashita.ntax;
-    long nchar = Miyashita.nchar;
+    long ntax = Brazeau.ntax;
+    long nchar = Brazeau.nchar;
     double testscore = 0.0;
     
     int hold = 1; // Hold up to 3 trees
     
-    char* rawmatrix = Miyashita.chardat;
+    char* rawmatrix = Brazeau.chardat;
     
     mpl_rng_set_seed(1);
 
