@@ -200,6 +200,20 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd)
     pd->minchanges = (long*)safe_calloc(range, sizeof(long));
 }
 
+void mpl_parsim_setup_nodal_index_buffers(const long nnodes, mpl_parsdat* pd)
+{
+    long i = 0;
+    
+    pd->nnodes = nnodes;
+    pd->nndindices = (long*)safe_calloc(nnodes, sizeof(long));
+    pd->ndindexbufs = (long**)safe_calloc(nnodes, sizeof(long*));
+    
+    for (i = 0; i < pd->nnodes; ++i) {
+        // TODO: This isn't fully safe because this function _could_ be called before end and start are specified
+        pd->ndindexbufs[i] = (long*)safe_calloc(pd->end - pd->start, sizeof(long));
+    }
+}
+
 void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd)
 {
     long i = 0;
@@ -213,6 +227,12 @@ void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd)
     for (i = 0; i < pd->ntips; ++i) {
         safe_free(pd->tipinbufs[i]);
     }
+    
+    for (i = 0; i < pd->nnodes; ++i) {
+        safe_free(pd->ndindexbufs[i]);
+    }
+    safe_free(pd->ndindexbufs);
+    safe_free(pd->nndindices);
     
     safe_free(pd->tipinbufs);
     safe_free(pd->ntipinbufs);
@@ -581,6 +601,8 @@ double mpl_fitch_na_second_downpass
     mpl_discr t = 0;
     double cost = 0.0;
     
+//    pd->nndindices[n] = 0L;
+    
     for (i = pd->start; i < end; ++i) {
         
         nodechanges[n][i] = 0L;
@@ -800,8 +822,8 @@ mpl_fitch_na_recalc_first_downpass
             }
         }
         
-        if (t != tempdn[n][i]) {
-            ++chgs;
+        if (t != tempdn[n][i]/* || t == NA*/) {
+             ++chgs;
         }
         
         dnset[n][i] = t;
@@ -836,8 +858,10 @@ int mpl_fitch_na_recalc_first_uppass
     mpl_discr t = 0;
     long* restrict indices = pd->indexbuf;
     
+//    pd->nndindices[n] = 0L;
+    
 //    for (j = 0; j < pd->nchars; ++j) {
-    for (j = pd->nchars; j-- ; ) {
+    for (j = 0; j < pd->nchars;  ++j) {
         
         i = indices[j];
         
@@ -871,8 +895,16 @@ int mpl_fitch_na_recalc_first_uppass
             if (tempprup[n][i] == NA || prupset[n][i] == NA) {
                 ++chgs;
             }
+//            pd->ndindexbufs[n][pd->nndindices[n]] = i;
+//            ++pd->nndindices[n];
         }
     }
+    
+//    assert(pd->nndindices[n] == pd->nchars);
+//    int m = 0;
+//    for (m = 0; m < pd->nndindices[n]; ++m) {
+//        assert(pd->ndindexbufs[n][m] == pd->indexbuf[m]);
+//    }
     
     return chgs;
 }
@@ -923,15 +955,25 @@ double mpl_fitch_na_recalc_second_downpass
 {
     size_t i;
     size_t j;
+    long end = 0;
 //    mpl_discr t = 0;
     register double cost = 0.0;
     
-    long* restrict indices = pd->indexbuf;
+    long* restrict indices = //pd->ndindexbufs[n];
+                             pd->indexbuf;
     
+//    if (pd->nndindices[n] == 0) {
+        end = pd->nchars;
+//        indices = pd->indexbuf;
+//    }
+//    else {
+//        end = pd->nndindices[n];
+//    }
+//    
     // Reset the doeschange counter
 //    pd->doeschange = 0;
     
-    for (j = pd->nchars; j-- ; ) {
+    for (j = 0; j < end; ++j) {
         
         i = indices[j];
 
@@ -948,21 +990,21 @@ double mpl_fitch_na_recalc_second_downpass
                 
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     cost += weights[i];
-                    //                    ++pd->doeschange;
+//                    ++pd->doeschange;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
-                    //                    ++pd->doeschange;
+//                    ++pd->doeschange;
                 }
             }
         } else {
             dnsetf[n][i] = prupset[n][i];
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
-                //                ++pd->doeschange;
+//                ++pd->doeschange;
             }
         }
         
-//        if (dnsetf[n][i] != tempdnf[n][i]) {
+//        if (dnsetf[n][i] != tempdnf[n][i] || dnsetf[n][i] == NA) {
 //            ++pd->doeschange;
 //        }
         
@@ -1097,7 +1139,15 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
     
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].score = 0.0;
+        
+        // Re-set the nodal index buffers
+        if (m->parsets[i].isNAtype == true) {
+            for (j = 0; j < m->parsets[i].nnodes; ++j) {
+                m->parsets[i].nndindices[j] = 0L;
+            }
+        }
     }
+    
     memset(changes, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
     memset(applicchgs, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
     // TODO: Get rid of the 2 * thing
@@ -1273,7 +1323,7 @@ double mpl_na_only_parsim_second_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            m->parsets[i].doeschange = 0;
+//            m->parsets[i].doeschange = 0;
             score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
         }
     }
@@ -1591,9 +1641,38 @@ void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m)
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
+            m->parsets[i].nndindices[n] = 0;
             for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
                 nodechanges[n][j] = 0L;
+                prupset[n][j] = 0;
+                tempprup[n][j] = 0;
             }
         }
     }
 }
+
+void mpl_parsim_reset_indexbufs(const long n, mpl_matrix *m)
+{
+    long i = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            m->parsets[i].nndindices[n] = 0;
+        }
+    }
+}
+
+void mpl_parsim_reset_nodal_indexbufs(mpl_matrix *m)
+{
+    long i = 0;
+    long j = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            for (j = 0; j < m->parsets[i].nnodes; ++j) {
+                m->parsets[i].nndindices[j] = 0;
+            }
+        }
+    }
+}
+
