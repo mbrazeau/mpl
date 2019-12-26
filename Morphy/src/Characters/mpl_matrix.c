@@ -524,11 +524,14 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
             mpl_parsim_init_parsdat
             (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
             
+            
+            
             // Update current range
             current_range += (m->parstypes[i] - m->nasbytype[i]);
             ++j;
         }
     }
+    
     
     // Set and size the inapplic parsimony sets
     for (i = 0; i < m->nparsimtypes; ++i) {
@@ -541,6 +544,9 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
             // type block
             mpl_parsim_init_parsdat
             (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
+            
+            // Set up the nodal index storage
+            mpl_parsim_setup_nodal_index_buffers(2 * m->num_rows, &m->parsets[j]);
             
             // Update current range
             current_range += m->nasbytype[i];
