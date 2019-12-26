@@ -470,15 +470,16 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
 {
     int i = 0;
     int j = 0;
+    int k = 0;
     long numstd = 0;
     long numna = 0;
     int joint_pars_types = 0;
     long current_range = 0;
+    mpl_parsim_t ptype = 0;
     
     // Each parsimony type will have a certain number of columns with inapplicable
     // values. This then can be used to determine the number of columns in the
     // inapplicable parsimony type
-//    mpl_count_inapplics_by_parstype(m);
     
     if (m->gaphandl == GAP_INAPPLIC) {
         // Determine each column's inapplicable data count and assign whether
@@ -517,14 +518,12 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         // Check how many standard characters in this type
         if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
             
-            mpl_parsim_set_type(GAP_MISSING, (mpl_parsim_t)i, &m->parsets[j]);
-            
+            ptype = m->charinfo[current_range].parsimtype;
+            mpl_parsim_set_type(GAP_MISSING, ptype, &m->parsets[j]);
             // The range for this type is the current range index + size of the
             // type block
             mpl_parsim_init_parsdat
             (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
-            
-            
             
             // Update current range
             current_range += (m->parstypes[i] - m->nasbytype[i]);
@@ -538,12 +537,16 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         // Check how many standard characters in this type
         if (m->nasbytype[i] > 0) {
             
-            mpl_parsim_set_type(GAP_INAPPLIC, (mpl_parsim_t)i, &m->parsets[j]);
+//            mpl_parsim_set_type(GAP_INAPPLIC, (mpl_parsim_t)i, &m->parsets[j]);
+            ptype = m->charinfo[current_range].parsimtype;
+            mpl_parsim_set_type(GAP_INAPPLIC, ptype, &m->parsets[j]);
             
             // The range for this type is the current range index + size of the
             // type block
             mpl_parsim_init_parsdat
             (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
+            
+
             
             // Set up the nodal index storage
             mpl_parsim_setup_nodal_index_buffers(2 * m->num_rows, &m->parsets[j]);
@@ -617,7 +620,7 @@ static void mpl_count_chartypes(mpl_matrix* m)
     long i = 0;
     
     // Reset the buffers before counting
-    memset(m->datypes, 0, MPL_DATA_T_MAX * sizeof(int));
+    memset(m->datypes,   0, MPL_DATA_T_MAX * sizeof(int));
     memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(int));
     
     for (i = 0; i < m->num_cols; ++i) {
@@ -629,6 +632,7 @@ static void mpl_count_chartypes(mpl_matrix* m)
         if (m->datypes[m->charinfo[i].datatype] == 1) {
             ++m->ndatypes;
         }
+        
         ++m->parstypes[m->charinfo[i].parsimtype];
         if (m->parstypes[m->charinfo[i].datatype] == 1) {
             ++m->nparsimtypes;
