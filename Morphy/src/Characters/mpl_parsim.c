@@ -1197,10 +1197,9 @@ void mpl_wagner_uppass
     
     for (i = pd->start; i < end; ++i) {
         
-        if ((dnset[left][i] & dnset[right][i]) == upset[anc][i]) {
-            fin = upset[anc][i] & dnset[n][i];
-        }
-        else {
+        fin = upset[anc][i] & dnset[n][i];
+        
+        if (fin != upset[anc][i]) {
             mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
             fin = (fin & upset[anc][i]) | dnset[n][i];
         }
@@ -1306,6 +1305,8 @@ void mpl_wagner_na_second_uppass
     long i;
     const long end = pd->end;
     mpl_discr t = 0;
+    mpl_discr fin = 0;
+    
     for (i = pd->start; i < end; ++i) {
         
         if (dnsetf[n][i] & ISAPPLIC) {
@@ -1325,11 +1326,19 @@ void mpl_wagner_na_second_uppass
                         upset[n][i] = (dnsetf[n][i] | (upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i])));// B2
                     } else {
                         if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
+                            
+                            mpl_parsim_closed_interval(&t,
+                                                       dnsetf[left][i] & ISAPPLIC,
+                                                       dnsetf[right][i] & ISAPPLIC);
+                            
                             if ((upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i]))) {
                                 upset[n][i] = upset[anc][i]; // B3
                             }
                             else {
-                                upset[n][i] = (upset[anc][i] | dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC; // B4
+                                upset[n][i] = (upset[anc][i]   |
+                                               dnsetf[left][i] |
+                                               dnsetf[right][i])
+                                               & ISAPPLIC; // B4
                             }
                         } else {
                             upset[n][i] = upset[anc][i] | dnsetf[n][i]; // B5
