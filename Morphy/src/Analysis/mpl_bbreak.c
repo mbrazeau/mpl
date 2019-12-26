@@ -142,12 +142,16 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
 {
     // Set up all the global variables.
     // Iterate over the tree list.
+    
+//    mpl_bbreak_print_status_header(bbk);
+    
     long i       = 0;
     long j       = 0;
     long nstarts = 0;
     
     time_t timein;
     time_t timeout;
+    time_t tkeep = 0.0;
     
     mpl_topol* current = NULL;
     mpl_topol* top     = NULL;
@@ -158,6 +162,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     
     timein = (float)clock()/CLOCKS_PER_SEC;
 
+    tkeep = timein;
+    
     t = mpl_new_tree(bbk->numtaxa);
     
 //    mpl_stepwise_init(MPL_AST_RANDOM, bbk->numtaxa, 1, &bbk->stepwise);
@@ -223,6 +229,12 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                            bbk->treelist->num_trees);
                     
                     fflush(stdout);
+//                    timeout = (float)clock()/CLOCKS_PER_SEC;
+//
+//                    if (timeout - tkeep > 10) {
+//                        mpl_bbreak_print_status(i, bbk);
+//                        tkeep = timeout;
+//                    }
     
                     mpl_tree_read_topol(t, current);
                     //                t->score = mpl_fullpass_parsimony(t);
@@ -325,8 +337,10 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         bbk->savecount = 0;
         
-        printf("\r                                   ");
-        printf("\r\tRatchet iteration %i.", i + 1);
+        printf("\r                                                          ");
+        printf("\r\tRatchet iteration %i. Best tree: %.0f steps",
+               i + 1,
+               bbk->shortest);
         fflush(stdout);
 
         mpl_treelist_newrep(false, t, bbk->treelist);
@@ -381,7 +395,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Nixon 6
     }
 
-    printf("\n\tBest tree found: %.0f steps.\n", bbk->shortest);
+//    printf("\n\tBest tree found: %.0f steps.\n", bbk->shortest);
     bbk->savelim = oldsavelim;
 }
 
@@ -448,7 +462,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         clips[i]->clipmark = true;
         
         // Clip the tree at i
-        left = NULL;
+        left  = NULL;
         right = NULL;
         csite = NULL;
         
@@ -478,40 +492,13 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             srclen = mpl_fullpass_subtree(*src, t);
         }
         
-        // If the branch is zero-length, no need to continue. All swaps will
-        // result in redundant trees after collapsing.
-//        mpl_node_bin_connect(left, right, clips[i]);
-//        mpl_node* site = NULL;
-//        if (left == NULL) {
-//            site = right;
-//        }
-//        else {
-//            site = left;
-//        }
-//        diff = mpl_score_try_parsimony(tgtlen + srclen,
-//                                        -1.0,
-//                                        clips[i],
-//                                        site,
-//                                        t);
-//        mpl_node_bin_clip(clips[i]);
-//
-//        if (clips[i]->anc->left == clips[i]) {
-//            right = csite;
-//            left = NULL;
-//        }
-//        else {
-//            left = csite;
-//            right = NULL;
-//        }
-//        
-//        if (diff == 0) {
+//        if ((srclen + tgtlen) < 0) {
 //            mpl_node_bin_connect(left, right, clips[i]);
 //            clips[i]->lock = false;
 //            clips[i]->clipmark = false;
 //            continue;
 //        }
-        
-        
+                
         // Set up the src pointers
         if ((*src)->tip == 0) {
             rtlef = clips[i]->left;
@@ -690,6 +677,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
  ******************************************************************************/
 static void mpl_bbreak_print_status_header(mpl_bbreak* bbk)
 {
+    printf("\n\n");
     printf("               Swapping             Trees            Shortest        Shortest\n");
     printf("Replic.        tree no.             saved            this rep.       overall\n");
     printf("--------------------------------------------------------------------------------\n");
@@ -697,7 +685,8 @@ static void mpl_bbreak_print_status_header(mpl_bbreak* bbk)
 
 static void mpl_bbreak_print_status(long rep, mpl_bbreak* bbk)
 {
-    printf("\t%li\t\t\t\t%li\t\t\t\t%li\t\t\t\t\t%.0f\t\t\t\t%.0f\n", rep,
+    printf(" %li\t\t\t\t%li\t\t\t\t%li\t\t\t\t%.0f\t\t\t\t%.0f\n",
+           rep+1,
            bbk->treelist->back->index,
            bbk->treelist->num_trees,
            bbk->bestinrep,
