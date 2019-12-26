@@ -181,7 +181,8 @@ double mpl_wagner_local_check
  mpl_parsdat* pd);
 double mpl_wagner_na_second_downpass
  (const long left, const long right, const long n, mpl_parsdat* pd);
-
+void mpl_wagner_na_second_uppass
+ (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);

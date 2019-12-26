@@ -97,8 +97,8 @@ static const mpl_parsdat Wagner_NA = {
     .isNAtype   = true,
     .downfxn1   = &mpl_fitch_na_first_downpass,     // Keep same
     .upfxn1     = &mpl_fitch_na_first_uppass,       // Keep same
-    .downfxn2   = &mpl_fitch_na_second_downpass,    // New fxn
-    .upfxn2     = &mpl_fitch_na_second_uppass,      // New fxn
+    .downfxn2   = &mpl_wagner_na_second_downpass,    // New fxn
+    .upfxn2     = &mpl_wagner_na_second_uppass,      // New fxn
     .tipfxn1    = &mpl_fitch_na_tip_update,         // Keep same
     .tipfxn2    = &mpl_fitch_na_tip_finalize,       // TODO: Check if this needs new fxn
     .rootfxn    = &mpl_fitch_na_root,               // Keep same
@@ -1254,7 +1254,9 @@ double mpl_wagner_na_second_downpass
         nodechanges[n][i] = 0L;
         
         if (prupset[n][i] & ISAPPLIC) {
+            
             t = dnsetf[left][i] & dnsetf[right][i];
+            
             if (t) {
                 if (t & ISAPPLIC) {
                     dnsetf[n][i] = t & ISAPPLIC;
@@ -1262,13 +1264,17 @@ double mpl_wagner_na_second_downpass
                     dnsetf[n][i] = t;
                 }
             } else {
-                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-                    cost += weights[i];
+                    cost += (weights[i] *
+                             mpl_parsim_closed_interval(&dnsetf[n][i],
+                                                        dnsetf[left][i] & ISAPPLIC,
+                                                        dnsetf[right][i] & ISAPPLIC));
                     ++changes[i];
                     ++applicchgs[i];
                     nodechanges[n][i] = 1L;
                 } else if (actives[left][i] && actives[right][i]) {
+                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                     cost += weights[i];
                     ++changes[i];
                     nodechanges[n][i] = 1L;
@@ -1294,6 +1300,57 @@ double mpl_wagner_na_second_downpass
     return cost;
 }
 
+void mpl_wagner_na_second_uppass
+(const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
+{
+    long i;
+    const long end = pd->end;
+    mpl_discr t = 0;
+    for (i = pd->start; i < end; ++i) {
+        
+        if (dnsetf[n][i] & ISAPPLIC) {
+            
+            if (upset[anc][i] & ISAPPLIC) {
+               
+                t = upset[anc][i] & dnsetf[n][i];
+                
+                if (t == upset[anc][i]) {
+                    
+                    upset[n][i] = t;  // B1
+                    
+                }
+                else {
+                    // TODO: FINISH THIS
+                    if (dnsetf[left][i] & dnsetf[right][i]) {
+                        upset[n][i] = (dnsetf[n][i] | (upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i])));// B2
+                    } else {
+                        if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
+                            if ((upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i]))) {
+                                upset[n][i] = upset[anc][i]; // B3
+                            }
+                            else {
+                                upset[n][i] = (upset[anc][i] | dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC; // B4
+                            }
+                        } else {
+                            upset[n][i] = upset[anc][i] | dnsetf[n][i]; // B5
+                        }
+                    }
+                }
+            }
+            else {
+                upset[n][i] = dnsetf[n][i];
+            }
+        }
+        else {
+            upset[n][i] = dnsetf[n][i];
+        }
+        
+        tempup[n][i] = upset[n][i];
+//        assert(!(upset[n][i] & NA && upset[n][i] & ISAPPLIC));
+//        assert(upset[n][i] & ISAPPLIC || upset[n][i] == NA);
+        assert(upset[n][i]);
+    }
+}
 
 /// External interface functions
 
