@@ -1012,10 +1012,11 @@ double mpl_fitch_na_recalc_second_downpass
                 
                 dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 
-                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-                    cost += weights[i];
-//                    ++pd->doeschange;
-                } else if (actives[left][i] && actives[right][i]) {
+//                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+//                    cost += weights[i];
+////                    ++pd->doeschange;
+//                } else
+                    if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
 //                    ++pd->doeschange;
                 }
@@ -1028,7 +1029,7 @@ double mpl_fitch_na_recalc_second_downpass
             }
         }
         
-//        if (dnsetf[n][i] != tempdnf[n][i] || dnsetf[n][i] == NA) {
+//        if (dnsetf[n][i] != tempdnf[n][i] /*|| dnsetf[n][i] == NA*/) {
 //            ++pd->doeschange;
 //        }
         
