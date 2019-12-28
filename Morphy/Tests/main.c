@@ -81,7 +81,8 @@ int main(int argc, const char * argv[]) {
     fails += test_skip_whitespace();
     fails += test_get_char_pointer_from_matrix();
     fails += test_counting_gaps_in_matrix_columns();
-    fails += test_parsimony_data_setup();
+    // TODO: Restore this function:
+//    fails += test_parsimony_data_setup();
 //    fails += test_matrix_from_io_source(argc, argv);
     
     // Test mpl_stepwise.c
@@ -99,10 +100,10 @@ int main(int argc, const char * argv[]) {
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
     
-    
     // Test shortcut parsimony
     fails += test_parsimony_shortcut();
     fails += test_parsimony_shortcut_with_rerooting();
+    fails += test_larger_parsimony_shortcut_with_rerooting();
     
     
 //    fails += test_find_char_by_char_mismatches();

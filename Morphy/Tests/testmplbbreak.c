@@ -276,6 +276,7 @@ int test_single_rep_hsearch (void)
     mpl_init_parsimony(m);
     
     mpl_search s;
+    s.use_ratchet = false;
     s.treelist = mpl_treelist_new(ntax, 100000, 0);
     s.num_taxa = ntax;
     s.ratch_iter = 0;
@@ -382,6 +383,7 @@ int test_mutliple_replicate_heuristic_search (void)
     mpl_search s;
     s.treelist = mpl_treelist_new(ntax, 100000, 0);
     s.num_taxa = ntax;
+    s.use_ratchet = false;
     s.bbreak_type = MPL_TBR_T;
     
     mpl_bbreak bbk;
@@ -439,13 +441,13 @@ int test_mutliple_replicate_heuristic_search_large (void)
     
     int failn = 0;
 
-    long ntax = Brazeau.ntax;
-    long nchar = Brazeau.nchar;
+    long ntax = Miyashita.ntax;
+    long nchar = Miyashita.nchar;
     double testscore = 0.0;
     
     int hold = 1; // Hold up to 3 trees
     
-    char* rawmatrix = Brazeau.chardat;
+    char* rawmatrix = Miyashita.chardat;
     
     mpl_rng_set_seed(1);
 
@@ -472,7 +474,7 @@ int test_mutliple_replicate_heuristic_search_large (void)
     bbk.bbktype = MPL_TBR_T;
     bbk.numreps = 10;
     //    bbk.bbktype = MPL_SPR_T;
-    mpl_stepwise_init(MPL_AST_RANDOM, bbk.numtaxa, hold, &bbk.stepwise);
+    mpl_stepwise_init(MPL_AST_ASIS, bbk.numtaxa, hold, &bbk.stepwise);
     mpl_do_bbreak(&bbk);
     
     mpl_tree* t  = mpl_new_tree(ntax);
