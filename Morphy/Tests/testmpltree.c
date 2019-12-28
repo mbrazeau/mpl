@@ -315,7 +315,7 @@ int test_tree_rebasing (void)
     nwk = NULL;
     
     mpl_delete_tree(&t);
-    mpl_topol_cleanup(&top);
+//    mpl_topol_cleanup(&top);
     
     return failn;
 }
@@ -359,7 +359,7 @@ int test_tree_rebasing_bigger_tree (void)
     nwk = NULL;
     
     mpl_delete_tree(&t);
-    mpl_topol_cleanup(&top);
+//    mpl_topol_cleanup(&top);
     return failn;
 }
 
