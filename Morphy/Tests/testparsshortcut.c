@@ -871,9 +871,9 @@ int test_parsimony_shortcut_multiple_tree (void)
                         
                         if (reclen != testscores[c]) {
                             ++failn;
-                            if (src->tip > 1) {
-                                printf("Yeehaw!\n");
-                            }
+//                            if (src->tip > 1) {
+//                                printf("Yeehaw!\n");
+//                            }
                             pfail;
                         }
                         else {
