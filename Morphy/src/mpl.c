@@ -203,7 +203,8 @@ int mpl_attach_symbols(const char* symbols, mpl_handle* handl)
 
 int mpl_set_gap_handl(const mpl_gap_t gaphandl, mpl_handle* handl)
 {
-    return MPL_NOTIMPLEMENTED;
+    mpl_matrix_set_gap_handle(gaphandl, handl->matrix);
+    return MPL_SUCCESS;
 }
 
 int mpl_set_hold(const int hold, mpl_handle* handl)
