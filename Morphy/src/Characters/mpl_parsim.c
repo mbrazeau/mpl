@@ -602,9 +602,8 @@ void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
         
         dnsetf[tipn][i] = prupset[tipn][i];
         
-        tempdn[tipn][i]   = dnset[tipn][i];
+//        tempdn[tipn][i]   = dnset[tipn][i];
         tempdnf[tipn][i]  = dnsetf[tipn][i];
-//        tempup[tipn][i] = upset[tipn][i];
         tempprup[tipn][i] = prupset[tipn][i];
         tempact[tipn][i]  = actives[tipn][i];
     }
