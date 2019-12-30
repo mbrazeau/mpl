@@ -104,8 +104,8 @@ int main(int argc, const char * argv[]) {
     // Test shortcut parsimony
     fails += test_parsimony_shortcut();
     fails += test_parsimony_shortcut_with_rerooting();
-//    fails += test_larger_parsimony_shortcut_with_rerooting();
-    fails += test_parsimony_shortcut_multiple_tree();
+    fails += test_larger_parsimony_shortcut_with_rerooting();
+//    fails += test_parsimony_shortcut_multiple_tree();
     
 //    fails += test_find_char_by_char_mismatches();
     
