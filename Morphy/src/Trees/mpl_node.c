@@ -422,6 +422,31 @@ void mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* n)
     site->anc = n->anc;
 }
 
+void mpl_node_collapse(mpl_node* n)
+{
+    size_t    i   = 0;
+    size_t    lim = 0;
+    mpl_node* anc = NULL;
+    mpl_node* p   = NULL;
+    
+    assert(n->anc != NULL);
+    anc = n->anc;
+    
+    // TODO: Verify that the node is correctly set up.
+    
+    lim = n->ndescs;
+    
+    for (i = 0; i < lim; ++i) {
+        p = NULL;
+        p = mpl_node_pop_desc(n);
+        n->descs[i] = NULL;
+    }
+    
+    n->left  = NULL;
+    n->right = NULL;
+    n->anc   = NULL;
+}
+
 inline void mpl_node_lock(mpl_node* n)
 {
     n->lock = true;

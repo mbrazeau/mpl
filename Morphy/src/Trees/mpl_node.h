@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include "mpl_utils.h"
+#include "../mpl_utils.h"
 
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;
@@ -57,6 +57,7 @@ void        mpl_node_rotate(mpl_node* n);
 void        mpl_node_swap_desc(mpl_node* newdesc, mpl_node* olddesc);
 mpl_node*   mpl_node_bin_clip(mpl_node* n);
 void        mpl_node_bin_connect(mpl_node* toleft, mpl_node* toright, mpl_node* n);
+void        mpl_node_collapse(mpl_node* n);
 inline void mpl_node_lock(mpl_node* n);
 inline void mpl_node_unlock(mpl_node* n);
 inline bool mpl_node_islocked(const mpl_node* n);
