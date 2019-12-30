@@ -174,7 +174,7 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
 {
     double len = 0.0;
     long i = 0;
-    mpl_node* n;
+    mpl_node* n = NULL;
     
     long internnds = t->nintern; // TODO: This is unsafe. Needs to know prior call to full traversal
     long alln = t->size;
@@ -192,7 +192,7 @@ double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
                                          n->mem_index, glmatrix);
     }
     
-    n = t->postord_intern[i-1];//subtr;//internalnodes[i-1];
+//    n = t->postord_intern[internnds-1];//subtr;//internalnodes[i-1];
     mpl_parsim_do_root(n->mem_index, n->anc->mem_index, glmatrix);
     
     // Uppass

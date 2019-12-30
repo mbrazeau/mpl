@@ -8,6 +8,8 @@
 #include <stdio.h>
 
 #include "../src/Trees/mpl_tree.h"
+#include "../src/Characters/mpl_charbuf.h"
+#include "../src/Characters/mpl_matrix.h"
 
 void mpl_test_print_bin_traverse(mpl_node* n);
 
@@ -88,4 +90,28 @@ int mpl_tree_checker(const mpl_tree* t)
     }
     
     return err;
+}
+
+void mpl_test_print_newick(mpl_node* n)
+{
+    if (n->tip != 0) {
+        printf("%li", n->tip);
+        return;
+    }
+    
+    printf("(");
+    
+    mpl_test_print_newick(n->left);
+    printf(",");
+    mpl_test_print_newick(n->right);
+    
+    printf(")");
+}
+
+void mpl_test_print_charchanges(mpl_matrix*  m)
+{
+    size_t i = 0;
+    for (i = 0; i < m->cbufs[0].num_chars; ++i) {
+        printf("%li\n", m->cbufs[0].charchanges[i]);
+    }
 }

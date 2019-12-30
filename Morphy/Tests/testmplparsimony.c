@@ -335,6 +335,62 @@ int test_fullpass_with_large_data_std_parsimony (void)
     return failn;
 }
 
+int test_fullpass_with_large_data_std_parsimony2 (void)
+{
+    theader("Test full-pass standard parsimony with large matrix II");
+    
+    int failn = 0;
+    
+    long ntax = Brazeau.ntax;
+    long nchar = Brazeau.nchar;
+    
+    char *rawmatrix = Brazeau.chardat;
+    
+    char* newick =
+    "(1,(2,(((8,(72,(((95,(28,(45,(((22,((49,((75,(31,(12,((13,(3,40)),(54,65))))),(26,33))),(43,63))),(37,(18,((68,(((69,(27,(((17,(4,19)),((39,(15,23)),(38,(59,76)))),(16,(60,74))))),(52,57)),(9,46))),(7,(62,77)))))),(94,(((79,(50,(24,(14,(41,(56,((47,(88,89)),(55,90)))))))),(73,(((30,35),((81,(34,64)),(80,(82,(83,(71,86)))))),((58,91),(87,(84,85)))))),(36,(93,(66,92))))))))),(48,(21,(25,(10,(20,42)))))),(29,((11,(5,70)),(51,53)))))),(32,44)),(78,(61,(6,67))))));";
+//    "(1,((((((2,6),(((14,24),17),15)),16),25),((((((((((3,18),5),26),(13,23)),28),27),20),((((4,22),19),12),11)),9),((8,10),21))),7));";
+    
+    mpl_matrix* m = mpl_matrix_new();
+    mpl_matrix_set_nrows(ntax, m);
+    mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+//    mpl_matrix_set_gap_handle(GAP_MISSING, m);
+    mpl_matrix_apply_data(m);
+    
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(newick, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    mpl_tree_checker(t);
+    
+//    mpl_tree_traverse(t);
+    
+    double len = 0.0;
+    
+    mpl_init_parsimony(m);
+    
+    len = mpl_fullpass_parsimony(t);
+    
+    if (len != 960.0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_matrix_delete(&m);
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
+
 int test_fullpass_with_inapplicables (void)
 {
     theader("Test full-pass with inapplicable data");

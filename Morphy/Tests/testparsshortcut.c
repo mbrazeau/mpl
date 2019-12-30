@@ -11,6 +11,7 @@
  Stuff for testing the parsimony shortcut being used.
  */
 
+#include "testutils.h"
 #include "testharddat.h"
 #include "testparsshortcut.h"
 #include "testmplbbreak.h"
@@ -45,6 +46,7 @@ int test_parsimony_shortcut (void)
     m = mpl_matrix_new();
     mpl_matrix_init(ntax, nchar, 2 * nchar, m);
     mpl_matrix_attach_rawdata(matrix, m);
+    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);
     mpl_init_parsimony(m);
     
@@ -111,7 +113,7 @@ int test_parsimony_shortcut (void)
         
         // Reconnect at clipsite:
         mpl_node_bin_connect(left, right, src);
-        
+        mpl_tree_traverse(t);
         // Calculate the length of reinserting to same spot
         reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, site, t);
 
@@ -125,6 +127,7 @@ int test_parsimony_shortcut (void)
         else {
             ppass;
         }
+        
     }
 
 
@@ -296,7 +299,8 @@ int test_parsimony_shortcut_with_rerooting (void)
 
             // Calculate the length of reinserting to same spot
             reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, site, t);
-
+            mpl_tree_traverse(t);
+            
             reclen += tgtlen + srclen;
             // Compare with test length
             //printf("%.1f, ", mpl_fullpass_parsimony(t));
@@ -491,7 +495,8 @@ int test_larger_parsimony_shortcut_with_rerooting (void)
 
             // Calculate the length of reinserting to same spot
             reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, site, t);
-
+            mpl_tree_traverse(t);
+            
             reclen += tgtlen + srclen;
             // Compare with test length
 //            printf("%.1f, ", mpl_fullpass_parsimony(t));
@@ -620,6 +625,7 @@ int test_parsimony_shortcut_multiple_tree (void)
     m = mpl_matrix_new();
     mpl_matrix_init(ntax, nchar, 2 * nchar, m);
     mpl_matrix_attach_rawdata(matrix, m);
+//    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);
     mpl_init_parsimony(m);
     
@@ -755,11 +761,12 @@ int test_parsimony_shortcut_multiple_tree (void)
                     // Calculuate the length of reinsertion to same spot
                     // Compare with test length
                     // Reconnect at clipsite:
-                    
+            
                     mpl_node_bin_connect(left, right, src);
 
                     // Calculate the length of reinserting to same spot
                     testscores[c] = (int)mpl_fullpass_parsimony(t);
+                    
                     ++c;
                     
                     mpl_node_bin_clip(src);
@@ -859,12 +866,18 @@ int test_parsimony_shortcut_multiple_tree (void)
                         // Calculuate the length of reinsertion to same spot
                         // Compare with test length
                         // Reconnect at clipsite:
+//                        mpl_fullpass_parsimony(t);
+//                        mpl_tree_traverse(t);
+//                        if (src->tip == 0) {
+//                            mpl_fullpass_subtree(src, t);
+//                        }
                         
                         mpl_node_bin_connect(left, right, src);
 
                         // Calculate the length of reinserting to same spot
+                        
                         reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, site, t);
-
+                        mpl_tree_traverse(t);
                         reclen += tgtlen + srclen;
                         // Compare with test length
             //            printf("%.1f, ", mpl_fullpass_parsimony(t));

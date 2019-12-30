@@ -14,6 +14,7 @@ int test_parsimony_on_tree (void);
 int test_fullpass_parsimony (void);
 int test_wagner_fullpass_parsimony (void);
 int test_fullpass_with_large_data_std_parsimony (void);
+int test_fullpass_with_large_data_std_parsimony2 (void);
 int test_fullpass_with_inapplicables (void);
 int test_fullpass_with_multiple_inapplics (void);
 int test_multiple_small_matrices (void);

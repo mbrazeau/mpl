@@ -96,6 +96,7 @@ int main(int argc, const char * argv[]) {
     fails += test_fullpass_parsimony();
     fails += test_wagner_fullpass_parsimony();
     fails += test_fullpass_with_large_data_std_parsimony();
+    fails += test_fullpass_with_large_data_std_parsimony2();
     fails += test_multiple_small_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();

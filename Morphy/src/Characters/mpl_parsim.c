@@ -415,6 +415,7 @@ void mpl_fitch_uppass
         }
 
         upset[n][i] = fin;
+//        assert(upset[n][i] != 0);
 //        tempup[n][i] = fin;
     }
 }
@@ -423,20 +424,14 @@ void mpl_fitch_uppass
 void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i = 0;
-    long j = 0;
-//    const long end = pd->end;
-    mpl_discr t;
+    const long end = pd->end;
     
-    for (j = 0; j < pd->ntipinbufs[tipn]; ++j) {
-        
-        i = pd->tipinbufs[tipn][j];
+    for (i = pd->start; i < end; ++i) {
         
         upset[tipn][i] = dnset[tipn][i];
-        
-        t = dnset[tipn][i] & upset[anc][i];
-        
-        if (t) {
-            upset[tipn][i] = t;
+
+        if (dnset[tipn][i] & upset[anc][i]) {
+            upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
 //        
 //        tempdn[tipn][i] = dnset[tipn][i];
@@ -457,9 +452,8 @@ double mpl_fitch_local_check
     long i;
     const long end = pd->end;
     double score = 0.0;
-    
+
 //    if (lim < 0.0) {
-#pragma clang loop vectorize(enable)
         for (i = pd->start; i < end; ++i) {
             if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
                 score += weights[i];
@@ -1636,7 +1630,7 @@ double mpl_do_src_root(const long left, const long right, const long n, mpl_pars
     long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        dnset[n][i] = upset[left][i] | upset[right][i];
+        //dnset[n][i] = upset[left][i] | upset[right][i];
     }
     
     return 0.0;
@@ -1751,8 +1745,9 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
+        m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
         if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
+//            mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
             mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]);
 //            mpl_update_active_sets(left, right, n, &m->parsets[i]);
         }

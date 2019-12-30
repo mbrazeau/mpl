@@ -330,9 +330,9 @@ MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
         return MPL_NOTIMPLEMENTED;
     }
     
-    for (i = 0; i < m->nparsets; ++i) {
-        mpl_parsim_setup_tips(m, &m->parsets[i]);
-    }
+//    for (i = 0; i < m->nparsets; ++i) {
+//        mpl_parsim_setup_tips(m, &m->parsets[i]);
+//    }
     
     return MPL_SUCCESS;
 }
@@ -632,7 +632,8 @@ static void mpl_count_chartypes(mpl_matrix* m)
         if (m->datypes[m->charinfo[i].datatype] == 1) {
             ++m->ndatypes;
         }
-        
+        // TODO: I think this is broken:
+        // This gets called before parsimony types are ever set.
         ++m->parstypes[m->charinfo[i].parsimtype];
         if (m->parstypes[m->charinfo[i].datatype] == 1) {
             ++m->nparsimtypes;
