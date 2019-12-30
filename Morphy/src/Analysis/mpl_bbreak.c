@@ -424,7 +424,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     long        clipmax = 0; // Limit for number of clippings to perform
     long        tgtnum  = 0; // Limit for number of reconnection target sites
     double      score   = 0.0;  // Local storage for tree score
-    double      diff    = 0.0;
+//    double      diff    = 0.0;
     mpl_node*   left    = NULL;
     mpl_node*   right   = NULL;
     mpl_node*   csite   = NULL;
@@ -491,13 +491,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
-        
-//        if ((srclen + tgtlen) < 0) {
-//            mpl_node_bin_connect(left, right, clips[i]);
-//            clips[i]->lock = false;
-//            clips[i]->clipmark = false;
-//            continue;
-//        }
                 
         // Set up the src pointers
         if ((*src)->tip == 0) {
