@@ -11,9 +11,9 @@
 
 typedef struct _bitset {
     
-    int nfields;
-    int maxbit;
-    unsigned long* data;
+    int             nfields;
+    int             maxbit;
+    unsigned long*  data;
     
 } mpl_bitset;
 
@@ -55,7 +55,7 @@ void mpl_bitset_delete(mpl_bitset** b)
 
 inline bool mpl_bitset_set(const long i, mpl_bitset* b)
 {
-    b->data[i / NULONGBITS] |= ( ((unsigned long)1) << (i % NULONGBITS) );
+    b->data[i / NULONGBITS] |= 1UL << (i % NULONGBITS);
     
     return true;
 }
