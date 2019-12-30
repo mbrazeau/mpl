@@ -14,6 +14,9 @@
 #include "../mpl_defs.h"
 #include "mpl_charinfo.h"
 #include "mpl_charbuf.h"
+#include "../mpl_utils.h"
+#include "mpl_parsim.h"
+#include "mpl_matrix.h"
 
 typedef struct _matrix mpl_matrix;
 typedef struct mpl_parsdat mpl_parsdat;
@@ -102,13 +105,13 @@ void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
-double mpl_na_only_parsim_first_downpass
+inline double mpl_na_only_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
-void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
-int mpl_na_only_parsim_first_uppass
+inline void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
+inline int mpl_na_only_parsim_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
-void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
-double mpl_na_only_parsim_second_downpass
+inline void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
+static inline double mpl_na_only_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 double mpl_fitch_na_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
@@ -162,9 +165,15 @@ double mpl_fitch_na_local_recheck
 double mpl_parsim_local_recheck
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
 
+double
+mpl_fitch_na_recalc_first_downpass
+ (const long left, const long right, const long n, mpl_parsdat* restrict pd);
 double mpl_fitch_na_recalc_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* restrict pd);
-
+void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd);
+int mpl_fitch_na_recalc_first_uppass
+ (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 static inline unsigned int mpl_parsim_closed_interval
  (mpl_discr* res, mpl_discr a, mpl_discr b);
 double mpl_wagner_downpass
@@ -204,4 +213,77 @@ void mpl_parsim_reset_nodal_indexbufs(mpl_matrix *m);
 void reset_temporary_changebuf(void);
 long get_temp_change(long i);
 void tempchangebuf_selective_reset(mpl_matrix *m);
+
+// NA-only passes
+
+inline double mpl_na_only_parsim_first_downpass
+(const long left, const long right, const long n, mpl_matrix* m)
+{
+    double score = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+            score += mpl_fitch_na_recalc_first_downpass(left, right, n, &m->parsets[i]);
+        }
+    }
+    
+    return score;
+}
+
+inline void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_recalc_root(n, anc, &m->parsets[i]);
+        }
+    }
+}
+
+inline int mpl_na_only_parsim_first_uppass
+(const long left, const long right, const long n, const long anc, mpl_matrix* m)
+{
+    int i;
+    int chgs = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
+            chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
+        }
+    }
+    
+    return chgs;
+}
+
+
+inline void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_recalc_tip_update(n, anc, &m->parsets[i]);
+//           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
+        }
+    }
+}
+
+static inline double mpl_na_only_parsim_second_downpass
+(const long left, const long right, const long n, mpl_matrix* m)
+{
+    double score = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            m->parsets[i].doeschange = 0;
+            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
+        }
+    }
+    
+    return score;
+}
+
 #endif /* mpl_parsim_h */

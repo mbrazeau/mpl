@@ -9,11 +9,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../mpl_utils.h"
-#include "mpl_parsim.h"
 #include "mpl_matrix.h"
-
-
+#include "mpl_parsim.h"
 
 long tempdbgchanges[400] = {0};
 
@@ -811,7 +808,7 @@ void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
 
 double
 mpl_fitch_na_recalc_first_downpass
-(const long left, const long right, const long n, mpl_parsdat* pd)
+(const long left, const long right, const long n, mpl_parsdat* restrict pd)
 {
     long i;
     long j;
@@ -1216,7 +1213,6 @@ double mpl_wagner_local_check
     double score = 0.0;
     
 //    if (lim < 0.0) {
-#pragma clang loop vectorize(enable)
         for (i = pd->start; i < end; ++i) {
             if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
                 score += (weights[i] * mpl_parsim_closed_interval(NULL,
@@ -1491,7 +1487,7 @@ void mpl_parsim_second_uppass
     }
 }
 
-void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
+inline void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
 {
     int i = 0;
     for (i = 0; i < m->nparsets; ++i) {
@@ -1502,77 +1498,7 @@ void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
     }
 }
 
-// NA-only passes
 
-double mpl_na_only_parsim_first_downpass
-(const long left, const long right, const long n, mpl_matrix* m)
-{
-    double score = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
-            score += mpl_fitch_na_recalc_first_downpass(left, right, n, &m->parsets[i]);
-        }
-    }
-    
-    return score;
-}
-
-void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m)
-{
-    int i = 0;
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_recalc_root(n, anc, &m->parsets[i]);
-        }
-    }
-}
-
-int mpl_na_only_parsim_first_uppass
-(const long left, const long right, const long n, const long anc, mpl_matrix* m)
-{
-    int i;
-    int chgs = 0;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
-            chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
-        }
-    }
-    
-    return chgs;
-}
-
-
-void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
-{
-    int i = 0;
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_recalc_tip_update(n, anc, &m->parsets[i]);
-//           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
-        }
-    }
-}
-
-double mpl_na_only_parsim_second_downpass
-(const long left, const long right, const long n, mpl_matrix* m)
-{
-    double score = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].doeschange = 0;
-            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
-        }
-    }
-    
-    return score;
-}
 
 void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
 {
@@ -1581,7 +1507,6 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long* restrict indices = pd->indexbuf;
     
     if (anc > -1) {
-#pragma clang loop vectorize(enable)
         for (j = pd->nchars; j-- ; ) {
             
             i = indices[j];
@@ -1598,7 +1523,6 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             actives[anc][i] = tempact[anc][i];
         }
     } else {
-#pragma clang loop vectorize(enable)
         for (j = pd->nchars; j-- ; ) {
             
             i = indices[j];
