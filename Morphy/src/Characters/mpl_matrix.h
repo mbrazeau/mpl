@@ -13,7 +13,9 @@
 #include "mpl_chardefs.h"
 #include "mpl_charinfo.h"
 #include "mpl_charbuf.h"
-#include "mpl_parsim.h"
+//#include "mpl_parsim.h"
+
+typedef struct mpl_parsdat mpl_parsdat;
 
 typedef struct _matrix {
     
