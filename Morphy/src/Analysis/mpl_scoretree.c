@@ -143,9 +143,11 @@ double mpl_length_only_parsimony(const double lim, mpl_tree* t)
             len += mpl_parsim_second_downpass (n->left->mem_index,
                                                n->right->mem_index,
                                                n->mem_index, glmatrix);
-//            if (len > lim) {
-//                return len;
-//            }
+            if (lim > -1.0) {
+                if (len > lim) {
+                    return len;
+                }
+            }
         }
     }
     
@@ -540,10 +542,10 @@ double mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
 double mpl_score_try_parsimony
 (const double sttlen, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
-    double score = 0.0;
-    double minscore = 0.0;
-    double scorerecall = 0.0;
-    double diff = -1.0;
+    double score       =  0.0;
+    double minscore    =  0.0;
+    double scorerecall =  0.0;
+    double diff        = -1.0;
     
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
@@ -562,25 +564,27 @@ double mpl_score_try_parsimony
         
         // Get the score of all characters whose lengths can't be checked during
         // a local insertion.
+
         scorerecall = mpl_parsim_get_score_recall(glmatrix);
 
         score -= scorerecall;
         minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
         
         if (lim > -1.0) {
-            
             if ((score + sttlen + minscore) > lim) {
-                return score + sttlen + minscore;
+                return score + minscore;
             }
-            
-            diff = lim - (score + sttlen);
-
+            diff = lim - (score + scorerecall + sttlen);
         }
         
         score += scorerecall;
+//      TODO: This, very strangely, ends up making a difference when it should not.
+//      if (glmatrix->parsets[1].nchars == 0) {
+//          mpl_tree_traverse(t);
+//          return score;
+//      }
         score += mpl_fullpass_parsimony_na_only(diff, src, t);
     }
-    
     
     return score;
 }
