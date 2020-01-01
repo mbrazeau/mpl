@@ -487,7 +487,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         double srclen = 0.0;
 
         tgtlen = mpl_fullpass_parsimony(t);
-        
+
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
@@ -582,7 +582,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 t->score = (score + tgtlen + srclen);
 //
 //                t->score = mpl_fullpass_parsimony(t);
-//                t->score = mpl_length_only_parsimony(bbk->shortest, t);
+//                t->score = mpl_length_only_parsimony(bbk->bestinrep, t);
                 
                 if (bbk->bestinrep == 0.0) {
                     bbk->bestinrep = t->score;
@@ -602,6 +602,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             clips[i]->clipmark = false;
                             mpl_treelist_add_tree(false, t, bbk->treelist);
                             clips[i]->lock = false;
+                            return;
                         
                         }
                         else {
