@@ -318,6 +318,7 @@ static void mpl_try_all_sites
         mpl_node_bin_connect(sw->sites[i], NULL, n);
         
 //        t->score = mpl_fullpass_parsimony(t);
+//        t->score = mpl_length_only_parsimony(-1.0, t);
         t->score = sttlen + mpl_score_try_parsimony(-1.0, -1.0, n, sw->sites[i], t);
         
         if (sw->held->num_trees == 0) {
