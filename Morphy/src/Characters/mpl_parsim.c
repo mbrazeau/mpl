@@ -370,7 +370,9 @@ double mpl_fitch_downpass
         if (!dnset[n][i]) {
             dnset[n][i] = dnset[left][i] | dnset[right][i];
             cost += weights[i];
+#ifdef DEBUG
             ++changes[i];
+#endif
         }
     }
     
@@ -427,7 +429,7 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
         
         upset[tipn][i] = dnset[tipn][i];
 
-        if (dnset[tipn][i] & upset[anc][i]) {
+        if ((dnset[tipn][i] & upset[anc][i]) == upset[anc][i]) {
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
 //        
@@ -436,6 +438,23 @@ void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
     }
 }
 
+#ifdef DEBUG
+long localchgs[800] = {0};
+
+void clear_local_changes(void)
+{
+    memset(localchgs, 0, 800 * sizeof(long));
+}
+
+void add_local_changes(mpl_charbuf* cb)
+{
+    size_t i = 0;
+    for (i = 0; i < cb->num_chars; ++i) {
+        changes[i] += localchgs[i];
+    }
+}
+
+#endif
 
 double mpl_fitch_local_check
 (const double lim,
@@ -450,10 +469,17 @@ double mpl_fitch_local_check
     const long end = pd->end;
     double score = 0.0;
 
+#ifdef DEBUG
+    clear_local_changes();
+#endif
+    
 //    if (lim < 0.0) {
         for (i = pd->start; i < end; ++i) {
             if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
                 score += weights[i];
+#ifdef DEBUG
+                localchgs[i] += weights[i];
+#endif
             }
         }
 //    }
@@ -790,7 +816,7 @@ void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
 
     for (i = pd->start; i < end; ++i) {
         
-        if (dnset[tipn][i] & upset[anc][i]) {
+        if ((dnset[tipn][i] & upset[anc][i]) == upset[anc][i]) {
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
         else {
@@ -816,7 +842,7 @@ mpl_fitch_na_recalc_first_downpass
     mpl_discr t = 0;
     double chgs = 0.0;
     
-    for (j = pd->nchars; j-- ; ) {
+    for (j = 0; j < pd->nchars; ++j) {
 
         i = indices[j];
         
@@ -852,7 +878,7 @@ void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd)
     long j;
     
 //    for (j = 0; j < pd->nchars; ++j) {
-    for (j = pd->nchars; j-- ; ) {
+    for (j = 0; j < pd->nchars; ++j) {
         
         i = pd->indexbuf[j];
         prupset[anc][i] = dnset[n][i];
@@ -932,7 +958,7 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
     
     long* restrict indices = pd->indexbuf;
     
-    for (j = pd->nchars; j-- ; ) {
+    for (j = 0; j < pd->nchars; ++j) {
         
         i = indices[j];
         
@@ -1079,12 +1105,14 @@ double mpl_fitch_na_local_check
     size_t i;
     const long end = pd->end;
     double score = 0.0;
+    mpl_discr t = 0;
     
     for (i = pd->start; i < end; ++i) {
         
         if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+                t = (tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC;
+                if (!(t & upset[src][i])) {
                     score += weights[i];
                 }
             }
@@ -1098,7 +1126,7 @@ double mpl_fitch_na_local_check
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
+                pd->minscore    += (applicchgs[i] * weights[i]);
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -1117,7 +1145,7 @@ double mpl_fitch_na_local_check
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
+            if (((score + base + pd->minscore) - pd->scorerecall) > lim) {
                 return score;
             }
         }
@@ -1498,6 +1526,77 @@ inline void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
     }
 }
 
+// NA-only passes
+
+double mpl_na_only_parsim_first_downpass
+(const long left, const long right, const long n, mpl_matrix* m)
+{
+    double score = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+            score += mpl_fitch_na_recalc_first_downpass(left, right, n, &m->parsets[i]);
+        }
+    }
+    
+    return score;
+}
+
+void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_recalc_root(n, anc, &m->parsets[i]);
+        }
+    }
+}
+
+int mpl_na_only_parsim_first_uppass
+(const long left, const long right, const long n, const long anc, mpl_matrix* m)
+{
+    int i;
+    int chgs = 0;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
+            chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
+        }
+    }
+    
+    return chgs;
+}
+
+
+void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
+{
+    int i = 0;
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            mpl_fitch_na_recalc_tip_update(n, anc, &m->parsets[i]);
+//           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
+        }
+    }
+}
+
+double mpl_na_only_parsim_second_downpass
+(const long left, const long right, const long n, mpl_matrix* m)
+{
+    double score = 0.0;
+    int i;
+    
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+//            m->parsets[i].doeschange = 0;
+            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
+        }
+    }
+    
+    return score;
+}
 
 
 void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
@@ -1553,7 +1652,7 @@ double mpl_do_src_root(const long left, const long right, const long n, mpl_pars
     long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        //dnset[n][i] = upset[left][i] | upset[right][i];
+        dnset[n][i] = upset[left][i] | upset[right][i];
     }
     
     return 0.0;
@@ -1567,20 +1666,9 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
     
     for (i = pd->start; i < end; ++i) {
         
-//        upset[n][i] = dnset[n][i];
         upset[n][i] = upset[left][i] | upset[right][i];
-//        dnset[n][i] = upset[n][i];
-        
-        if (upset[n][i] & ISAPPLIC) {
-            upset[n][i] &= ISAPPLIC;
-        }
-        
-//        tempdn[n][i]  = dnset[n][i];
-//        tempdnf[n][i] = dnset[n][i];
+
         tempup[n][i]  = upset[n][i];
-        
-//        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
-//        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
@@ -1593,14 +1681,16 @@ double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
     
     for (i = pd->start; i < end; ++i) {
         
-        upset[n][i] = dnsetf[n][i] = dnset[n][i];
+        upset[n][i] = prupset[n][i] = dnsetf[n][i] = dnset[n][i];
+
         
         tempdn[n][i]  = dnset[n][i];
         tempdnf[n][i] = dnsetf[n][i];
+        tempprup[n][i] = prupset[n][i];
         tempup[n][i]  = upset[n][i];
         
-//        actives[n][i] = dnset[n][i] & ISAPPLIC;
-//        tempact[n][i] = actives[n][i];
+        actives[n][i] = dnset[n][i] & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
     }
     
     return 0.0;
@@ -1668,11 +1758,11 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-        m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
+//        m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
         if (m->parsets[i].isNAtype == true) {
-//            mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
+            // TODO: This fitch NA first downpass might need to be removed?
+            mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
             mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]);
-//            mpl_update_active_sets(left, right, n, &m->parsets[i]);
         }
     }
 }
@@ -1681,7 +1771,7 @@ double mpl_parsim_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
-    double cscore = base;
+    double cscore = 0.0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1692,11 +1782,11 @@ double mpl_parsim_local_check
         score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
         cscore += score;
         
-        if (lim > -1.0) {
-            if (score > lim) {
-                return score;
-            }
-        }
+//        if (lim > -1.0) {
+//            if (score > lim) {
+//                return score;
+//            }
+//        }
 //      m->parsets[i].tryscore = score;
     }
     
@@ -1736,7 +1826,6 @@ double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
     int i;
     double minremain = 0.0;
 
-    
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
             minremain += m->parsets[i].minscore;
