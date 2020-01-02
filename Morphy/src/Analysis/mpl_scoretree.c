@@ -275,9 +275,13 @@ static void mpl_part_parsim_uppass
     if (!mpl_na_only_parsim_first_uppass(n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-       if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) /*&& srcflag == false*/) {
+        if ((!n->marked) && (n != ostart)) {
             return;
         }
+        
+//        if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) /*&& srcflag == false*/) {
+//             return;
+//         }
     }
     
     n->marked = 0;
@@ -396,8 +400,8 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     start->marked = 0;
     
-//    mpl_parsim_reset_indexbufs(start->mem_index, glmatrix);
-//    mpl_parsim_reset_indexbufs(start->anc->mem_index, glmatrix);
+    mpl_parsim_reset_indexbufs(start->mem_index, glmatrix);
+    mpl_parsim_reset_indexbufs(start->anc->mem_index, glmatrix);
     
     len = 0.0;
     for (i = 0; i < t->nsubnodes; ++i) {
@@ -586,6 +590,11 @@ double mpl_score_try_parsimony
     }
     
     return score;
+}
+
+void mpl_scoretree_calc_abs_minscores(void)
+{
+    mpl_parsim_calc_abs_minscore(glmatrix);
 }
 
 void mpl_scoretree_copy_original_characters(void)

@@ -28,7 +28,7 @@ void    mpl_scoretree_restore_original_characters(mpl_matrix* m, mpl_tree* t);
 void    mpl_tempset_stdtype(void);
 void    mpl_tempreset_natype(void);
 void    mpl_parsim_update_root_prupset(const long left, const long right, const long n, mpl_matrix* m);
-
+void mpl_scoretree_calc_abs_minscores(void);
 void mpl_do_ratchet_weights(void);
 void mpl_reset_std_weights(void);
 #endif /* mpl_scoretree_h */

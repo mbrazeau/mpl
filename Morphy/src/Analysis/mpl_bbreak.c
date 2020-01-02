@@ -494,7 +494,11 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
-                
+        
+        // Assign an absolute minimum score in each parsimony partition
+        // Restore this if using the break in the shortcut algorithm
+//        mpl_scoretree_calc_abs_minscores();
+        
         // Set up the src pointers
         if ((*src)->tip == 0) {
             rtlef = clips[i]->left;
