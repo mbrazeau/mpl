@@ -310,6 +310,7 @@ static void mpl_try_all_sites
     nsites = sw->nsites;
     
     sttlen = mpl_fullpass_parsimony(t);
+//    mpl_src_root_parsimony(n);
 //    mpl_scoretree_copy_original_characters();
     
     for (i = 0; i < nsites; ++i) {
