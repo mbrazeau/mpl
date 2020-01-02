@@ -1105,14 +1105,16 @@ double mpl_fitch_na_local_check
     size_t i;
     const long end = pd->end;
     double score = 0.0;
-    mpl_discr t = 0;
+    double cminscore = pd->cminscore;
+    double testscore = 0.0;
+    long s = 0;
+//    mpl_discr t = 0;
     
     for (i = pd->start; i < end; ++i) {
         
         if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                t = (tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC;
-                if (!(t & upset[src][i])) {
+                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
                 }
             }
@@ -1126,7 +1128,7 @@ double mpl_fitch_na_local_check
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]);
+                pd->minscore    += (applicchgs[i] * weights[i]); // More exact but slower
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -1141,14 +1143,18 @@ double mpl_fitch_na_local_check
                 pd->minscore    += (changes[i] * weights[i]);
             }
         }
+        
+        cminscore -= (applicchgs[i] * weights[i]); // Absolute possible minimum
+
+        testscore = score + pd->minscore + cminscore + base - pd->scorerecall;
 
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
-        if (lim > -1.0) {
-            if (((score + base + pd->minscore) - pd->scorerecall) > lim) {
-                return score;
-            }
-        }
+//        if (lim > -1.0) {
+//            if (testscore > lim) {
+//                return score;
+//            }
+//        }
     }
     
     return score;
@@ -1668,6 +1674,10 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         
         upset[n][i] = upset[left][i] | upset[right][i];
 
+        if (upset[n][i] & ISAPPLIC) {
+            upset[n][i] &= ISAPPLIC;
+        }
+        
         tempup[n][i]  = upset[n][i];
     }
     
@@ -1771,7 +1781,7 @@ double mpl_parsim_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
-    double cscore = 0.0;
+    double cscore = base;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1833,6 +1843,26 @@ double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
     }
     
     return minremain;
+}
+
+double mpl_parsim_calc_abs_minscore(mpl_matrix* m)
+{
+    size_t i = 0;
+    size_t j = 0;
+    double minscore = 0.0;
+
+    for (i = 0; i < m->nparsets; ++i) {
+        if (m->parsets[i].isNAtype == true) {
+            m->parsets[i].cminscore = 0.0;
+            for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
+                m->parsets[i].cminscore += (applicchgs[i] * weights[i]);
+            }
+            
+            minscore += m->parsets[i].cminscore;
+        }
+    }
+    
+    return minscore;
 }
 
 void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd)

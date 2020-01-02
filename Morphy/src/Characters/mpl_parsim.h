@@ -42,6 +42,7 @@ typedef struct mpl_parsdat {
     long*           nndindices;
     long**          ndindexbufs;
     double          minscore;
+    double          cminscore; // A current minimum score based on state of tree and applicable-only changes
     long*           minchanges;
     int             doeschange; // Number of times a character changes
     double          scorerecall; // For characters needing full-pass estimation
@@ -201,6 +202,7 @@ double mpl_parsim_get_standard_tryscore(mpl_matrix* m);
 void mpl_reset_state_buffs(const long nrows, mpl_parsdat* pd);
 void mpl_parsim_reset_state_buffers(mpl_matrix *m);
 double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m);
+double mpl_parsim_calc_abs_minscore(mpl_matrix* m);
 int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
