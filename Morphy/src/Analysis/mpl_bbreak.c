@@ -313,6 +313,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     bbk->savelim = 1;
     
     bbk->bestinrep = t->score;
+//    printf("Start tree: %.0f\n", t->score);
     oldbest = bbk->bestinrep;
     bbk->hitisland = false;
     bbk->doislandcheck = true;
@@ -343,6 +344,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
                bbk->shortest);
         fflush(stdout);
 
+//        assert(0);
+        
         mpl_treelist_newrep(false, t, bbk->treelist);
         
         // Nixon 3:
@@ -573,8 +576,15 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 mpl_node_bin_connect(tgts[j], NULL, clips[i]);
                 ++bbk->num_rearrangs;
                 
+                double limit = -1.0;
+                if (bbk->bestinrep == 0.0) {
+                    limit = -1.0;
+                }
+                else {
+                    limit = bbk->bestinrep;
+                }
                 score = mpl_score_try_parsimony(tgtlen + srclen,
-                                                bbk->bestinrep,
+                                                limit,
                                                 clips[i],
                                                 tgts[j],
                                                 t);
@@ -582,7 +592,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 t->score = (score + tgtlen + srclen);
 //
 //                t->score = mpl_fullpass_parsimony(t);
-//                t->score = mpl_length_only_parsimony(bbk->bestinrep, t);
+//                t->score = mpl_length_only_parsimony(limit, t);
                 
                 if (bbk->bestinrep == 0.0) {
                     bbk->bestinrep = t->score;
