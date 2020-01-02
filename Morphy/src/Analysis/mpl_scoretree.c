@@ -549,11 +549,12 @@ double mpl_score_try_parsimony
     
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
+    
     // If the lim is set and the score exceeds the limit already, return score.
     if (lim > 0) {
         diff = lim-sttlen;
     }
-    
+
     // This gives a minimum number of steps added with a quick check.
     score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
                                    tgt->mem_index,
@@ -574,15 +575,13 @@ double mpl_score_try_parsimony
             if ((score + sttlen + minscore) > lim) {
                 return score + minscore;
             }
-            diff = lim - (score + scorerecall + sttlen);
+            diff = lim - (score + sttlen - scorerecall);
         }
         
         score += scorerecall;
-//      TODO: This, very strangely, ends up making a difference when it should not.
-//      if (glmatrix->parsets[1].nchars == 0) {
-//          mpl_tree_traverse(t);
-//          return score;
-//      }
+
+        // TODO: Add a break condition here for when the number of
+        // characters to check is 0.
         score += mpl_fullpass_parsimony_na_only(diff, src, t);
     }
     
