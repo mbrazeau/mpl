@@ -105,13 +105,13 @@ void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
-inline double mpl_na_only_parsim_first_downpass
+double mpl_na_only_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
-inline void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
-inline int mpl_na_only_parsim_first_uppass
+void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
+int mpl_na_only_parsim_first_uppass
 (const long left, const long right, const long n, const long anc, mpl_matrix* m);
-inline void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
-static inline double mpl_na_only_parsim_second_downpass
+void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
+double mpl_na_only_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 double mpl_fitch_na_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
@@ -214,76 +214,5 @@ void reset_temporary_changebuf(void);
 long get_temp_change(long i);
 void tempchangebuf_selective_reset(mpl_matrix *m);
 
-// NA-only passes
-
-inline double mpl_na_only_parsim_first_downpass
-(const long left, const long right, const long n, mpl_matrix* m)
-{
-    double score = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            score += m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
-            score += mpl_fitch_na_recalc_first_downpass(left, right, n, &m->parsets[i]);
-        }
-    }
-    
-    return score;
-}
-
-inline void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m)
-{
-    int i = 0;
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_recalc_root(n, anc, &m->parsets[i]);
-        }
-    }
-}
-
-inline int mpl_na_only_parsim_first_uppass
-(const long left, const long right, const long n, const long anc, mpl_matrix* m)
-{
-    int i;
-    int chgs = 0;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
-            chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
-        }
-    }
-    
-    return chgs;
-}
-
-
-inline void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
-{
-    int i = 0;
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_recalc_tip_update(n, anc, &m->parsets[i]);
-//           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
-        }
-    }
-}
-
-static inline double mpl_na_only_parsim_second_downpass
-(const long left, const long right, const long n, mpl_matrix* m)
-{
-    double score = 0.0;
-    int i;
-    
-    for (i = 0; i < m->nparsets; ++i) {
-        if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].doeschange = 0;
-            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
-        }
-    }
-    
-    return score;
-}
 
 #endif /* mpl_parsim_h */
