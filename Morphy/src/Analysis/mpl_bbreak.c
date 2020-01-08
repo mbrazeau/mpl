@@ -357,7 +357,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Swap the tree with new weights
         index = bbk->treelist->back->index; // for assert
         
-        bbk->bestinrep = mpl_length_only_parsimony(-1.0, t);
+        bbk->bestinrep = 0.0;//mpl_length_only_parsimony(-1.0, t);
         bbk->doislandcheck = false;
 
         mpl_swap_all(t, bbk);

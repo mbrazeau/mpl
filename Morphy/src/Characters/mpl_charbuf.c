@@ -110,6 +110,7 @@ void mpl_charbuf_add_data_column
 //        if (((datcol[i] - 1) & datcol[i]) == 0) {
 //            cb->actives[i][colnum] = cb->tempact[i][colnum];
 //        }
+        assert(cb->dnset[i][colnum]);
     }
 }
 

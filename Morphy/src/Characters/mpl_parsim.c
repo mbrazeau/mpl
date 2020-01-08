@@ -905,9 +905,6 @@ int mpl_fitch_na_recalc_first_uppass
     mpl_discr t = 0;
     long* restrict indices = pd->indexbuf;
     
-//    pd->nndindices[n] = 0L;
-    
-//    for (j = 0; j < pd->nchars; ++j) {
     for (j = 0; j < pd->nchars;  ++j) {
         
         i = indices[j];
@@ -922,11 +919,14 @@ int mpl_fitch_na_recalc_first_uppass
                     prupset[n][i] = dnset[n][i] & ISAPPLIC;
                 }
             } else {
-                prupset[n][i] = NA;
-                if (prupset[anc][i] != NA) {
+                if (prupset[anc][i] == NA) {
+                    prupset[n][i] = NA;
+                } else {
                     t = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
                     if (t != 0) {
                         prupset[n][i] = t;
+                    } else {
+                        prupset[n][i] = NA;
                     }
                 }
             }
@@ -1041,7 +1041,7 @@ double mpl_fitch_na_recalc_second_downpass
             }
         }
         
-//        if (dnsetf[n][i] != tempdnf[n][i] /*|| dnsetf[n][i] == NA*/) {
+//        if (dnsetf[n][i] != tempdnf[n][i] || dnsetf[n][i] == NA) {
 //            ++pd->doeschange;
 //        }
         
@@ -1074,7 +1074,7 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m)
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
             ret += m->parsets[i].doeschange;
-            m->parsets[i].doeschange = 0;
+//            m->parsets[i].doeschange = 0;
         }
     }
     
@@ -1113,22 +1113,16 @@ double mpl_fitch_na_local_check
                 if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
                 }
+            } else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (applicchgs[i] * weights[i]);
             } else if (upset[src][i] < MISSING) {
-//                splits = 0;
-//                if (nusplits[i] > 2) {
-//                    splits = nusplits[i] - 2;
-//                }
-                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    pd->scorerecall += (changes[i] * weights[i]);
-                    pd->minscore    += (applicchgs[i] * weights[i]);
-                } else {
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    pd->scorerecall += (changes[i] * weights[i]);
-                    pd->minscore    += (applicchgs[i] * weights[i]); // This is more accurate, but using changes is faster
-                }
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (applicchgs[i] * weights[i]); // This is more accurate, but using changes is faster
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -1138,6 +1132,8 @@ double mpl_fitch_na_local_check
             } else {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
             }
 
         }

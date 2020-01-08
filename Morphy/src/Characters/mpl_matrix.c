@@ -883,6 +883,7 @@ static mpl_discr mpl_rawcharptr2bitset
         res = mpl_char2bitset(*cp, isNAtype, m);
     }
     
+    assert(res);
     return res;
 }
 

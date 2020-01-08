@@ -307,9 +307,6 @@ int test_parsimony_shortcut_with_rerooting (void)
             
             if (reclen != testscores[c]) {
                 ++failn;
-                if (src->tip > 1) {
-                    printf("Yeehaw!\n");
-                }
                 pfail;
             }
             else {
