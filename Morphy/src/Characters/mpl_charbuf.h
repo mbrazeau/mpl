@@ -32,6 +32,7 @@ typedef struct _charbuf {
     long*       charchanges;
     long*       minchanges;
     long*       appliccanges;
+    long*       nusplits; // Number of unique splits in characters
     long*       n_ndindices;
     long**      indexbufs;
     long**      nodechanges;
@@ -40,6 +41,7 @@ typedef struct _charbuf {
     mpl_discr** prupset;
     mpl_discr** dnsetf; // second downpass set
     mpl_discr** upset; // The set of uppass characters
+    mpl_discr** rtset;
     mpl_discr** actives; // Applicable states encountered down to this node
     mpl_discr** tempdn; // Temporary storage of state sets
     mpl_discr** tempprup;

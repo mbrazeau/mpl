@@ -38,6 +38,7 @@ void mpl_charbuf_init
     cb->orig_indices    = (long*)safe_calloc(ncols, sizeof(long));
     cb->charchanges     = (long*)safe_calloc(ncols, sizeof(long));
     cb->appliccanges    = (long*)safe_calloc(ncols, sizeof(long));
+    cb->nusplits        = (long*)safe_calloc(ncols, sizeof(long));
     // TODO: CHECK RETURN!!!
     
     for (i = 0; i < cb->char_max; ++i) {
@@ -56,6 +57,7 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     safe_free(cb->minchanges);
     safe_free(cb->charchanges);
     safe_free(cb->appliccanges);
+    safe_free(cb->nusplits);
     
     for (i = 0; i < (2 * cb->num_rows); ++i) {
         // Free the index bufs
@@ -67,12 +69,14 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->upset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->prupset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnsetf);
+    mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->rtset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->actives);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdn);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempprup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempdnf);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempact);
+    
     
     memset(cb, 0, sizeof(mpl_charbuf));
 }
@@ -248,6 +252,8 @@ long mpl_charbuf_analyze_discr_minchanges(const long i, bool gapinapplic, mpl_ch
         result -= 1;
     }
     
+//    printf("Min number of changes for char %li:\t%li\n", i, result);
+    
     return result;
 }
 /*******************************************************************************
@@ -336,6 +342,7 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
     cb->dnsetf   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->upset    = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->actives  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
+    cb->rtset    = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempdn   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempprup = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->tempdnf  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);

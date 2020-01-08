@@ -108,6 +108,7 @@ mpl_discr** restrict dnset          = NULL;
 mpl_discr** restrict prupset        = NULL;
 mpl_discr** restrict dnsetf         = NULL;
 mpl_discr** restrict upset          = NULL;
+mpl_discr** restrict rtset          = NULL;
 mpl_discr** restrict actives        = NULL;
 mpl_discr** restrict tempdn         = NULL;
 mpl_discr** restrict tempprup       = NULL;
@@ -118,6 +119,7 @@ double*     restrict weights        = NULL;
 double*     restrict preweight      = NULL;
 long*       restrict changes        = NULL;
 long*       restrict applicchgs     = NULL;
+long*       restrict nusplits      = NULL;
 long*       restrict minchanges     = NULL;
 long*       restrict n_ndindices    = NULL;
 long**      restrict indexbufs      = NULL;
@@ -136,6 +138,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     prupset         = cb->prupset;
     dnsetf          = cb->dnsetf;
     upset           = cb->upset;
+    rtset           = cb->rtset;
     actives         = cb->actives;
     tempdn          = cb->tempdn;
     tempdnf         = cb->tempdnf;
@@ -146,6 +149,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     preweight       = cb->preweight;
     changes         = cb->charchanges;
     applicchgs      = cb->appliccanges;
+    nusplits        = cb->nusplits;
     minchanges      = cb->minchanges;
     n_ndindices     = cb->n_ndindices;
     indexbufs       = cb->indexbufs;
@@ -673,6 +677,7 @@ double mpl_fitch_na_second_downpass
             if (actives[left][i] && actives[right][i]) {
                 cost += weights[i];
                 ++changes[i];
+                ++nusplits[i];
                 nodechanges[n][i] = 1L;
             }
         }
@@ -863,7 +868,9 @@ mpl_fitch_na_recalc_first_downpass
         }
         
         if (t != tempdn[n][i]/* || t == NA*/) {
-             ++chgs;
+//             if (!((t & tempdn[n][i]) & NA)) {
+              ++chgs;
+//             }
         }
         
         dnset[n][i] = t;
@@ -915,14 +922,11 @@ int mpl_fitch_na_recalc_first_uppass
                     prupset[n][i] = dnset[n][i] & ISAPPLIC;
                 }
             } else {
-                if (prupset[anc][i] == NA) {
-                    prupset[n][i] = NA;
-                } else {
+                prupset[n][i] = NA;
+                if (prupset[anc][i] != NA) {
                     t = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
                     if (t != 0) {
                         prupset[n][i] = t;
-                    } else {
-                        prupset[n][i] = NA;
                     }
                 }
             }
@@ -935,16 +939,8 @@ int mpl_fitch_na_recalc_first_uppass
             if (tempprup[n][i] == NA || prupset[n][i] == NA) {
                 ++chgs;
             }
-//            pd->ndindexbufs[n][pd->nndindices[n]] = i;
-//            ++pd->nndindices[n];
         }
     }
-    
-//    assert(pd->nndindices[n] == pd->nchars);
-//    int m = 0;
-//    for (m = 0; m < pd->nndindices[n]; ++m) {
-//        assert(pd->ndindexbufs[n][m] == pd->indexbuf[m]);
-//    }
     
     return chgs;
 }
@@ -1103,12 +1099,12 @@ double mpl_fitch_na_local_check
     // on inapplicable characters.
     
     size_t i;
-    const long end = pd->end;
-    double score = 0.0;
-    double cminscore = pd->cminscore;
-    double testscore = 0.0;
-    long s = 0;
-//    mpl_discr t = 0;
+    const long end   = pd->end;
+    double score     = 0.0;
+//    long splits = 0;
+//    double cminscore = pd->cminscore; // Sum of all applicable changes
+//    double testscore = 0.0;
+//    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1117,41 +1113,44 @@ double mpl_fitch_na_local_check
                 if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
                 }
-            }
-            else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]);
-            }
-            else if (upset[src][i] < MISSING) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]); // More exact but slower
+            } else if (upset[src][i] < MISSING) {
+//                splits = 0;
+//                if (nusplits[i] > 2) {
+//                    splits = nusplits[i] - 2;
+//                }
+                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                } else {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]); // This is more accurate, but using changes is faster
+                }
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
                 }
-            }
-            else {
+            } else {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (changes[i] * weights[i]);
             }
+
         }
         
-        cminscore -= (applicchgs[i] * weights[i]); // Absolute possible minimum
-
-        testscore = score + pd->minscore + cminscore + base - pd->scorerecall;
-
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
 //        if (lim > -1.0) {
+//
+//            testscore = score + cminscore + pd->minscore - pd->scorerecall - recall + base;
+//
 //            if (testscore > lim) {
+//                pd->minscore    += cminscore;
+//                pd->scorerecall += recall;
 //                return score;
 //            }
 //        }
@@ -1329,7 +1328,7 @@ void mpl_wagner_na_second_uppass
     long i;
     const long end = pd->end;
     mpl_discr t = 0;
-    mpl_discr fin = 0;
+//    mpl_discr fin = 0;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1423,9 +1422,11 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
     
     memset(changes, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
     memset(applicchgs, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    memset(nusplits, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
     // TODO: Get rid of the 2 * thing
     for (i = 0; i < (2 * m->cbufs[MPL_DISCR_T].row_max); ++i) {
         memset(nodechanges[i], 0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+        memset(rtset[i], 0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(mpl_discr));
     }
 }
 
@@ -1677,7 +1678,7 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         if (upset[n][i] & ISAPPLIC) {
             upset[n][i] &= ISAPPLIC;
         }
-        
+////
         tempup[n][i]  = upset[n][i];
     }
     
@@ -1854,8 +1855,10 @@ double mpl_parsim_calc_abs_minscore(mpl_matrix* m)
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
             m->parsets[i].cminscore = 0.0;
+            m->parsets[i].crecall   = 0.0;
             for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
-                m->parsets[i].cminscore += (applicchgs[i] * weights[i]);
+                m->parsets[i].cminscore += (applicchgs[j] * weights[j]);
+                m->parsets[i].crecall   += (changes[j] * weights[j]);
             }
             
             minscore += m->parsets[i].cminscore;

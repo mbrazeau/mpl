@@ -43,6 +43,7 @@ typedef struct mpl_parsdat {
     long**          ndindexbufs;
     double          minscore;
     double          cminscore; // A current minimum score based on state of tree and applicable-only changes
+    double          crecall;
     long*           minchanges;
     int             doeschange; // Number of times a character changes
     double          scorerecall; // For characters needing full-pass estimation

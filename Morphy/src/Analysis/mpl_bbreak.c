@@ -74,6 +74,8 @@ int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
     bbk->num_rearrangs  = 0;
     bbk->nratchets      = 0;
     bbk->savelim        = 0;
+    bbk->nsubs          = 0;
+    bbk->maxsubs        = 0;
     bbk->bbktype        = s->bbreak_type;
     bbk->treelist       = s->treelist;
     bbk->numtaxa        = s->num_taxa;
@@ -355,7 +357,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Swap the tree with new weights
         index = bbk->treelist->back->index; // for assert
         
-        bbk->bestinrep = 0.0;/*current->score =*/ //mpl_length_only_parsimony(-1.0, t);
+        bbk->bestinrep = mpl_length_only_parsimony(-1.0, t);
         bbk->doislandcheck = false;
 
         mpl_swap_all(t, bbk);
@@ -495,9 +497,15 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             srclen = mpl_fullpass_subtree(*src, t);
         }
         
+//        if ((srclen + tgtlen) > bbk->bestinrep && bbk->bestinrep != 0) {
+//            mpl_node_bin_connect(left, right, clips[i]);
+//            clips[i]->lock = false;
+//            continue;
+//        }
+        
         // Assign an absolute minimum score in each parsimony partition
         // Restore this if using the break in the shortcut algorithm
-//        mpl_scoretree_calc_abs_minscores();
+        mpl_scoretree_calc_abs_minscores();
         
         // Set up the src pointers
         if ((*src)->tip == 0) {

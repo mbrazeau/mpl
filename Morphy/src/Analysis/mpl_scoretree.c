@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <float.h>
 
 #include "../Characters/mpl_matrix.h"
 #include "../Trees/mpl_tree.h"
@@ -275,7 +276,7 @@ static void mpl_part_parsim_uppass
     if (!mpl_na_only_parsim_first_uppass(n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
 
-        if ((!n->marked) && (n != ostart)) {
+        if ((!n->marked) && (n != ostart) && (n->anc != ostart->anc)) {
             return;
         }
         
@@ -359,6 +360,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     double len = 0.0;
     long i = 0;
     mpl_node* n;
+    mpl_node* p;
     mpl_node* t1 = NULL;
     mpl_node* t2 = NULL;
     double chgs = 0.0;
@@ -379,7 +381,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     }
     
     while (n->anc != NULL) {
-        
+        p = n;
         chgs = mpl_na_only_parsim_first_downpass(n->left->mem_index,
                                           n->right->mem_index,
                                           n->mem_index, glmatrix);
@@ -546,18 +548,18 @@ double mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
 double mpl_score_try_parsimony
 (const double sttlen, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
-    double score       =  0.0;
-    double minscore    =  0.0;
-    double scorerecall =  0.0;
+    double score       = 0.0;
+    double minscore    = 0.0;
+    double scorerecall = 0.0;
     double diff        = -1.0;
     
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
     
     // If the lim is set and the score exceeds the limit already, return score.
-    if (lim > 0) {
-        diff = lim-sttlen;
-    }
+//    if (lim > 0) {
+//        diff = lim-sttlen;
+//    }
 
     // This gives a minimum number of steps added with a quick check.
     score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
@@ -579,7 +581,7 @@ double mpl_score_try_parsimony
             if ((score + sttlen + minscore) > lim) {
                 return score + minscore;
             }
-            diff = lim - (score + sttlen - scorerecall);
+//            diff = lim - (score + sttlen);
         }
         
         score += scorerecall;

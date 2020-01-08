@@ -27,6 +27,8 @@ typedef struct _bbreak {
     long            nratchets; // Number of ratchet iterations
     long            savelim;
     long            savecount;
+    int             nsubs;
+    int             maxsubs;
     bool            hitisland;
     bool            doislandcheck;
     mpl_bbreak_t    bbktype;
