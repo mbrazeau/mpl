@@ -280,9 +280,6 @@ static void mpl_part_parsim_uppass
             return;
         }
         
-//        if ((!n->marked) && (n->anc != ostart) && (n != ostart) && (n->anc != ostart->anc) /*&& srcflag == false*/) {
-//             return;
-//         }
     }
     
     n->marked = 0;
@@ -386,6 +383,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                           n->right->mem_index,
                                           n->mem_index, glmatrix);
         n->marked = 1;
+        
         if (chgs == 0.0 && n != start && n != start->anc) {
             break;
         }
@@ -447,7 +445,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
 
             if (lim > -1.0) {
-                if (len > lim /*|| !mpl_parsim_check_nas_updated(glmatrix)*/) {
+                if (len > lim) {
 
                     while (n != t->base) {
                         n = n->anc;

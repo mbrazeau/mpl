@@ -18,6 +18,7 @@ typedef void* mpl_str;
 
 void* safe_calloc(const unsigned long nelems, const size_t size);
 void __safe_free(void** p);
+void** alloc_matrix(const size_t nrows, const size_t ncols, const size_t datasz);
 mpl_str* mpl_str_new(const long capacity);
 void mpl_str_delete(mpl_str** old);
 int mpl_str_append(const char c, mpl_str* s);

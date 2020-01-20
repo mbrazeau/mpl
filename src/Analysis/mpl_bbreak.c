@@ -170,7 +170,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     
 //    mpl_stepwise_init(MPL_AST_RANDOM, bbk->numtaxa, 1, &bbk->stepwise);
 
-    bbk->shortest = 0.0;
+    bbk->shortest = MPL_MAXSCORE;//0.0;
     
 //    mpl_bbreak_print_status_header(bbk);
     
@@ -626,8 +626,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             clips[i]->lock = false;
                             return;
                         
-                        }
-                        else {
+                        } else {
                         
                             mpl_topol* ret = 0;
                             bbk->bestinrep = t->score;
@@ -648,13 +647,11 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         }
                         
                         return;
-                    }
-                    else if (bbk->savelim > 0) {
+                    } else if (bbk->savelim > 0) {
                         if (bbk->treelist->rep_num_trees < bbk->savelim) {
                             mpl_treelist_add_tree(true, t, bbk->treelist);
                         }
-                    }
-                    else {
+                    } else {
                         mpl_treelist_add_tree(true, t, bbk->treelist);
                     }
                 }

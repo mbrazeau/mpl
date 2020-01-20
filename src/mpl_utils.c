@@ -60,6 +60,22 @@ void __safe_free(void** p)
     }
 }
 
+void** alloc_matrix(const size_t nrows, const size_t ncols, const size_t datasz)
+{
+    size_t i = 0;
+    void** ret = NULL;
+    
+    // TODO: This 2* thing needs to be replaced
+    ret = (void**)safe_calloc(nrows, sizeof(void*));
+    
+    for (i = 0; i < nrows; ++i) {
+        ret[i] = safe_calloc(ncols, datasz);
+    }
+    
+    return ret;
+}
+
+
 /*
  * PUBLIC STRING FUNCTIONS
  */

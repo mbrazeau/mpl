@@ -351,5 +351,5 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
     cb->tempact  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     
     cb->nodechanges = mpl_charbuf_alloc_long_matrix(cb->row_max, cb->char_max);
-    
+    cb->regdist = (short**)alloc_matrix(2 * cb->row_max, cb->char_max, sizeof(short));
 }

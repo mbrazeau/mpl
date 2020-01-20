@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 
 #include "mpl_matrix.h"
 #include "mpl_parsim.h"
@@ -117,9 +118,10 @@ mpl_discr** restrict tempup         = NULL;
 mpl_discr** restrict tempact        = NULL;
 double*     restrict weights        = NULL;
 double*     restrict preweight      = NULL;
+short**     restrict regdist        = NULL;
 long*       restrict changes        = NULL;
 long*       restrict applicchgs     = NULL;
-long*       restrict nusplits      = NULL;
+long*       restrict nusplits       = NULL;
 long*       restrict minchanges     = NULL;
 long*       restrict n_ndindices    = NULL;
 long**      restrict indexbufs      = NULL;
@@ -154,6 +156,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     n_ndindices     = cb->n_ndindices;
     indexbufs       = cb->indexbufs;
     nodechanges     = cb->nodechanges;
+    regdist         = cb->regdist;
 }
 
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb)
@@ -751,10 +754,6 @@ void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd)
         upset[anc][i] = dnsetf[n][i];
         dnsetf[anc][i] = dnsetf[n][i];
         
-        if (upset[anc][i] & ISAPPLIC) {
-            upset[anc][i] &= ISAPPLIC;
-        }
-        
 //        tempdn[anc][i] = dnset[anc][i];
         tempdnf[anc][i] = dnsetf[anc][i];
         tempup[anc][i] = upset[anc][i];
@@ -973,15 +972,6 @@ void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat
         }
         
         dnsetf[tipn][i] = prupset[tipn][i];
-        
-//        if (dnset[tipn][i] & prupset[anc][i] && dnset[tipn][i] != prupset[anc][i]) {
-//            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
-//            prupset[tipn][i] = dnset[tipn][i];
-//            if (prupset[anc][i] & ISAPPLIC) {
-//                prupset[tipn][i] &= ISAPPLIC;
-//            }
-//            upset[tipn][i] = prupset[tipn][i];
-//        }
     }
 }
 
@@ -1110,43 +1100,58 @@ double mpl_fitch_na_local_check
         
         if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
+                if (!(((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) & upset[src][i])) {
                     score += weights[i];
                 }
-            } else if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]);
+//                recall -= (changes[i] * weights[i]);
             } else if (upset[src][i] < MISSING) {
-                pd->indexbuf[pd->nchars] = i;
-                ++pd->nchars;
-                pd->scorerecall += (changes[i] * weights[i]);
-                pd->minscore    += (applicchgs[i] * weights[i]); // This is more accurate, but using changes is faster
+                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                }
+                else if (upset[src][i] & NA) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    if (tempact[troot][i]) {
+                        pd->scorerecall += (changes[i] * weights[i]);
+                        pd->minscore    += (changes[i] * weights[i]);
+                    } else {
+                        pd->scorerecall += (changes[i] * weights[i]);
+                        pd->minscore    += (applicchgs[i] * weights[i]);
+                    }
+                //                    recall -= (changes[i] * weights[i]);
+                } else {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                }
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
                 }
+//                recall -= (changes[i] * weights[i]);
             } else {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
             }
-
         }
         
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
 //        if (lim > -1.0) {
 //
-//            testscore = score + cminscore + pd->minscore - pd->scorerecall - recall + base;
+//            testscore = score + pd->minscore - pd->scorerecall - recall + base;
 //
 //            if (testscore > lim) {
-//                pd->minscore    += cminscore;
-//                pd->scorerecall += recall;
+//                pd->scorerecall -= recall;
+//                pd->minscore += cminscore;
 //                return score;
 //            }
 //        }
@@ -1671,9 +1676,9 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         
         upset[n][i] = upset[left][i] | upset[right][i];
 
-        if (upset[n][i] & ISAPPLIC) {
-            upset[n][i] &= ISAPPLIC;
-        }
+//        if (upset[n][i] & ISAPPLIC) {
+//            upset[n][i] &= ISAPPLIC;
+//        }
 ////
         tempup[n][i]  = upset[n][i];
     }

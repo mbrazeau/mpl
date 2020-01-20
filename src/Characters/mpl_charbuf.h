@@ -48,6 +48,7 @@ typedef struct _charbuf {
     mpl_discr** tempdnf; 
     mpl_discr** tempup;
     mpl_discr** tempact;
+    short**     regdist; // distance to nearest region
     
 } mpl_charbuf;
 
