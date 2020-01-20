@@ -11,13 +11,13 @@
 
 #include "mpl_defs.h"
 #include "mpl_utils.h"
-#include "Taxa/mpl_taxblock.h"
-#include "Analysis/mpl_search.h"
-#include "Results/mpl_results.h"
-#include "Characters/mpl_matrix.h"
-#include "Analysis/mpl_scoretree.h"
-#include "Trees/mpl_newick_rdr.h"
-#include "Analysis/mpl_bbreak.h"
+#include "mpl_taxblock.h"
+#include "mpl_search.h"
+#include "mpl_results.h"
+#include "mpl_matrix.h"
+#include "mpl_scoretree.h"
+#include "mpl_newick_rdr.h"
+#include "mpl_bbreak.h"
 
 typedef struct _handle {
     

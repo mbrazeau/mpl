@@ -12,7 +12,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "../mpl_defs.h"
+#include "mpl_defs.h"
 
 typedef unsigned int mpl_discr;
 #define MAXSTATES (CHAR_BIT * sizeof(mpl_discr) - 1U)  // -1 for the NA reserved token

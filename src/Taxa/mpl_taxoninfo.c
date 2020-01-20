@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include "mpl_taxoninfo.h"
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 void mpl_taxoninfo_cleanup(mpl_taxoninfo* ti)
 {
     if (ti != NULL) {

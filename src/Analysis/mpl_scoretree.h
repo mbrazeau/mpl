@@ -9,7 +9,7 @@
 #ifndef mpl_scoretree_h
 #define mpl_scoretree_h
 
-#include "../Characters/mpl_parsim.h"
+#include "mpl_parsim.h"
 
 typedef void    (*mpl_clipreopt)(mpl_node* src, mpl_node* csite, mpl_tree* t);
 typedef double  (*mpl_scoretry)(const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t);

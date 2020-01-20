@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 #include "mpl_treelist.h"
 
 static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);

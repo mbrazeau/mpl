@@ -11,9 +11,9 @@
 #include <assert.h>
 #include <time.h>
 
-#include "../mpl_defs.h"
-#include "../mpl_utils.h"
-#include "../Trees/mpl_node.h"
+#include "mpl_defs.h"
+#include "mpl_utils.h"
+#include "mpl_node.h"
 #include "mpl_stepwise.h"
 #include "mpl_scoretree.h"
 

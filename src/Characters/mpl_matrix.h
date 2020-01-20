@@ -9,7 +9,7 @@
 #ifndef mpl_matrix_h
 #define mpl_matrix_h
 
-#include "../mpl_defs.h"
+#include "mpl_defs.h"
 #include "mpl_chardefs.h"
 #include "mpl_charinfo.h"
 #include "mpl_charbuf.h"

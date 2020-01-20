@@ -9,10 +9,10 @@
 #ifndef mpl_stepwise_h
 #define mpl_stepwise_h
 
-#include "../mpl_defs.h"
-#include "../Trees/mpl_tree.h"
-#include "../Trees/mpl_topol.h"
-#include "../Trees/mpl_treelist.h"
+#include "mpl_defs.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_treelist.h"
 
 typedef struct mpl_stepwise {
     

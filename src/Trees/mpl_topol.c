@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "mpl_topol.h"
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 
 
 /*

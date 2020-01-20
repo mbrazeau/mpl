@@ -9,8 +9,8 @@
 #ifndef mpl_tdraw_h
 #define mpl_tdraw_h
 
-#include "../Trees/mpl_tree.h"
-#include "../Taxa/mpl_taxblock.h"
+#include "mpl_tree.h"
+#include "mpl_taxblock.h"
 
 typedef struct _tdraw {
     

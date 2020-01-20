@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 #include "mpl_charbuf.h"
 #include "mpl_charinfo.h"
 

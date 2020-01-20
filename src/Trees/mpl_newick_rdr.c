@@ -12,7 +12,7 @@
 //TODO: Temporary:
 #include <stdio.h>
 
-#include "../Taxa/mpl_taxblock.h"
+#include "mpl_taxblock.h"
 #include "mpl_newick_rdr.h"
 #include "mpl_utils.h"
 

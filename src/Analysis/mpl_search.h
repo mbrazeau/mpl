@@ -9,12 +9,12 @@
 #ifndef mpl_search_h
 #define mpl_search_h
 
-#include "../mpl_defs.h"
-#include "../Results/mpl_results.h"
-#include "../Trees/mpl_node.h"
-#include "../Trees/mpl_tree.h"
-#include "../Trees/mpl_treelist.h"
-#include "../Analysis/mpl_scoretree.h"
+#include "mpl_defs.h"
+#include "mpl_results.h"
+#include "mpl_node.h"
+#include "mpl_tree.h"
+#include "mpl_treelist.h"
+#include "mpl_scoretree.h"
 
 
 typedef struct _search mpl_search;

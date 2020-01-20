@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <float.h>
 
-#include "../Characters/mpl_matrix.h"
-#include "../Trees/mpl_tree.h"
-#include "../Characters/mpl_parsim.h"
+#include "mpl_matrix.h"
+#include "mpl_tree.h"
+#include "mpl_parsim.h"
 #include "mpl_scoretree.h"
 
 static void mpl_part_parsim_uppass(mpl_node* n, mpl_node* ostart, long* i, mpl_tree* t);

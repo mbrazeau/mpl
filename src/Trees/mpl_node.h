@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;

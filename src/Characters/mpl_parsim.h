@@ -11,10 +11,10 @@
 
 #include <stdbool.h>
 
-#include "../mpl_defs.h"
+#include "mpl_defs.h"
 #include "mpl_charinfo.h"
 #include "mpl_charbuf.h"
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 #include "mpl_parsim.h"
 #include "mpl_matrix.h"
 

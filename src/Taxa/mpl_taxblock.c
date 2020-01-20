@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #include "mpl_taxblock.h"
-#include "../mpl_utils.h"
+#include "mpl_utils.h"
 
 mpl_taxablock* mpl_taxablock_new(const long max_taxa)
 {

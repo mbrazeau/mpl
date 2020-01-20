@@ -11,8 +11,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include "../mpl_defs.h"
-#include "../mpl_utils.h"
+#include "mpl_defs.h"
+#include "mpl_utils.h"
 #include "mpl_matrix.h"
 #include "mpl_charbuf.h"
 #include "mpl_parsim.h"

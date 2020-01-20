@@ -9,7 +9,7 @@
 #ifndef mpl_bipartlist_h
 #define mpl_bipartlist_h
 
-#include "../mpl_bitset.h"
+#include "mpl_bitset.h"
 
 typedef struct mpl_bipartlist {
     
