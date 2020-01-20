@@ -11,13 +11,13 @@
 
 #include "testmplbbreak.h"
 #include "testharddat.h"
-#include "../src/Trees/mpl_node.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
-#include "../src/Characters/mpl_matrix.h"
-#include "../src/Analysis/mpl_scoretree.h"
-#include "../src/Analysis/mpl_stepwise.h"
+#include "mpl_node.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
+#include "mpl_matrix.h"
+#include "mpl_scoretree.h"
+#include "mpl_stepwise.h"
 
 int test_bbreak_reroot_all_for_subtree (void)
 {

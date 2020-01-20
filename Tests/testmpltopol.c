@@ -11,10 +11,10 @@
 #include "testmpltopol.h"
 #include "mpltest.h"
 #include "testmplnode.h"
-#include "../src/Trees/mpl_node.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
+#include "mpl_node.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
 #include "testmpltree.h"
 
 static void mpl_node_bin_traverse_temp(mpl_node* n)

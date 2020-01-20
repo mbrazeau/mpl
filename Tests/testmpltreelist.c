@@ -9,10 +9,10 @@
 #include "mpltest.h"
 #include "testutils.h"
 #include "testmpltreelist.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
-#include "../src/Trees/mpl_treelist.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
+#include "mpl_treelist.h"
 
 int test_basic_treelist (void)
 {

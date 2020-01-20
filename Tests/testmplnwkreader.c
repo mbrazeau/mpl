@@ -10,9 +10,9 @@
 
 #include "mpltest.h"
 #include "testmplnwkreader.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
 
 
 int test_newick_reader (void)

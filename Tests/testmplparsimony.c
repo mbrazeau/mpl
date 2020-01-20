@@ -8,13 +8,13 @@
 
 #include "mpltest.h"
 #include "testharddat.h"
-#include "../src/Characters/mpl_matrix.h"
-#include "../src/Characters/mpl_parsim.h"
+#include "mpl_matrix.h"
+#include "mpl_parsim.h"
 #include "testutils.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
-#include "../src/Analysis/mpl_scoretree.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
+#include "mpl_scoretree.h"
 #include "testmplparsimony.h"
 
 int test_basic_parsimony (void)

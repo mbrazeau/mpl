@@ -9,7 +9,7 @@
 #ifndef testmplmatrix_h
 #define testmplmatrix_h
 
-#include "../src/Characters/mpl_matrix.h"
+#include "mpl_matrix.h"
 
 int test_basic_matrix (void);
 int test_skip_closure (void);

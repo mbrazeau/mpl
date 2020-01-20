@@ -8,8 +8,8 @@
 
 #ifndef testutils_h
 #define testutils_h
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Characters/mpl_matrix.h"
+#include "mpl_tree.h"
+#include "mpl_matrix.h"
 
 void mpl_tests_tree_traverse(mpl_tree* t);
 int mpl_tree_checker(const mpl_tree* t);

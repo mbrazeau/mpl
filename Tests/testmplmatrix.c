@@ -12,12 +12,12 @@
 #include "mpltest.h"
 #include "testutils.h"
 #include "testmplmatrix.h"
-#include "../src/Characters/mpl_chardefs.h"
-#include "../src/Trees/mpl_node.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_newick_rdr.h"
-#include "../src/Analysis/mpl_scoretree.h"
+#include "mpl_chardefs.h"
+#include "mpl_node.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_newick_rdr.h"
+#include "mpl_scoretree.h"
 
 int test_basic_matrix (void)
 {

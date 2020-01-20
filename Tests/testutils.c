@@ -7,9 +7,9 @@
 //
 #include <stdio.h>
 
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Characters/mpl_charbuf.h"
-#include "../src/Characters/mpl_matrix.h"
+#include "mpl_tree.h"
+#include "mpl_charbuf.h"
+#include "mpl_matrix.h"
 
 void mpl_test_print_bin_traverse(mpl_node* n);
 

@@ -13,12 +13,12 @@
 #include "testutils.h"
 #include "testmplstepwise.h"
 
-#include "../src/Trees/mpl_node.h"
-#include "../src/Trees/mpl_tree.h"
-#include "../src/Trees/mpl_topol.h"
-#include "../src/Trees/mpl_treelist.h"
-#include "../src/Characters/mpl_matrix.h"
-#include "../src/Analysis/mpl_scoretree.h"
+#include "mpl_node.h"
+#include "mpl_tree.h"
+#include "mpl_topol.h"
+#include "mpl_treelist.h"
+#include "mpl_matrix.h"
+#include "mpl_scoretree.h"
 
 
 

@@ -9,7 +9,7 @@
 #ifndef testmplbbreak_h
 #define testmplbbreak_h
 
-#include "../src/Analysis/mpl_bbreak.h"
+#include "mpl_bbreak.h"
 
 // Unit test functions:
 int test_bbreak_reroot_all_for_subtree (void);

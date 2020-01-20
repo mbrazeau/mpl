@@ -9,8 +9,8 @@
 #ifndef testmplstepwise_h
 #define testmplstepwise_h
 
-#include "../src/mpl_defs.h"
-#include "../src/Analysis/mpl_stepwise.h"
+#include "mpl_defs.h"
+#include "mpl_stepwise.h"
 
 int test_initial_fork (void);
 int test_build_arbitrary_tree (void);

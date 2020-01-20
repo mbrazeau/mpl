@@ -7,7 +7,7 @@
 //
 #include <stdio.h>
 #include "mpltest.h"
-#include "../src/Taxa/mpl_taxblock.h"
+#include "mpl_taxblock.h"
 #include "testio.h"
 #include "testtaxblock.h"
 
