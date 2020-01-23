@@ -1523,7 +1523,7 @@ void mpl_parsim_second_uppass
     }
 }
 
-inline void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
+void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
 {
     int i = 0;
     for (i = 0; i < m->nparsets; ++i) {
