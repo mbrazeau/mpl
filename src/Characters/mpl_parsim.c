@@ -1093,7 +1093,7 @@ double mpl_fitch_na_local_check
     double score     = 0.0;
 //    long splits = 0;
 //    double cminscore = pd->cminscore; // Sum of all applicable changes
-//    double testscore = 0.0;
+    double testscore = 0.0;
 //    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
@@ -1145,16 +1145,12 @@ double mpl_fitch_na_local_check
         
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
-//        if (lim > -1.0) {
-//
-//            testscore = score + pd->minscore - pd->scorerecall - recall + base;
-//
-//            if (testscore > lim) {
-//                pd->scorerecall -= recall;
-//                pd->minscore += cminscore;
-//                return score;
-//            }
-//        }
+        if (lim > -1.0) {
+            testscore = score + pd->minscore - pd->scorerecall + base;
+            if (testscore > lim) {
+                return score;
+            }
+        }
     }
     
     return score;
