@@ -555,9 +555,9 @@ double mpl_score_try_parsimony
     // this junction.
     
     // If the lim is set and the score exceeds the limit already, return score.
-//    if (lim > 0) {
-//        diff = lim-sttlen;
-//    }
+    if (lim > 0) {
+        diff = lim-sttlen;
+    }
 
     // This gives a minimum number of steps added with a quick check.
     score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
@@ -579,7 +579,7 @@ double mpl_score_try_parsimony
             if ((score + sttlen + minscore) > lim) {
                 return score + minscore;
             }
-//            diff = lim - (score + sttlen);
+            diff = lim - (score + sttlen);
         }
         
         score += scorerecall;
