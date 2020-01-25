@@ -888,9 +888,9 @@ void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd)
         
         i = pd->indexbuf[j];
         prupset[anc][i] = dnset[n][i];
-        if (prupset[anc][i] & ISAPPLIC) {
-            prupset[anc][i] &= ISAPPLIC;
-        }
+//        if (prupset[anc][i] & ISAPPLIC) {
+//            prupset[anc][i] &= ISAPPLIC;
+//        }
     }
 }
 
@@ -1100,7 +1100,7 @@ double mpl_fitch_na_local_check
         
         if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
-                if (!(((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) & upset[src][i])) {
+                if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
                 }
 //                recall -= (changes[i] * weights[i]);
@@ -1110,23 +1110,23 @@ double mpl_fitch_na_local_check
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     pd->minscore    += (applicchgs[i] * weights[i]);
-                }
-                else if (upset[src][i] & NA) {
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    if (tempact[troot][i]) {
-                        pd->scorerecall += (changes[i] * weights[i]);
-                        pd->minscore    += (changes[i] * weights[i]);
-                    } else {
-                        pd->scorerecall += (changes[i] * weights[i]);
-                        pd->minscore    += (applicchgs[i] * weights[i]);
-                    }
-                //                    recall -= (changes[i] * weights[i]);
+//                }
+//                else if (upset[src][i] & NA) {
+//                    pd->indexbuf[pd->nchars] = i;
+//                    ++pd->nchars;
+////                    if (tempact[troot][i]) {
+//                        pd->scorerecall += (changes[i] * weights[i]);
+//                        pd->minscore    += (changes[i] * weights[i]);
+////                    } else {
+////                        pd->scorerecall += (changes[i] * weights[i]);
+////                        pd->minscore    += (applicchgs[i] * weights[i]);
+////                    }
+//                //                    recall -= (changes[i] * weights[i]);
                 } else {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
-                    pd->minscore    += (applicchgs[i] * weights[i]);
+                    pd->minscore    += (changes[i] * weights[i]);
                 }
             }
         } else {
@@ -1676,9 +1676,9 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         
         upset[n][i] = upset[left][i] | upset[right][i];
 
-//        if (upset[n][i] & ISAPPLIC) {
-//            upset[n][i] &= ISAPPLIC;
-//        }
+        if (upset[n][i] & ISAPPLIC) {
+            upset[n][i] &= ISAPPLIC;
+        }
 ////
         tempup[n][i]  = upset[n][i];
     }
