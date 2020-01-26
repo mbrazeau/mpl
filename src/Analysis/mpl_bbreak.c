@@ -76,6 +76,8 @@ int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
     bbk->savelim        = 0;
     bbk->nsubs          = 0;
     bbk->maxsubs        = 0;
+    bbk->maxhits        = 5;
+    bbk->nhits          = 0;
     bbk->bbktype        = s->bbreak_type;
     bbk->treelist       = s->treelist;
     bbk->numtaxa        = s->num_taxa;
@@ -189,7 +191,9 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                      // could be programmed in the future.
         
         for (j = 0; j < nstarts; ++j) {
-
+            
+            bbk->nhits = 0;
+            
             if (bbk->stepwise.astype != MPL_AST_INMEM) {
                 // Add the first tree from the rep in the buffer
                 top = mpl_treelist_get_shortest(bbk->stepwise.queued);
@@ -253,6 +257,9 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                         break;
                     }
     
+                    if (bbk->nhits > bbk->maxhits) {
+                        break;
+                    }
 //                    mpl_bbreak_print_status(i + 1, bbk);
                     
                 } while (current != NULL);
@@ -325,6 +332,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     bbk->doislandcheck = true;
     
     // Swap the starting tree
+    bbk->nhits = 0;
     mpl_swap_all(t, bbk);
     
     // Nixon 2:
@@ -364,6 +372,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->bestinrep = 0.0;//mpl_length_only_parsimony(-1.0, t);
         bbk->doislandcheck = false;
 
+        bbk->nhits = 0;
         mpl_swap_all(t, bbk);
 
         bbk->doislandcheck = true;
@@ -388,6 +397,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 
         assert(current->index == index);
         
+        bbk->nhits = 0;
         mpl_swap_all(t, bbk);
 
         if (bbk->bestinrep < oldbest) {
@@ -621,7 +631,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         bbk->hitisland = false;
                         
                         if (t->score < bbk->shortest) {
-                            
+                            bbk->nhits = 1;
                             bbk->shortest   = t->score;
                             bbk->bestinrep  = t->score;
                             mpl_treelist_clear_all(bbk->treelist);
@@ -631,7 +641,10 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             return;
                         
                         } else {
-                        
+                            ++bbk->nhits;
+                            if (bbk->nhits > bbk->maxhits) {
+                                return;
+                            }
                             mpl_topol* ret = 0;
                             bbk->bestinrep = t->score;
                             mpl_treelist_clear_rep(bbk->treelist);

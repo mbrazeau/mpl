@@ -29,6 +29,8 @@ typedef struct _bbreak {
     long            savecount;
     int             nsubs;
     int             maxsubs;
+    int             maxhits;
+    int             nhits;
     bool            hitisland;
     bool            doislandcheck;
     mpl_bbreak_t    bbktype;
