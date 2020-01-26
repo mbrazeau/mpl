@@ -185,7 +185,7 @@ int mpl_attach_rawdata(const mpl_data_t datype, const char* rawmatrix, mpl_handl
     }
     
     // TODO: Attach the data
-    mpl_matrix_attach_rawdata(rawmatrix, handl->matrix);
+    ret = mpl_matrix_attach_rawdata(rawmatrix, handl->matrix);
     
     return ret;
 }
