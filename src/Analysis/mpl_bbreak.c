@@ -224,7 +224,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 // For all unswapped trees in the buffer:
                 do {
                     // Rebuild the tree according to the stored topology
-                    printf("\r                                                                                ");
+                    printf("\r                                                                              ");
                     printf("\r\tShortest tree found: %.0f; swapping %li of %li trees saved.",
                            bbk->bestinrep,
                            current->index+1,
