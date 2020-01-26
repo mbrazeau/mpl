@@ -277,14 +277,23 @@ int mpl_do_search(mpl_handle* handl)
     RET_IF_NULL(handl);
     MPL_RETURN ret = MPL_ERR;
     
-    mpl_matrix_apply_data(handl->matrix);
-    mpl_init_parsimony(handl->matrix);
+    ret = mpl_matrix_apply_data(handl->matrix);
+    if (ret != MPL_SUCCESS) {
+        return ret;
+    }
     
-    mpl_matrix_report(handl->matrix);
+    ret = mpl_init_parsimony(handl->matrix);
+    if (ret != MPL_SUCCESS) {
+        return ret;
+    }
+    
+    ret = mpl_matrix_report(handl->matrix);
+    if (ret != MPL_SUCCESS) {
+        return ret;
+    }
     
     ret = mpl_search_execute(handl->search);
 
-    // TODO: Check return
     return ret;
 }
 

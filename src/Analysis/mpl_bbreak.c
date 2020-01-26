@@ -63,7 +63,7 @@ int mpl_bbreak_search(mpl_search* s)
     mpl_do_bbreak(s->bbreak);
     mpl_bbreak_cleanup(s->bbreak);
     
-    return MPL_ERR;
+    return MPL_SUCCESS;
 }
 
 int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
