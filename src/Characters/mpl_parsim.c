@@ -1144,15 +1144,15 @@ double mpl_fitch_na_local_check
                 
             }
         }
-        recall -= (changes[i] * weights[i]);
-        cminscore -= (applicchgs[i] * weights[i]);
+//        recall -= (changes[i] * weights[i]);
+//        cminscore -= (applicchgs[i] * weights[i]);
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            testscore = score + cminscore + pd->minscore - pd->scorerecall - recall + base;
+            testscore = score + pd->minscore - pd->scorerecall + base;
             if (testscore > lim) {
-                pd->minscore += cminscore;
-                pd->scorerecall += recall;
+//                pd->minscore += cminscore;
+//                pd->scorerecall += recall;
                 return score;
             }
         }

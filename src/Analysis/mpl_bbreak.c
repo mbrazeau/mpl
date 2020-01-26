@@ -509,7 +509,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         
         // Assign an absolute minimum score in each parsimony partition
         // Restore this if using the break in the shortcut algorithm
-        mpl_scoretree_calc_abs_minscores();
+//        mpl_scoretree_calc_abs_minscores();
         
         // Set up the src pointers
         if ((*src)->tip == 0) {
