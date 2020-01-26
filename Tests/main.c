@@ -118,7 +118,7 @@ int main(int argc, const char * argv[]) {
     //    fails += test_bbreak_store_TBR_allswaps();
     fails += test_single_rep_hsearch();
     fails += test_mutliple_replicate_heuristic_search();
-//    fails += test_mutliple_replicate_heuristic_search_large();
+    fails += test_mutliple_replicate_heuristic_search_large();
     fails += test_ratchet_search();
 
     printf("\n\nTest summary:\n\n");

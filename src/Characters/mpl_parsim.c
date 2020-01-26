@@ -1092,9 +1092,9 @@ double mpl_fitch_na_local_check
     const long end   = pd->end;
     double score     = 0.0;
 //    long splits = 0;
-//    double cminscore = pd->cminscore; // Sum of all applicable changes
+    double cminscore = pd->cminscore; // Sum of all applicable changes
     double testscore = 0.0;
-//    double recall    = pd->crecall;
+    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1126,28 +1126,33 @@ double mpl_fitch_na_local_check
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
-                    pd->minscore    += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
                 }
+//                cminscore -= (applicchgs[i] * weights[i]);
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
                 }
-//                recall -= (changes[i] * weights[i]);
+                
             } else {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
+                
             }
         }
-        
+        recall -= (changes[i] * weights[i]);
+        cminscore -= (applicchgs[i] * weights[i]);
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            testscore = score + pd->minscore - pd->scorerecall + base;
+            testscore = score + cminscore + pd->minscore - pd->scorerecall - recall + base;
             if (testscore > lim) {
+                pd->minscore += cminscore;
+                pd->scorerecall += recall;
                 return score;
             }
         }
