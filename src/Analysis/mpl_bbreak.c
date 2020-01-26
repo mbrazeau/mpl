@@ -210,6 +210,10 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 bbk->treelist->head = &bbk->treelist->trees[0];
             }
 
+            if (i == 0) {
+                bbk->shortest = current->score;
+            }
+            
             if (bbk->nratchets > 0) {
                 mpl_do_ratchet_search(t, bbk);
             } else {
