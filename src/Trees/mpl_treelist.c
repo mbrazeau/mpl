@@ -36,13 +36,18 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
 
 void mpl_treelist_delete(mpl_treelist** tl)
 {
-    long i = 0;
-    
-    for (i = 0; i < (*tl)->max_trees; ++i) {
-        mpl_topol_cleanup(&(*tl)->trees[i]);
+    mpl_treelist* tli = NULL;
+    tli = *tl;
+    if (tli != NULL) {
+        
+        long i = 0;
+        
+        for (i = 0; i < (*tl)->max_trees; ++i) {
+            mpl_topol_cleanup(&(*tl)->trees[i]);
+        }
+        
+        safe_free((*tl)->trees);
     }
-    
-    safe_free((*tl)->trees);
 }
 
 void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)

@@ -124,6 +124,10 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
+    if (ntax == 0 || nchar == 0) {
+        return MPL_NODIMENSIONS;
+    }
+    
     if (!mpl_check_init(handl)) {
         
         handl->ntax  = ntax;
