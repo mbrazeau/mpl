@@ -34,6 +34,7 @@ typedef struct _node {
     double      length;
     bool        lock;
     bool        clipmark;
+    bool        inpath;
     int         marked;
     
 } mpl_node;

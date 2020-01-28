@@ -462,3 +462,15 @@ static void mpl_tree_mark_uniquely(mpl_tree* t)
         }
     }
 }
+
+mpl_node* mpl_tree_find_common
+ (const mpl_node* p, const mpl_node* q, const mpl_tree *t)
+{
+    bool foundp = false;
+    bool foundq = false;
+    mpl_node* c = NULL;
+    
+    
+    
+    return c;
+}

@@ -77,6 +77,7 @@ int mpl_reset_node(mpl_node* n)
     n->weight       = 0;
     n->clipmark     = false;
     n->lock         = false;
+    n->inpath       = false;
     
     return 0;
 }
