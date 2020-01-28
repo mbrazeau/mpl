@@ -1095,10 +1095,6 @@ double mpl_fitch_na_local_check
     double cminscore = pd->cminscore; // Sum of all applicable changes
     double testscore = 0.0;
     double recall    = pd->crecall;
-    bool dorecall = false;
-    if (recall > 0.0) {
-        dorecall = true;
-    }
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
@@ -1108,19 +1104,16 @@ double mpl_fitch_na_local_check
                 }
             } else if (upset[src][i] < MISSING) {
                 if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
-//                    cminscore -= (applicchgs[i] * weights[i]);
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     pd->minscore    += (applicchgs[i] * weights[i]);
                 } else {
-//                    cminscore -= (applicchgs[i] * weights[i]);
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     pd->minscore    += (applicchgs[i] * weights[i]);
                 }
-//                cminscore -= (applicchgs[i] * weights[i]);
             }
         } else {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & NA) {
@@ -1135,9 +1128,7 @@ double mpl_fitch_na_local_check
             }
         }
         cminscore -= (applicchgs[i] * weights[i]);
-        if (dorecall) {
-            recall -= (changes[i] * weights[i]);
-        }
+        recall -= (changes[i] * weights[i]);
         
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
