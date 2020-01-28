@@ -1095,34 +1095,26 @@ double mpl_fitch_na_local_check
     double cminscore = pd->cminscore; // Sum of all applicable changes
     double testscore = 0.0;
     double recall    = pd->crecall;
+    bool dorecall = false;
+    if (recall > 0.0) {
+        dorecall = true;
+    }
     
     for (i = pd->start; i < end; ++i) {
-        
         if (upset[src][i] & ISAPPLIC) {
             if ((tempup[tgt1][i] | tempup[tgt2][i]) & ISAPPLIC) {
                 if (!((tempup[tgt1][i] | tempup[tgt2][i]) & upset[src][i])) {
                     score += weights[i];
                 }
-//                recall -= (changes[i] * weights[i]);
             } else if (upset[src][i] < MISSING) {
                 if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+//                    cminscore -= (applicchgs[i] * weights[i]);
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     pd->minscore    += (applicchgs[i] * weights[i]);
-//                }
-//                else if (upset[src][i] & NA) {
-//                    pd->indexbuf[pd->nchars] = i;
-//                    ++pd->nchars;
-////                    if (tempact[troot][i]) {
-//                        pd->scorerecall += (changes[i] * weights[i]);
-//                        pd->minscore    += (changes[i] * weights[i]);
-////                    } else {
-////                        pd->scorerecall += (changes[i] * weights[i]);
-////                        pd->minscore    += (applicchgs[i] * weights[i]);
-////                    }
-//                //                    recall -= (changes[i] * weights[i]);
                 } else {
+//                    cminscore -= (applicchgs[i] * weights[i]);
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
@@ -1135,24 +1127,25 @@ double mpl_fitch_na_local_check
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
                 }
-                
             } else {
                 pd->indexbuf[pd->nchars] = i;
                 ++pd->nchars;
                 pd->scorerecall += (changes[i] * weights[i]);
                 pd->minscore    += (changes[i] * weights[i]);
-                
             }
         }
-//        recall -= (changes[i] * weights[i]);
-//        cminscore -= (applicchgs[i] * weights[i]);
+        cminscore -= (applicchgs[i] * weights[i]);
+        if (dorecall) {
+            recall -= (changes[i] * weights[i]);
+        }
+        
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            testscore = score + pd->minscore - pd->scorerecall + base;
+            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
             if (testscore > lim) {
-//                pd->minscore += cminscore;
-//                pd->scorerecall += recall;
+                pd->minscore += cminscore;
+                pd->scorerecall += recall;
                 return score;
             }
         }
@@ -1862,7 +1855,7 @@ double mpl_parsim_calc_abs_minscore(mpl_matrix* m)
                 m->parsets[i].cminscore += (applicchgs[j] * weights[j]);
                 m->parsets[i].crecall   += (changes[j] * weights[j]);
             }
-            
+            assert(m->parsets[i].crecall > 0);
             minscore += m->parsets[i].cminscore;
         }
     }
