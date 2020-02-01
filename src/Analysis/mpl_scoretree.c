@@ -144,10 +144,8 @@ double mpl_length_only_parsimony(const double lim, mpl_tree* t)
             len += mpl_parsim_second_downpass (n->left->mem_index,
                                                n->right->mem_index,
                                                n->mem_index, glmatrix);
-            if (lim > -1.0) {
-                if (len > lim) {
-                    return len;
-                }
+            if (len > lim) {
+                return len;
             }
         }
     }
@@ -282,9 +280,6 @@ static void mpl_part_parsim_uppass
         
     }
     
-    n->marked = 0;
-    n->anc->marked = 0;
-    
     mpl_part_parsim_uppass(n->left, ostart, i, t);
     mpl_part_parsim_uppass(n->right, ostart, i, t);
     
@@ -351,6 +346,10 @@ void mpl_src_root_parsimony(mpl_node* src)
     }
 }
 
+void mpl_use_ndidx(const bool useflag)
+{
+    mpl_parsim_use_nodeidx(useflag, glmatrix);
+}
 
 double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t)
 {
@@ -398,16 +397,20 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
     t->nsubnodes = 0;
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
-    start->marked = 0;
-    
-    mpl_parsim_reset_indexbufs(start->mem_index, glmatrix);
-    mpl_parsim_reset_indexbufs(start->anc->mem_index, glmatrix);
     
     len = 0.0;
+    mpl_use_ndidx(false);
+    
     for (i = 0; i < t->nsubnodes; ++i) {
 
         n = t->partial_pass[i];
-
+    
+        if (!n->marked) {
+            mpl_use_ndidx(true);
+        } else {
+            mpl_use_ndidx(false);
+        }
+        
         len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                   n->right->mem_index,
                                                   n->mem_index,
@@ -415,48 +418,25 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
         if (lim > -1.0) {
             if (len > lim) {
-                for ( ; i < t->nsubnodes; ++i) {
-                    n = t->partial_pass[i];
-                    mpl_parsim_reset_root_state_buffers(n->left->mem_index,
-                                                        n->right->mem_index,
-                                                        glmatrix);
-                }
-
-                mpl_parsim_reset_root_state_buffers(n->mem_index,
-                                                    n->anc->mem_index,
-                                                    glmatrix);
-
                 break;
             }
         }
     }
 
+    mpl_use_ndidx(false);
     n = n->anc;
     
     if (len <= lim || lim < 0.0) {
         while (n != t->base->anc) {
-
-//            mpl_parsim_reset_indexbufs(n->mem_index, glmatrix);
-            
             len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                       n->right->mem_index,
                                                       n->mem_index,
                                                       glmatrix);
-
+            t->partial_pass[t->nsubnodes] = n;
+            ++t->nsubnodes;
 
             if (lim > -1.0) {
                 if (len > lim) {
-
-                    while (n != t->base) {
-                        n = n->anc;
-                        mpl_parsim_reset_root_state_buffers(n->left->mem_index,
-                                                            n->right->mem_index,
-                                                            glmatrix);
-                    }
-
-                    mpl_parsim_reset_root_state_buffers(n->mem_index,
-                                                        n->anc->mem_index,
-                                                        glmatrix);
                     break;
                 }
             }
@@ -464,14 +444,19 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
             n = n->anc;
         };
     }
-    
 
-    if (n == t->base->anc) {
-        n = t->base;
-        mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+    // Clean up the state sets
+    for (i = 0; i < t->nsubnodes; ++i) {
+        n = t->partial_pass[i];
+        mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+    }
+    mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+    
+    // Unmark all the nodes
+    for (i = 0; i < t->num_nodes; ++i) {
+        t->nodes[i].marked = 0;
     }
 
-//    mpl_parsim_reset_state_buffers(glmatrix);
     return len;
 }
 
@@ -586,7 +571,7 @@ double mpl_score_try_parsimony
 
         // TODO: Add a break condition here for when the number of
         // characters to check is 0.
-        score += mpl_fullpass_parsimony_na_only(diff, src, t);
+        score += mpl_fullpass_parsimony_na_only(-1.0, src, t);
     }
     
     return score;

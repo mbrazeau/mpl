@@ -606,9 +606,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                                 t);
 
                 t->score = (score + tgtlen + srclen);
-//
+////
 //                t->score = mpl_fullpass_parsimony(t);
-//                t->score = mpl_length_only_parsimony(limit, t);
+//                t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
                 
                 if (bbk->bestinrep == 0.0) {
                     bbk->bestinrep = t->score;

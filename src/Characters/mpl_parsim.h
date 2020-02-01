@@ -41,6 +41,7 @@ typedef struct mpl_parsdat {
     long**          tipinbufs; // Characters in
     long*           nndindices;
     long**          ndindexbufs;
+    bool            usndidx; // Flag for using node indices
     double          minscore;
     double          cminscore; // A current minimum score based on state of tree and applicable-only changes
     double          crecall;
@@ -208,6 +209,7 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
 void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
 void mpl_parsim_reset_all_weights(mpl_charbuf* cb);
+void mpl_parsim_use_nodeidx(const bool useflag, mpl_matrix* m);
 void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m);
 void mpl_parsim_reset_indexbufs(const long n, mpl_matrix *m);
 void mpl_parsim_reset_nodal_indexbufs(mpl_matrix *m);
