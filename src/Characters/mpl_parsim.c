@@ -994,23 +994,22 @@ double mpl_fitch_na_recalc_second_downpass
     size_t i;
     size_t j;
     long end = 0;
-//    mpl_discr t = 0;
     register double cost = 0.0;
     
     long* restrict indices = pd->indexbuf;
     end = pd->nchars;
     
+    // If possible, limit reconstructions to characters updated at this node.
     if (pd->usndidx == true) {
         indices = pd->ndindexbufs[n];
         end = pd->nndindices[n];
     }
-    // Reset the doeschange counter
-//    pd->doeschange = 0;
     
     for (j = 0; j < end; ++j) {
         
         i = indices[j];
 
+        // Deduct the old score added at this node.
         cost -= (nodechanges[n][i] * weights[i]);
 
         // More efficient implementation?
@@ -1029,22 +1028,21 @@ double mpl_fitch_na_recalc_second_downpass
                 cost += weights[i];
             }
         }
-
         
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         // Reset the left buffers
-//        dnset[left][i]    = tempdn[left][i];
-//        dnsetf[left][i]   = tempdnf[left][i];
-//        prupset[left][i]  = tempprup[left][i];
-////        upset[left][i]    = tempup[left][i];
-//        actives[left][i]  = tempact[left][i];
-//        // Reset the right buffers
-//        dnset[right][i]   = tempdn[right][i];
-//        dnsetf[right][i]  = tempdnf[right][i];
-//        prupset[right][i] = tempprup[right][i];
-////        upset[right][i]   = tempup[right][i];
-//        actives[right][i] = tempact[right][i];
+        dnset[left][i]    = tempdn[left][i];
+        dnsetf[left][i]   = tempdnf[left][i];
+        prupset[left][i]  = tempprup[left][i];
+//        upset[left][i]    = tempup[left][i];
+        actives[left][i]  = tempact[left][i];
+        // Reset the right buffers
+        dnset[right][i]   = tempdn[right][i];
+        dnsetf[right][i]  = tempdnf[right][i];
+        prupset[right][i] = tempprup[right][i];
+//        upset[right][i]   = tempup[right][i];
+        actives[right][i] = tempact[right][i];
 
     }
     

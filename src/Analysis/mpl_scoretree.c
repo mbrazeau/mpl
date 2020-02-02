@@ -418,6 +418,16 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
         if (lim > -1.0) {
             if (len > lim) {
+                // Copy the temp buffers back in and exit the loop
+                for ( ; i < t->nsubnodes; ++i) {
+                    n = t->partial_pass[i];
+                    mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                                        n->right->mem_index,
+                                                        glmatrix);
+                }
+                mpl_parsim_reset_root_state_buffers(n->mem_index,
+                                                    n->anc->mem_index,
+                                                    glmatrix);
                 break;
             }
         }
@@ -437,6 +447,13 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
 
             if (lim > -1.0) {
                 if (len > lim) {
+                    while (n != t->base->anc){
+                        n = t->partial_pass[i];
+                        mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                                            n->right->mem_index,
+                                                            glmatrix);
+                        n = n->anc;
+                    }
                     break;
                 }
             }
@@ -445,12 +462,12 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
         };
     }
 
-    // Clean up the state sets
-    for (i = 0; i < t->nsubnodes; ++i) {
-        n = t->partial_pass[i];
-        mpl_parsim_reset_root_state_buffers(n->left->mem_index, n->right->mem_index, glmatrix);
+    if (n == t->base) {
+        mpl_parsim_reset_root_state_buffers(n->left->mem_index,
+                                            n->right->mem_index,
+                                            glmatrix);
     }
-    mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
+   
     
     // Unmark all the nodes
     for (i = 0; i < t->num_nodes; ++i) {
