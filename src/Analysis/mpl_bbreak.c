@@ -842,7 +842,8 @@ static long mpl_bbreak_get_target_list
     assert(t->num_polys == 0);
     
     // TODO: This crap is not safe:
-    mpl_node* start = mpl_node_get_sib(&t->nodes[0]);
+    mpl_node* start = NULL;
+    start = mpl_node_get_sib(&t->nodes[0]); // The 0 assumption
     
     if (start == NULL) {
         bbk->nshorttgts = 0;
