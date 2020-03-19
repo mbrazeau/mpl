@@ -13,6 +13,7 @@
 #include "mpl_taxblock.h"
 
 #define DEFAULT_CANVAS_WIDTH 80
+#define NAME_BUFFER_WIDTH 15
 
 typedef struct _tdraw {
     
