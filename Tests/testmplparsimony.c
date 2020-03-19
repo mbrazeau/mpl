@@ -11,6 +11,7 @@
 #include "mpl_matrix.h"
 #include "mpl_parsim.h"
 #include "testutils.h"
+#include "mpl_node.h"
 #include "mpl_tree.h"
 #include "mpl_topol.h"
 #include "mpl_newick_rdr.h"

@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 
+#include "mpl_tree.h"
 #include "mpl_tdraw.h"
 #include "mpl_utils.h"
 
@@ -74,8 +75,6 @@ void mpl_tdraw_delete(mpl_tdraw **td)
     safe_free(*td);
     
     *td = NULL;
-    
-    return;
 }
 
 void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
@@ -91,6 +90,6 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
 
 static void calc_dimensions(const long ntax, mpl_tdraw* td)
 {
-    td->width = DEFAULT_CANVAS_WIDTH;
+    td->width  = DEFAULT_CANVAS_WIDTH;
     td->height = 2 * ntax - 1;
 }

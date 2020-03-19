@@ -7,6 +7,7 @@
 //
 #include <stdio.h>
 
+#include "mpl_node.h"
 #include "mpl_tree.h"
 #include "mpl_charbuf.h"
 #include "mpl_matrix.h"

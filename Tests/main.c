@@ -20,6 +20,7 @@
 #include "testmplparsimony.h"
 #include "testmplstepwise.h"
 #include "testparsshortcut.h"
+#include "testtdraw.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -84,6 +85,10 @@ int main(int argc, const char * argv[]) {
     // TODO: Restore this function:
 //    fails += test_parsimony_data_setup();
 //    fails += test_matrix_from_io_source(argc, argv);
+    
+    // Test mpl_tdraw.c
+    fails += test_new_tree_drawing();
+    
     
     // Test mpl_stepwise.c
     fails += test_initial_fork();
