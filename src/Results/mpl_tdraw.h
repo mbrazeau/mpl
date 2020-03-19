@@ -12,16 +12,21 @@
 #include "mpl_tree.h"
 #include "mpl_taxblock.h"
 
+#define DEFAULT_CANVAS_WIDTH 80
+
 typedef struct _tdraw {
     
-    int     width;
-    int     height;
-    char**  canvas;
+    long                    width;  // Display width
+    long                    height; // Display height
+    long                    ttop;   // Top of the tree branches
+    char**                  canvas;
+    const mpl_taxablock*    taxa;
     
 } mpl_tdraw;
 
-mpl_tdraw* mpl_trdraw_new(mpl_tree* t, mpl_taxablock* taxa);
-void mpl_tdraw_delete(mpl_tdraw** td);
-void mpl_tdraw_print(mpl_tdraw* td);
+mpl_tdraw* mpl_tdraw_new(const mpl_taxablock *taxa);
+void mpl_tdraw_delete(mpl_tdraw **td);
+void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td);
+void mpl_tdraw_print(mpl_tdraw *td);
 
 #endif /* mpl_tdraw_h */
