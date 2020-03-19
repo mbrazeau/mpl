@@ -367,6 +367,8 @@ MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
     RET_IF_NULL(m);
     
     printf("Dataset has %li characters\n", m->num_cols);
+    
+    // TODO: This needs implementing and a grammatical condition is/are
     printf("\t %li characters are parsimony uninformative\n", -1L);
     
     long nNA = 0;
@@ -378,7 +380,12 @@ MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
         }
     }
     
-    printf("\t %li characters are treated as type \"inapplicable\"\n", nNA);
+    if (nNA == 1) {
+        printf("\t %li character is ", nNA);
+    } else {
+        printf("\t %li characters are ", nNA);
+    }
+    printf("treated as type \"inapplicable\"\n");
     
     
     return ret;

@@ -454,21 +454,22 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                                             glmatrix);
                         n = n->anc;
                     }
+                    mpl_parsim_reset_root_state_buffers(n->mem_index,
+                                                        n->anc->mem_index,
+                                                        glmatrix);
                     break;
                 }
             }
 
             n = n->anc;
-        };
+        };  
     }
 
-    if (n == t->base) {
-        mpl_parsim_reset_root_state_buffers(n->left->mem_index,
-                                            n->right->mem_index,
-                                            glmatrix);
+    if (n == t->base->anc) {
+        n = t->base;
+        mpl_parsim_reset_root_state_buffers(n->mem_index, n->anc->mem_index, glmatrix);
     }
-   
-    
+
     // Unmark all the nodes
     for (i = 0; i < t->num_nodes; ++i) {
         t->nodes[i].marked = 0;

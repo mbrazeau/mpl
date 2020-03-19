@@ -1843,7 +1843,7 @@ double mpl_parsim_calc_abs_minscore(mpl_matrix* m)
                 m->parsets[i].cminscore += (applicchgs[j] * weights[j]);
                 m->parsets[i].crecall   += (changes[j] * weights[j]);
             }
-            assert(m->parsets[i].crecall > 0);
+            assert(m->parsets[i].crecall >= 0);
             minscore += m->parsets[i].cminscore;
         }
     }
