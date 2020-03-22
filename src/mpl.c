@@ -35,19 +35,6 @@ typedef struct _handle {
 // Static function prototypes
 static int mpl_check_init(mpl_handle* handl);
 
-
-/*******************************************************************************
- *                                                                             *
- *  PUBLIC FUNCTION DEFINITIONS                                                *
- *                                                                             *
- ******************************************************************************/
-
-/**
- Creates a new instance of the mpl_handle. A program can generate as many of
- these as it needs.
- 
- @return A pointer to an instance of an mpl_handle.
- */
 mpl_handle* mpl_handle_new(void)
 {
     mpl_handle* newhandl = NULL;
@@ -67,13 +54,6 @@ mpl_handle* mpl_handle_new(void)
     return newhandl;
 }
 
-/**
- Deletes an instance of the mpl_handle struct by freeing all of its memory and
- setting the pointer to NULL.
- 
- @param handl Address of the pointer to the handle structure.
- @return An mpl error code.
- */
 int mpl_handle_delete(mpl_handle** handl)
 {
     RET_IF_NULL(handl);
@@ -96,30 +76,13 @@ int mpl_handle_delete(mpl_handle** handl)
     return MPL_SUCCESS;
 }
 
-/**
- Resets the parameters in the handle to initial values. All objects and
- allocated memory in the handle is freed/destroyed. This function is to be used
- when changing the dimensions and input data.
- 
- @param handl A pointer to an instance of the mpl_handle struct.
- @return An mpl error code.
- */
+
 int mpl_reset_handle(mpl_handle* handl)
 {
     //
     return MPL_NOTIMPLEMENTED;
 }
 
-/**
- Initialise the dimensions of the data set to be supplied to the mpl. This will
- set the number of terminals (taxa) and characters. These values will be used
- to check data inputs.
- 
- @param ntax The number of taxa (rows) in the dataset.
- @param nchar The number of characters (columns) in the dataset.
- @param handl A pointer to an instance of the mpl_handle struct.
- @return An mpl error code.
- */
 int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
 {
     RET_IF_NULL(handl);

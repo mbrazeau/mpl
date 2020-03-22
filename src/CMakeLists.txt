@@ -5,7 +5,7 @@ file(GLOB_RECURSE LIBSRCS
 )
 include_directories(../include ./ ./Taxa ./Characters ./Trees ./Analysis ./Results)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${LIBSRCS})
-add_library(mpl STATIC ${LIBSRCS})
+add_library(mpl STATIC "${LIBSRCS}" "../include/mpl.h")
 
 install(TARGETS mpl DESTINATION lib)
 install(DIRECTORY ../include/ DESTINATION include)
