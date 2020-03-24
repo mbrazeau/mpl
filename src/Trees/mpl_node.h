@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "mpl_utils.h"
+#include "mpl_bitset.h"
 
 typedef struct _node mpl_node;
 typedef struct _tree mpl_tree;
@@ -25,6 +26,7 @@ typedef struct _node {
     size_t      ndescs;
     size_t      capacity;
     mpl_node*   anc;
+    mpl_bitset* bipart;
     long        mem_index;
     long        po_index;
     long        copy_index;
