@@ -5,7 +5,11 @@
 //  Created by Martin Brazeau on 31/01/2019.
 //  Copyright © 2019 Martin Brazeau. All rights reserved.
 //
+#include <stdlib.h>
+#include <limits.h>
 #include <assert.h>
+#include <string.h>
+
 #include "mpl_utils.h"
 #include "mpl_bitset.h"
 
@@ -58,4 +62,66 @@ inline bool mpl_bitset_set(const long i, mpl_bitset* b)
     b->data[i / NULONGBITS] |= 1UL << (i % NULONGBITS);
     
     return true;
+}
+
+bool mpl_bitset_clearbit(long i, mpl_bitset* b)
+{
+    b->data[i / NULONGBITS] &= ~(1UL << (i % NULONGBITS));
+    
+    return true;
+}
+
+bool mpl_bitset_clearall(mpl_bitset* b)
+{
+    memset(b->data, 0, b->nfields * sizeof(unsigned long));
+    return true;
+}
+
+inline bool mpl_bitset_AND
+(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2)
+{
+    int i = 0;
+    bool ret = false;
+    
+    for (i = 0; i < b1->nfields; ++i) {
+        if ((dest->data[i] = b1->data[i] & b2->data[i])) {
+            ret = true;
+        }
+    }
+    
+    return ret;
+}
+
+inline void mpl_bitset_OR
+(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2)
+{
+    int i = 0;
+     
+    for (i = 0; i < b1->nfields; ++i) {
+        dest->data[i] = b1->data[i] & b2->data[i];
+    }
+}
+
+inline bool mpl_bitset_XOR
+(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2)
+{
+    int i = 0;
+    bool ret = false;
+    
+    for (i = 0; i < b1->nfields; ++i) {
+        if ((dest->data[i] = b1->data[i] & b2->data[i])) {
+            ret = true;
+        }
+    }
+    
+    return ret;
+}
+
+void mpl_bitset_flip(mpl_bitset* b)
+{
+    int i = 0;
+
+    for (i = 0; i < b->nfields; ++i) {
+        b->data[i] = ~b->data[i];
+    }
 }

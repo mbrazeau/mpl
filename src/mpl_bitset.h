@@ -9,8 +9,6 @@
 #ifndef mpl_bitset_h
 #define mpl_bitset_h
 
-#include <stdlib.h>
-#include <limits.h>
 #include <stdbool.h>
 
 typedef struct _bitset mpl_bitset;
@@ -22,9 +20,9 @@ void        mpl_bitset_delete(mpl_bitset** b);
 inline bool mpl_bitset_set(const long i, mpl_bitset* b);
 bool        mpl_bitset_clearbit(long i, mpl_bitset* b);
 bool        mpl_bitset_clearall(mpl_bitset* b);
-bool        mpl_bitset_AND(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
-bool        mpl_bitset_OR(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
-bool        mpl_bitset_XOR(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
-bool        mpl_bitset_flip(mpl_bitset* b);
+inline bool mpl_bitset_AND(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
+inline void mpl_bitset_OR(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
+inline bool mpl_bitset_XOR(mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2);
+void        mpl_bitset_flip(mpl_bitset* b);
 
 #endif /* mpl_bitset_h */
