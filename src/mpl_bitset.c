@@ -6,20 +6,11 @@
 //  Copyright © 2019 Martin Brazeau. All rights reserved.
 //
 #include <stdlib.h>
-#include <limits.h>
 #include <assert.h>
 #include <string.h>
 
 #include "mpl_utils.h"
 #include "mpl_bitset.h"
-
-typedef struct _bitset {
-    
-    int             nfields;
-    int             maxbit;
-    unsigned long*  data;
-    
-} mpl_bitset;
 
 mpl_bitset* mpl_bitset_new(const int minbits)
 {
@@ -57,7 +48,7 @@ void mpl_bitset_delete(mpl_bitset** b)
     safe_free(*b);
 }
 
-inline bool mpl_bitset_set(const long i, mpl_bitset* b)
+bool mpl_bitset_set(const long i, mpl_bitset* b)
 {
     b->data[i / NULONGBITS] |= 1UL << (i % NULONGBITS);
     
@@ -92,7 +83,7 @@ inline bool mpl_bitset_AND
     return ret;
 }
 
-inline void mpl_bitset_OR
+void mpl_bitset_OR
 (mpl_bitset* dest, const mpl_bitset* b1, const mpl_bitset* b2)
 {
     int i = 0;
