@@ -9,6 +9,7 @@
 
 #include "mpl_tree.h"
 #include "mpl_utils.h"
+#include "mpl_bitset.h"
 
 // Private function prototypes
 static inline void mpl_tree_reset_copy_indices(mpl_tree* t);
@@ -36,7 +37,7 @@ mpl_tree* mpl_new_tree(long num_taxa)
     for (i = 0; i < t->num_nodes + 1; ++i) {
         t->nodes[i].descs = (mpl_node**)safe_calloc(3, sizeof(mpl_tree*));
         // TODO: Need to find some way to test this
-        if (!t->nodes[i].descs) {
+        if (t->nodes[i].descs == NULL) {
             mpl_delete_tree(&t);
             return NULL;
         }
@@ -44,8 +45,15 @@ mpl_tree* mpl_new_tree(long num_taxa)
         t->nodes[i].ndescs = 0;
         t->nodes[i].mem_index = i;
         t->nodes[i].copy_index = -1;
+        t->nodes[i].bipart = mpl_bitset_new(t->num_taxa);
+        if (t->nodes[i].bipart == NULL) {
+            mpl_delete_tree(&t);
+            return NULL;
+        }
+        
         if (i < num_taxa) {
             t->nodes[i].tip = i + 1;
+            mpl_bitset_set(i, t->nodes[i].bipart);
         }
     }
     
@@ -81,6 +89,7 @@ int mpl_delete_tree(mpl_tree** t)
             if ((*t)->nodes[i].descs != NULL) {
                 free ((*t)->nodes[i].descs);
                 (*t)->nodes[i].descs = NULL;
+                mpl_bitset_delete(&(*t)->nodes[i].bipart);
             }
         }
         
