@@ -137,6 +137,7 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     p = &n->descs[0];
     do {
         mpl_node_poly_traverse(*p, t, i, j);
+        mpl_node_set_bipart((*p)->bipart, n->bipart);
         ++p;
 #ifdef DEBUG
         ++_countcheck;
@@ -149,6 +150,32 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     t->postord_all[*i] = t->postord_intern[*j] = n;
     (*i)++;
     (*j)++;
+}
+
+void mpl_node_bipart_traverse(mpl_node* n, mpl_tree* t)
+{
+#ifdef DEBUG
+    assert(n && t);
+    int _countcheck = 0;
+#endif
+    mpl_node** p = NULL;
+    
+    if (n->tip) {
+        return;
+    }
+    
+    p = &n->descs[0];
+    do {
+        mpl_node_bipart_traverse(*p, t);
+        mpl_node_set_bipart((*p)->bipart, n->bipart);
+        ++p;
+#ifdef DEBUG
+        ++_countcheck;
+#endif
+    } while (*p);
+#ifdef DEBUG
+    assert(_countcheck == n->ndescs);
+#endif
 }
 
 long mpl_node_push_desc(mpl_node* tgt, mpl_node* src)
