@@ -32,6 +32,21 @@ typedef struct _mpl_string {
     char* str;
 } mpl_str;
 
+typedef struct _culink {
+    void* data;
+    struct _culink* next;
+} culink;
+
+typedef struct _culist {
+    size_t  capacity;
+    size_t  extension_rate;
+    culink* pool;
+    culink* head;
+    culink* back;
+} culist;
+
+
+
 void* safe_calloc(const unsigned long nelems, const size_t size)
 {
     void* ret = NULL;
@@ -65,7 +80,6 @@ void** alloc_matrix(const size_t nrows, const size_t ncols, const size_t datasz)
     size_t i = 0;
     void** ret = NULL;
     
-    // TODO: This 2* thing needs to be replaced
     ret = (void**)safe_calloc(nrows, sizeof(void*));
     
     for (i = 0; i < nrows; ++i) {
@@ -176,6 +190,10 @@ char* mpl_str_c(mpl_str* s)
     return s->str;
 }
 
+/*
+* RANDOM NUMBER GENERATION
+*/
+
 uint32_t mpl_rng_seed = MPL_DEFAULT_RSEED;
 
 uint32_t mpl_rng(void)
@@ -216,6 +234,40 @@ int mpl_compchar(const void* int1, const void* int2)
     return (*(char*)int1) - (*(char*)int2);
 }
 
+
+/*
+ * LINKED LISTS
+ */
+
+void culist_delete(culist* list)
+{
+    
+}
+
+culist* culist_new(size_t nelems)
+{
+    culist* newlist = NULL;
+    newlist = (culist*)safe_calloc(1, sizeof(culist));
+    
+    if (newlist != NULL) {
+        size_t i = 0;
+        culink* n = NULL;
+        culink* p = NULL;
+        n = (culink*)safe_calloc(1, sizeof(culink));
+        p = n;
+        for (i = 1; i < nelems; ++i) {
+            n->next = (culink*)safe_calloc(1, sizeof(culink));
+            if (n->next == NULL) {
+                culist_delete(newlist);
+                return NULL;
+            }
+            n = n->next;
+        }
+        newlist->pool = p;
+    }
+    
+    return newlist;
+}
 
 /*
  * PRIVATE STRING FUNCTIONS
