@@ -35,7 +35,7 @@ mpl_bitset* mpl_bitset_new(const int minbits)
         nb = NULL; // Just precautionary
     }
     
-    nb->maxbit = nb->nfields * NULONGBITS;
+    nb->maxbit = minbits;//nb->nfields * NULONGBITS;
     
     return nb;
 }
@@ -89,7 +89,7 @@ void mpl_bitset_OR
     int i = 0;
      
     for (i = 0; i < b1->nfields; ++i) {
-        dest->data[i] = b1->data[i] & b2->data[i];
+        dest->data[i] = b1->data[i] | b2->data[i];
     }
 }
 
@@ -114,5 +114,33 @@ void mpl_bitset_flip(mpl_bitset* b)
 
     for (i = 0; i < b->nfields; ++i) {
         b->data[i] = ~b->data[i];
+    }
+}
+
+void mpl_bitset2str(mpl_str* str, mpl_bitset* b)
+{
+    mpl_str_clear(str);
+    
+    int i = 0;
+    for (i = b->nfields-1; i >= 0; --i) {
+        int j = 0;
+        unsigned long t = (1UL << (NULONGBITS-1));
+        if (i == b->nfields-1) {
+            t = (1UL << ((b->maxbit % NULONGBITS) - 1));
+        }
+
+        unsigned long lim = NULONGBITS;
+        if (i == b->nfields-1) {
+            lim = b->maxbit % NULONGBITS;
+        }
+        
+        for (j = 0; j < lim; ++j) {
+            
+            if (b->data[i] & (t >> j)) {
+                mpl_str_append('*', str);
+            } else {
+                mpl_str_append('.', str);
+            }
+        }
     }
 }
