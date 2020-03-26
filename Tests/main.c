@@ -33,7 +33,11 @@ int main(int argc, const char * argv[]) {
     fails += test_mpl_string_append();
     fails += test_appending_integers();
     fails += test_rand_in_range();
+    
+    // Test bipartitioning
     fails += test_mpl_bitset_basic();
+    fails += test_all_bipartitions_small_tree();
+    fails += test_all_nontrivial_bipartitions();
     
     // Test mpl_node.c
     fails += test_node_new_delete();
