@@ -27,7 +27,7 @@ typedef struct mpl_topol {
     long*           edges;
     char*           newick;
     double          score;
-//    mpl_topol*      next;
+    mpl_topol*      next;
 //    mpl_topol*      back;
 } mpl_topol;
 
