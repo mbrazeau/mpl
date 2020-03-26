@@ -9,5 +9,7 @@
 #define testbitset_h
 
 int test_mpl_bitset_basic (void);
+int test_all_bipartitions_small_tree (void);
+int test_all_nontrivial_bipartitions (void);
 
 #endif /* testbitset_h */
