@@ -84,23 +84,7 @@ int mpl_reset_node(mpl_node* n)
 
 void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
 {
-#ifdef DEBUG
-//    assert(n && t && i && j);
-#endif
-//    if (n->tip) {
-//        t->postord_all[*i] = n;
-//        (*i)++;
-//        return;
-//    }
-//
-//    mpl_node_bin_traverse(n->left, t, i, j);
-//    mpl_node_bin_traverse(n->right, t, i, j);
-//
-//    t->postord_all[*i] = t->postord_intern[*j] = n;
-//    (*i)++;
-//    (*j)++;
-    
-    if (n) {
+    if (n != NULL) {
         mpl_node_bin_traverse(n->left, t, i, j);
         mpl_node_bin_traverse(n->right, t, i, j);
         
