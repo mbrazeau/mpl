@@ -20,6 +20,6 @@ typedef struct mpl_bipartlist {
     
 } mpl_bipartlist;
 
-mpl_bipartlist* mpl_bipartlist_new(void);
+mpl_bipartlist* mpl_bipartlist_new (void);
 
 #endif /* mpl_bipartlist_h */
