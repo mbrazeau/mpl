@@ -241,7 +241,30 @@ int mpl_compchar(const void* int1, const void* int2)
 
 void culist_delete(culist* list)
 {
+    culink* p = NULL;
+    culink* q = NULL;
     
+    p = list->pool;
+    while (p != NULL) {
+        assert(p->data == NULL);
+        q = p->next;
+        free(p);
+        p = q;
+    }
+    
+    p = list->head;
+    while (p != NULL) {
+        assert(p->data == NULL);
+        q = p->next;
+        free(p);
+        p = q;
+    }
+    
+    list->pool = NULL;
+    list->head = NULL;
+    list->back = NULL;
+    
+    free(list);
 }
 
 culist* culist_new(size_t nelems)
@@ -264,9 +287,56 @@ culist* culist_new(size_t nelems)
             n = n->next;
         }
         newlist->pool = p;
+        
+        newlist->head = NULL;
+        newlist->back = NULL;
     }
     
     return newlist;
+}
+
+int culist_push_back(void* data, culist* list)
+{
+    int ret = -1;
+    culink* nlink = NULL;
+    culink* p = NULL;
+    
+    // Get a new link from the pool
+    nlink = list->pool;
+    if (nlink != NULL) {
+        p = nlink->next;
+        list->pool = p;
+        
+        nlink->next = NULL;
+        
+        if (list->head == NULL) {
+            list->head = nlink;
+        } else {
+            list->back->next = nlink;
+        }
+        list->back = nlink;
+        
+        ret = 0;
+    }
+    
+    return ret;
+}
+
+void* culist_get(const size_t i, culist* list)
+{
+    culink* p = NULL;
+    
+    int k = 0;
+    
+    p = list->head;
+    while (k < i && p != NULL) {
+        p = p->next;
+        ++k;
+    }
+    
+    assert(p != NULL);
+    
+    return p->data;
 }
 
 /*
