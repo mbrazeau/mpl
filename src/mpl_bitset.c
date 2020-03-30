@@ -108,6 +108,27 @@ inline bool mpl_bitset_XOR
     return ret;
 }
 
+int mpl_bitset_cmp(const mpl_bitset* b1, const mpl_bitset* b2)
+{
+#ifdef DEBUG
+    assert(b1->nfields == b2->nfields);
+#endif
+    return memcmp(b1->data, b2->data, b1->nfields * sizeof(unsigned long));
+}
+
+bool mpl_bitset_compat(const mpl_bitset* bits, const mpl_bitset* constr)
+{
+    int i = 0;
+    
+    for (i = 0; i < bits->nfields; ++i) {
+        if ((bits->data[i] & constr->data[i]) != bits->data[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 void mpl_bitset_flip(mpl_bitset* b)
 {
     int i = 0;
