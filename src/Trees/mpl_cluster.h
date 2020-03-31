@@ -15,9 +15,10 @@ typedef struct _cluster mpl_cluster;
 
 typedef struct _cluster {
     
-    int             size;
-    mpl_bitset*     bitset;
-    mpl_cluster*    next;
+    int             size;   // Number of tips subtended by this cluster
+    int             count;  // Number of identical clusters (for consensus trees)
+    mpl_bitset*     bitset; // Bitset defining the bipartition
+    mpl_cluster*    next;   // For linked listing
     
 } mpl_cluster;
 
@@ -30,9 +31,9 @@ void            mpl_cluster_delete(mpl_cluster** clust);
  @discussion Forms the bitwise union of two clusters and updates the count of
  taxa incorporated into the cluster.
  
- @param dest A pointer to the destination result cluster.
- @param clust1 A pointer to the first source cluster.
- @param clust2 A pointer to the second source cluster.
+ @param dest    A pointer to the destination result cluster.
+ @param clust1  A pointer to the first source cluster.
+ @param clust2  A pointer to the second source cluster.
  */
 void            mpl_cluster_join(mpl_cluster*       dest,
                                  const mpl_cluster* clust1,
@@ -44,8 +45,8 @@ void            mpl_cluster_join(mpl_cluster*       dest,
  @discussion This function determines if a cluster is compatible with the
  supplied constraint. 
  
- @param clust The cluster to be checked against the constraint.
- @param constr The constraint cluster.
+ @param clust   The cluster to be checked against the constraint.
+ @param constr  The constraint cluster.
  @return True if compatible, false if not compatible.
  */
 bool            mpl_cluster_compat(const mpl_cluster* clust,
