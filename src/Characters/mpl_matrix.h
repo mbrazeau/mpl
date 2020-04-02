@@ -31,6 +31,8 @@ typedef struct _matrix {
     char            missingsymb;
     char            gapsymb;
     char            unknownsymb;
+    long            ninform;
+    long            nvariable;
 //    double*         weights; // The vector of user-defined weights
 //    double**        weightptrs; // A vector of pointers to weights in the data blocks
     mpl_gap_t       gaphandl;

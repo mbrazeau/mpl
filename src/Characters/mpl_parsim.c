@@ -306,12 +306,92 @@ void mpl_parsim_set_type
 }
 
 
+void mpl_parsim_analyse_informative
+ (mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb)
+{
+    int i = 0;
+    int j = 0;
+    bool state1x = false;
+    bool state2x = false;
+    mpl_discr a = NOCHARS;
+    
+    ci->isvariable = false;
+    ci->isparsinform = false;
+    
+    int nstates = 0;
+    
+    for (i = 0; i < cb->num_rows; ++i) {
+        if (col[i] < UNKNOWN && ((col[i] & (col[i] - 1)) == 0)) {
+        
+            if (col[i] != (col[i] & a)) {
+                a |= col[i];
+                ++nstates;
+            }
+        }
+    }
+
+    if (nstates == 0) {
+        return;
+    }
+
+    int* statecounts = safe_calloc(nstates, sizeof(int));
+    mpl_discr* states = safe_calloc(nstates, sizeof(mpl_discr));
+    
+    nstates = 0;
+    
+    a = NOCHARS;
+
+    for (i = 0; i < cb->num_rows; ++i) {
+        
+        if (col[i] < UNKNOWN && ((col[i] & (col[i] - 1)) == 0)) {
+            
+            if (col[i] != (col[i] & a)) {
+                a |= col[i];
+                states[nstates] = col[i];
+                ++statecounts[nstates];
+                ++nstates;
+            } else {
+                // Search for the state
+                for (j = 0; j < nstates; ++j) {
+                    if (col[i] == states[j]) {
+                        ++statecounts[j];
+                    }
+                }
+            }
+        }
+    }
+    
+    for (i = 0; i < nstates-1; ++i) {
+        if (statecounts[i] > 1) {
+            for (j = i+1; j < nstates; ++j) {
+                if (statecounts[j] > 1) {
+                    ci->isparsinform = true;
+                    break;
+                }
+            }
+            if (ci->isparsinform == true) {
+                break;
+            }
+        }
+    }
+    
+    free(states);
+    free(statecounts);
+}
+
 void mpl_parsim_add_data_column_to_buffer
 (mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd)
 {
+    
+    // Write the character in
     mpl_charbuf_add_data_column(col, pd->start + pd->nchars, ci, cb);
+    
+    // Analyse minimum number of changes
     cb->minchanges[pd->start + pd->nchars] = mpl_charbuf_analyze_discr_minchanges(pd->start + pd->nchars, pd->isNAtype, cb);
     ++pd->nchars;
+    
+    // Analyse informative characters
+    mpl_parsim_analyse_informative(col, ci, cb);
 #ifdef DEBUG
     assert(pd->nchars <= pd->end);
 #endif

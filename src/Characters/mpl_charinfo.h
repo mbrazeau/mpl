@@ -24,6 +24,7 @@ typedef struct _charinfo {
     mpl_parsim_t parsimtype;
     bool         isincluded;
     bool         isparsinform;
+    bool         isvariable;
     double       weight;
     double*      wtptr; // Points to the weight in the derived char buf.
     double       preweight; // Probability of reweighting

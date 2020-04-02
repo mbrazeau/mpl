@@ -21,6 +21,7 @@ typedef unsigned int mpl_discr;
 #define ISAPPLIC ((mpl_discr)~NA) // Bitmask for states that are applicable
 #define MISSING  ((mpl_discr)~0) // Bitmask for missing data (all state)
 #define UNKNOWN  ((mpl_discr)~NA) // Bitmask for missing data that's know to be logically applicable
+#define NOCHARS  0UL // Empty set
 #define GAPPUSH  1 // Shift value for the position of the gap
 
 #define VALID_NEXMAT_PUNC   "{}();"

@@ -369,7 +369,7 @@ MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
     printf("Dataset has %li characters\n", m->num_cols);
     
     // TODO: This needs implementing and a grammatical condition is/are
-    printf("\t %li characters are parsimony uninformative\n", -1L);
+    printf("\t %li characters are parsimony uninformative\n", m->num_cols - m->ninform);
     
     long nNA = 0;
     
@@ -569,6 +569,22 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         // Write into buffer
         mpl_matrix_write_discr_parsim_to_buffer(&m->parsets[i], m);
     }
+    
+    // Analyse the informative characters
+    m->ninform = 0;
+    m->nvariable = 0;
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        if (m->charinfo[i].isvariable == true) {
+            ++m->nvariable;
+        }
+        if (m->charinfo[i].isparsinform == true) {
+            ++m->ninform;
+        } else {
+            printf("Character %i deemed uninformative\n", i+1);
+        }
+    }
+    
 }
 
 static void mpl_matrix_convert_into_discrbuffer
