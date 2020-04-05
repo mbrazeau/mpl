@@ -123,26 +123,75 @@ int         mpl_set_gap_handl(const mpl_gap_t gaphandl, mpl_handle handl);
 //          Delete taxon label
 //          Exclude taxon
 //          Include taxon
+
 //          Set character weight
 int         mpl_set_char_weight(const float weight, const long index, mpl_handle handl);
+
 //          Get character weight
 float       mpl_get_char_weight(const long index, mpl_handle handl);
+
 //          Set equal weights
 int         mpl_set_equal_weights(mpl_handle handl);
+
 //          Set character parsimony type
 //          Get character parsimony type
 //          Apply character settings
-//          Set hold value
+
+/**
+ @brief Set the number of trees to hold at each step during stepwise addition.
+ 
+ @param hold an integer indicating the number of trees to hold at each step.
+ @param handl A constant pointer to an instanec of the mpl object.
+ @return 0 if success; negative value for an error.
+ */
 int         mpl_set_hold(const int hold, mpl_handle handl);
-//          Get hold value
+
+/**
+ @brief Returns the number of trees to be held at each step during stepwise
+ addition.
+ 
+ @param handl A constant pointer to an instanec of the mpl object.
+ @return An integer indicating the hold number.
+ */
 int         mpl_get_hold(const mpl_handle handl);
-//          Set maxtrees
-int         mpl_set_maxtrees(const long maxtrees, mpl_handle handle);
-//          Get maxtrees
-long        mpl_get_maxtrees(const mpl_handle handle);
+
+/**
+ @brief Sets the maximum number of trees to hold in memory.
+ 
+ @discussion This is the maximum number of trees held in memory. Any additional
+ trees will be discarded.
+ 
+ @param maxtrees An integer indicating the maximum number of trees to hold in memory.
+ @param handl A pointer to an instanec of the mpl object.
+ @return 0 if success; negative value for an error.
+ */
+int         mpl_set_maxtrees(const long maxtrees, mpl_handle handl);
+
+/**
+ @brief Returns the maximum number of trees that can be held in memory.
+ 
+ @param handl A constant pointer to an instanec of the mpl object.
+ @return An integer indicating the maximum number of trees.
+ */
+long        mpl_get_maxtrees(const mpl_handle handl);
+
 //          Set autoincrease value
 //          Get autoincrease value
-//          Set addition sequence type
+
+/**
+ @brief Sets the type of addition sequence to use in obtaining starting trees.
+ 
+ @discussion Three parameters are possible for this function (passed as enumerated
+ data types defined in mpl_defs.h:
+ 
+ Random (MPL_AST_RANDOM): Randomises input order of taxa.
+ As-is (MPL_AST_ASIS): Uses the input order of taxa.
+ None (MPL_AST_INMEM): Skips the addition sequence and uses trees in memory.
+ 
+ @param as A constant value indicating the addition sequence type (as defined in mpl_defs.h
+ @param handl A pointer to an instanec of the mpl object.
+ @return 0 if success; negative value for an error.
+ */
 int         mpl_set_addseq(const mpl_addseq_t as, mpl_handle handle);
 //          Get addition sequence type
 //          Set branch-swapping type
