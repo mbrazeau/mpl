@@ -183,6 +183,11 @@ int mpl_str_clear(mpl_str* s)
     return 0;
 }
 
+int mpl_strcmp(mpl_str* s1, mpl_str* s2)
+{
+    return strcmp(s1->str, s2->str);
+}
+
 char* mpl_str_c(mpl_str* s)
 {
     // NOTE: This function violates encapsulation, it could be replaced

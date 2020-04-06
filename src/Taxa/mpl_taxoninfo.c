@@ -81,3 +81,23 @@ long mpl_taxoninfo_get_index(const mpl_taxoninfo* ti)
     
     return -1;
 }
+
+int mpl_taxoninfo_match(mpl_taxoninfo* ti1, mpl_taxoninfo* ti2)
+{
+    return strcmp(ti1->name, ti2->name);
+}
+
+int mpl_taxoninfo_dummy(mpl_taxoninfo* ti)
+{
+    int i = 0;
+    char dummyname[16];
+    
+    for (i = 0; i < 15; ++i) {
+        dummyname[i] = mpl_rng_between('a', 'z');
+    }
+    dummyname[15] = '\0';
+    
+    mpl_taxoninfo_set_name(ti, dummyname);
+    
+    return 0;
+}

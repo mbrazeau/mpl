@@ -80,3 +80,31 @@ int mpl_taxablock_add_taxon(const char* label, mpl_taxablock* tb)
     
     return 0;
 }
+
+int mpl_taxablock_make_dummylist(const int ntax, mpl_taxablock* tb)
+{
+    if (tb->max_taxa < 1) {
+        return -1;
+    }
+    
+    int i = 0;
+    int j = 0;
+    
+    for (i = 0; i < ntax; ++i) {
+        mpl_taxoninfo_dummy(&tb->taxa[i]);
+        mpl_taxoninfo_set_index(&tb->taxa[i], i);
+
+        // Just make sure you don't createa duplicate
+        for (j = 0; j < tb->num_taxa; ++j) {
+            while (!mpl_taxoninfo_match(&tb->taxa[i], &tb->taxa[j])) {
+                mpl_taxoninfo_dummy(&tb->taxa[i]);
+            }
+        }
+        
+        ++tb->num_taxa;
+        
+        assert(tb->num_taxa <= tb->max_taxa);
+    }
+    
+    return 0;
+}

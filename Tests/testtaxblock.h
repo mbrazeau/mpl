@@ -10,5 +10,6 @@
 #define testtaxblock_h
 
 int test_taxa_block_basic (int argc, const char * argv[]);
+int test_taxa_block_dummylist (void);
 
 #endif /* testtaxblock_h */

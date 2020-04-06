@@ -24,6 +24,7 @@ void mpl_str_delete(mpl_str** old);
 int mpl_str_append(const char c, mpl_str* s);
 int mpl_str_append_int(long i, mpl_str* s);
 int mpl_str_clear(mpl_str* s);
+int mpl_strcmp(mpl_str* s1, mpl_str* s2);
 char* mpl_str_c(mpl_str* s);
 uint32_t mpl_rng(void);
 int mpl_rng_set_seed(const uint32_t seed);

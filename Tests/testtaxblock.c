@@ -49,3 +49,25 @@ int test_taxa_block_basic (int argc, const char * argv[])
     
     return failn;
 }
+
+int test_taxa_block_dummylist (void)
+{
+    theader("Test creation of a dummy list of taxa");
+    
+    int failn = 0;
+    long ntax = 10;
+    
+    mpl_taxablock* tb = mpl_taxablock_new(ntax);
+    mpl_taxablock_make_dummylist(ntax, tb);
+    
+    int i = 0;
+    
+    printf("\n");
+    for (i = 0; i < tb->num_taxa; ++i) {
+        printf("%s\n", tb->taxa[i].name);
+    }
+    
+    mpl_taxablock_delete(&tb);
+    
+    return failn;
+}

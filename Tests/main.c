@@ -75,6 +75,10 @@ int main(int argc, const char * argv[]) {
     fails += test_newick_bulk_reads();
     fails += test_polytomous_postorder();
     
+    // Test mpl_taxablock.c
+    //    fails += test_taxa_block_basic(argc, argv);
+    test_taxa_block_dummylist();
+    
     // Test mpl_treelist.c
     fails += test_basic_treelist();
     fails += test_dynamic_treelist();
@@ -120,9 +124,6 @@ int main(int argc, const char * argv[]) {
 //    fails += test_parsimony_shortcut_multiple_tree();
 //    
 //    fails += test_find_char_by_char_mismatches();
-    
-    // Test mpl_taxablock.c
-    //    fails += test_taxa_block_basic(argc, argv);
     
     // Test mpl_bbreak.c
     //    fails += test_bbreak_reroot_all_for_subtree();

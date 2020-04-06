@@ -22,5 +22,6 @@ typedef struct _taxblock {
 mpl_taxablock*  mpl_taxablock_new(const long max_taxa);
 int             mpl_taxablock_delete(mpl_taxablock** tb);
 int             mpl_taxablock_add_taxon(const char* label, mpl_taxablock* tb);
+int             mpl_taxablock_make_dummylist(const int ntax, mpl_taxablock* tb);
 
 #endif /* mpl_taxblock_h */
