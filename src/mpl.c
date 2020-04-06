@@ -168,6 +168,13 @@ int mpl_attach_symbols(const char* symbols, mpl_handle* handl)
     return ret;
 }
 
+int mpl_set_parsim_t(const long index, const mpl_parsim_t ptype, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    
+    return mpl_matrix_set_parsim_t(index, ptype, handl->matrix);
+}
+
 int mpl_set_gap_handl(const mpl_gap_t gaphandl, mpl_handle* handl)
 {
     mpl_matrix_set_gap_handle(gaphandl, handl->matrix);
