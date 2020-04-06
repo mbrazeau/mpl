@@ -111,7 +111,7 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
     long i = 0;
     long j = 0;
     long nsaved = 0;
-    long nheld;
+//    long nheld;
     mpl_node* nexttip = NULL;
     
 //    float timein;
