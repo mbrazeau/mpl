@@ -155,7 +155,7 @@ void mpl_charbuf_restore_discr_states
 (const long start, const long end, mpl_charbuf* cb)
 {
     size_t i;
-    size_t j;
+//    size_t j;
     size_t lend = end;
     
     if (end == 0) {

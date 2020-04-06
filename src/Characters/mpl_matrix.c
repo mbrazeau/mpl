@@ -187,8 +187,8 @@ long mpl_matrix_get_nnodes(const mpl_matrix* m)
 MPL_RETURN  mpl_matrix_init
 (const long nrows, const long ncols, const long nnodes, mpl_matrix* m)
 {
-    long i = 0;
-    long j = 0;
+//    long i = 0;
+//    long j = 0;
     
     MPL_RETURN ret = MPL_SUCCESS;
     
@@ -282,7 +282,7 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
 
 MPL_RETURN mpl_matrix_set_parsim_t(const long ind, const mpl_parsim_t ptype, mpl_matrix* m)
 {
-    if (ind >= m->num_cols) {
+    if (ind >= m->num_cols || ind < 0) {
         return MPL_OUTOFBOUNDS;
     }
     
@@ -315,8 +315,6 @@ MPL_RETURN mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m)
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {
     RET_IF_NULL(m);
-    
-    int i = 0;
     
     // Everything after here needs to be re-done if character parameters are
     // changed, in particular the parsimony type. This could be moved to its
@@ -477,7 +475,6 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
 {
     int i = 0;
     int j = 0;
-    int k = 0;
     long numstd = 0;
     long numna = 0;
     int joint_pars_types = 0;
