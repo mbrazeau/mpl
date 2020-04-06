@@ -311,8 +311,6 @@ void mpl_parsim_analyse_informative
 {
     int i = 0;
     int j = 0;
-    bool state1x = false;
-    bool state2x = false;
     mpl_discr a = NOCHARS;
     
     ci->isvariable = false;
