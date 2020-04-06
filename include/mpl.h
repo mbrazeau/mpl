@@ -99,7 +99,17 @@ in the mpl_chardefs.h header file.
 */
 int         mpl_attach_symbols(const char* symbols, mpl_handle handl);
 
-//          Set character types
+
+/**
+ @brief Set the parsimony type for the dataset.
+ 
+ @discussion Set the parsimony type as either unordered (default) or ordered.
+ 
+ @param index 0-initial index of the character whose parsimony type is to be set.
+ @param ptype The parsimony type as defined in mpl_defs.h header file.
+ @return 0 if success; negative value for an error.
+ */
+int mpl_set_parsim_t(const long index, const mpl_parsim_t ptype, mpl_handle handl);
 
 /*!
 
