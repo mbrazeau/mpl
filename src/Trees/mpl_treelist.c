@@ -20,7 +20,10 @@ mpl_topol* mpl_treelist_pool_fetch(mpl_treelist* tl);
 // TODO: Treelist should be indifferent to num_taxa
 mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const long increase_rate)
 {
+    int i = 0;
     mpl_treelist* tl = NULL;
+    mpl_topol* p = NULL;
+    mpl_topol* q = NULL;
     
     if ((tl = (mpl_treelist*)safe_calloc(1, sizeof(mpl_treelist)))) {
         tl->num_taxa = num_taxa;
@@ -29,8 +32,29 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
         tl->increase_rate = increase_rate;
         tl->rep_num_trees = 0;
         
-        // TODO: Check return from this:
-        mpl_treelist_resize(num_taxa, max_trees, tl);
+        q = p = mpl_topol_new(num_taxa);
+        if (p == NULL) {
+            printf("Warning: insufficient memory for requested treelist\n");
+            return -1;
+        }
+
+        // Run the factory
+        while (i < tl->max_trees) {
+            p->next = mpl_topol_new(num_taxa);
+            if (p->next == NULL) {
+                printf("Warning: insufficient memory to complete requested treelist capacity\n");
+                break;
+            }
+            p = p->next;
+            ++i;
+        }
+        
+        // Push these to the front of the pool
+        if (tl->pool != NULL) {
+            p->next = tl->pool;
+        }
+        
+        tl->pool = q;
     }
     
     return tl;
@@ -53,12 +77,15 @@ void mpl_treelist_delete(mpl_treelist** tl)
     }
 }
 
+
+// TODO: Re-write this
 void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 {
     if (maxtrees < tl->num_trees) {
         tl->num_trees = tl->max_trees;
         tl->back = &tl->trees[tl->num_trees-1];
         
+        // TODO: Remove any dependencies on tl.head
         if (tl->head > tl->back) {
             tl->head = NULL;
         }
@@ -116,6 +143,7 @@ long mpl_treelist_get_numtrees(const mpl_treelist* tl)
     return tl->num_trees;
 }
 
+// TODO: This will need replacing
 void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
 {
     long i = 0;
@@ -177,13 +205,20 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
     }
 }
 
-mpl_topol* mpl_treelist_get_topol(long tnum, mpl_treelist* tl)
+mpl_topol* mpl_treelist_get_topol(const long tnum, mpl_treelist* tl)
 {
-    if (tnum < tl->num_trees) {
-        return &tl->trees[tnum];
-    }
+    int i = 0;
+    mpl_topol* p = NULL;
     
-    return NULL;
+    if (tnum < tl->num_trees) {
+        p = tl->trees;
+        while (i < tnum && p != NULL) {
+            p = p->next;
+            ++i;
+        }
+    }
+
+    return p;
 }
 
 // TODO: DELETE
@@ -192,7 +227,7 @@ void mpl_treelist_reset_head(mpl_treelist* tl)
 //    tl->head = tl->front;
 }
 
-// TODO: Delete
+// TODO: DELETE
 void mpl_treelist_reverse_head(mpl_treelist* tl)
 {
     if (tl->head != NULL) {
@@ -208,6 +243,7 @@ void mpl_treelist_reverse_head(mpl_treelist* tl)
     }
 }
 
+// TODO: DELETE
 mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
@@ -227,6 +263,7 @@ mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
     return ret;
 }
 
+// TODO: Re-write for Linked List
 mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 {
     long i = 0;
@@ -248,10 +285,10 @@ mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
+    tl->back = tl->pool;
+    tl->pool = tl->trees;
+    tl->trees = NULL;
     tl->num_trees       = 0;
-    tl->rep_num_trees   = 0;
-    tl->shortest        = 0.0;
-    tl->longest         = 0.0;
     tl->head            = NULL;
     tl->back            = NULL;
  //   tl->repstart        = NULL;
@@ -318,23 +355,31 @@ mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
 // TODO: This really needs a return to check.
 static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_treelist* tl)
 {
-
     int i = 0;
     mpl_topol* p = NULL;
     mpl_topol* q = NULL;
     
+    if (extension <= 0 || tl->increase_rate == 0) {
+        return -1;
+    }
+    
     // Start the factory
     q = p = mpl_topol_new(num_taxa);
     if (p == NULL) {
+        printf("Warning: insufficient memory for requested treelist extension\n");
         return -1;
     }
+    
+    ++tl->max_trees;
     
     // Run the factory
     while (i < extension) {
         p->next = mpl_topol_new(num_taxa);
         if (p->next == NULL) {
+            printf("Warning: insufficient memory to complete requested treelist extension\n");
             break;
         }
+        ++tl->max_trees;
         p = p->next;
         ++i;
     }
