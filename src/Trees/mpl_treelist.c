@@ -12,8 +12,9 @@
 #include "mpl_utils.h"
 #include "mpl_treelist.h"
 
-static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl);
+static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_treelist* tl);
 void mpl_treelist_extend(const long nelems, mpl_treelist* tl);
+mpl_topol* mpl_treelist_pool_fetch(mpl_treelist* tl);
 
 
 // TODO: Treelist should be indifferent to num_taxa
@@ -41,14 +42,14 @@ void mpl_treelist_delete(mpl_treelist** tl)
     tli = *tl;
     if (tli != NULL) {
         
-        long i = 0;
-
-        // TODO: This will all need to be replaced by linked list management
-        for (i = 0; i < (*tl)->max_trees; ++i) {
-            mpl_topol_cleanup(&(*tl)->trees[i]);
+        if (tli->trees != NULL) {
+            // TODO: Call new fxn mpl_topol_destroy_linked(tli->trees);
+            tli->trees = NULL;
         }
-        
-        safe_free((*tl)->trees);
+        if (tli->pool != NULL) {
+            // TODO: Call new fxn mpl_topol_destroy_linked(tli->pool);
+            tli->pool = NULL;
+        }
     }
 }
 
@@ -78,8 +79,6 @@ void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
-    long i = 0;
-    
     if (tl->num_trees >= tl->max_trees) {
         
         if (tl->increase_rate == 0) {
@@ -87,36 +86,33 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
         }
         
         // TODO: Check return of this
-        mpl_treelist_resize(tl->trees[0].num_taxa, tl->increase_rate, tl);
+        mpl_treelist_resize(t->num_taxa, tl->increase_rate, tl);
     }
 
-    mpl_topol* top = &tl->trees[tl->num_trees];
+    mpl_topol* top = mpl_treelist_pool_fetch(tl);
+    if (top == NULL) {
+        return NULL;
+    }
     
     mpl_tree_record_topol(top, t);
     
-    if (checkdupes == true) {
-        for (i = 0; i < tl->num_trees; ++i) {
-            if (!mpl_topol_compare(top, &tl->trees[i])) {
-                return &tl->trees[i];
-            }
-        }
+    // Put the tree to the back of the list
+    if (tl->back != NULL) {
+        tl->back->next = top;
+    } else {
+        assert(tl->trees == NULL);
+        tl->trees = top;
     }
     
     tl->back = top;
+    top->next = NULL; // Sanity precaution
     ++tl->num_trees;
-    ++tl->rep_num_trees;
-    
-    if (tl->num_trees == 1 || tl->head == NULL) {
-        tl->head    = top;
-        //tl->front   = &tl->trees[0];
-    }
-    
+
     assert(tl->num_trees <= tl->max_trees);
+    
     // TODO: Rebase the topology if the tree is unrooted
-    // TODO: This can only be done once you decide how to record topologies
-    // which may have less than the maximum number of tips...
-    
-    
+    // TODO: This can only be done once you decide how to record topologies which may have less than the maximum number of tips...
+
     return NULL;
 }
 
@@ -326,13 +322,57 @@ mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
  */
 
 // TODO: This really needs a return to check.
-static int mpl_treelist_resize(long num_taxa, long extension, mpl_treelist* tl)
+static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_treelist* tl)
 {
-    size_t i = 0;
-    size_t cleanupstart = 0;
+
+    int i = 0;
+    mpl_topol* p = NULL;
+    mpl_topol* q = NULL;
     
+    // Start the factory
+    q = p = mpl_topol_new(num_taxa);
+    if (p == NULL) {
+        return -1;
+    }
+    
+    // Run the factory
+    while (i < extension) {
+        p->next = mpl_topol_new(num_taxa);
+        if (p->next == NULL) {
+            break;
+        }
+        p = p->next;
+        ++i;
+    }
+    
+    // Push these to the front of the pool
+    if (tl->pool != NULL) {
+        p->next = tl->pool;
+    }
+    
+    tl->pool = q;
 
     return 0;
+}
+
+mpl_topol* mpl_treelist_pool_fetch(mpl_treelist* tl)
+{
+    mpl_topol* ret = NULL;
+    mpl_topol* p = NULL;
+    
+    if (tl->pool == NULL) {
+        if (tl->increase_rate == 0) {
+            return NULL;
+        }
+        mpl_treelist_resize(tl->num_taxa, tl->increase_rate, tl);
+    }
+    
+    ret = tl->pool;
+    p = ret->next;
+    ret->next = NULL; // Pops the topology
+    tl->pool = p;
+    
+    return ret;
 }
 
 //void mpl_treelist_push_back(mpl_topol* top, mpl_treelist* tl)
