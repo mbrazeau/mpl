@@ -39,6 +39,7 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
         }
 
         // Run the factory
+        i = 1;
         while (i < tl->max_trees) {
             p->next = mpl_topol_new(num_taxa);
             if (p->next == NULL) {
@@ -263,30 +264,33 @@ mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
     return ret;
 }
 
-// TODO: Re-write for Linked List
 mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 {
-    long i = 0;
     double shortest;
     
     mpl_topol* ret = NULL;
-    ret = &tl->trees[0];
+    mpl_topol* p = NULL;
+    ret = tl->trees;
     shortest = ret->score;
     
-    for (i = 1; i < tl->num_trees; ++i) {
-        if (tl->trees[i].score < shortest) {
-            ret = &tl->trees[i];
-            shortest = ret->score;
+    p = ret->next;
+    while (p != NULL) {
+        if (p->score < shortest) {
+            shortest = p->score;
+            ret = p;
         }
+        p = p->next;
     }
-    
+
     return ret;
 }
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
     tl->back = tl->pool;
-    tl->pool = tl->trees;
+    if (tl->trees != NULL) {
+        tl->pool = tl->trees;
+    }
     tl->trees = NULL;
     tl->num_trees       = 0;
     tl->head            = NULL;

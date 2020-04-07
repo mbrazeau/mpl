@@ -43,6 +43,7 @@ typedef struct _bbreak {
     mpl_node**      tgtsshort;
     unsigned long   num_rearrangs; // TODO: Need to support 32-bit int range because this will easily overflow on 32-bit machine
     mpl_treelist*   treelist;
+    mpl_topol*      head;
     mpl_stepwise    stepwise;
     
     double          keepscore; // Allowance for longer trees

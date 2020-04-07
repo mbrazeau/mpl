@@ -198,17 +198,17 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 mpl_tree_rebase(0, t);
                 
                 //            // Initiate a new replicate
-                current = mpl_treelist_newrep(true, t, bbk->treelist);
+                current = mpl_treelist_newrep(true, t, bbk->treelist); // <----- Replace with own bbreak function
                 
                 // If the starting tree is already in the list, skip rep.
                 if (current == NULL) {
-                    mpl_treelist_clear_rep(bbk->treelist);
+                    mpl_treelist_clear_rep(bbk->treelist); // <----------------- Replace with own bbreak function
                     break;
                 }
             }
             else {
                 current = mpl_treelist_get_topol(0, bbk->treelist);
-                bbk->treelist->head = &bbk->treelist->trees[0];
+                bbk->treelist->head = &bbk->treelist->trees[0]; // <------------ Direct access to tree list
             }
 
             if (i == 0) {
@@ -248,7 +248,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                     //                mpl_tree_rebase(0, t);
                     mpl_branch_swap(t, bbk);
     
-                    current = mpl_treelist_get_next(bbk->treelist);
+                    current = mpl_treelist_get_next(bbk->treelist); // <-------- Replace with own bbreak function
     
                     if (search_interrupt == 1) {
                         break;
@@ -448,6 +448,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     
     mpl_tree_traverse(t); // Traverse the tree and get all nodes in the tree
     clips = bbk->clips;
+    
+    // TODO: Might be good to use the tips first; then the postorder list of internal nodes
+    // TODO: Doing this could allow you to minimize times the buffers are copied back
     for (i = 1, clipmax = 0; i < t->size; ++i) {
         if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
             clips[clipmax] = &t->nodes[i];
@@ -500,12 +503,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         if ((*src)->tip == 0) {
             srclen = mpl_fullpass_subtree(*src, t);
         }
-        
-//        if ((srclen + tgtlen) > bbk->bestinrep && bbk->bestinrep != 0) {
-//            mpl_node_bin_connect(left, right, clips[i]);
-//            clips[i]->lock = false;
-//            continue;
-//        }
         
         // Assign an absolute minimum score in each parsimony partition
         // Restore this if using the break in the shortcut algorithm
@@ -634,7 +631,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             bbk->bestinrep = t->score;
                             mpl_treelist_clear_rep(bbk->treelist);
                             clips[i]->clipmark = false;
-                            ret = mpl_treelist_add_tree(bbk->doislandcheck,
+                            // doislandcheck is a flag to check for duplicates
+                            ret = mpl_treelist_add_tree(bbk->doislandcheck,//<-- Add own island check function don't leave this to the push fxn
                                                         t,
                                                         bbk->treelist);
                             clips[i]->lock = false;
