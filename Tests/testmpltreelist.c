@@ -168,14 +168,12 @@ int test_dynamic_treelist (void)
     mpl_topol* checktop = mpl_topol_new(ntax);
 
     for (i = 0; i < numtrees; ++i) {
-        
+        top = mpl_treelist_get_topol(i, tl);
         mpl_topol_reset(ntax, checktop);
         mpl_newick_read(newicks[i], checktop, &rdr);
         mpl_tree_read_topol(t, checktop);
         mpl_tree_record_topol(checktop, t);
-        
-        top = mpl_treelist_get_next(tl);//mpl_treelist_get_topol(i, tl);
-        
+
         if (mpl_topol_compare(top, checktop)) {
             ++failn;
             pfail;
