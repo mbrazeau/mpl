@@ -134,11 +134,15 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
     mpl_treelist_clear_all(sw->held);
     mpl_treelist_clear_all(sw->queued);
     
+    mpl_topol* p = sw->queued->pool;
+    mpl_topol* q = sw->held->pool;
     for (i = 0; i < sw->queued->max_trees; ++i) {
-        for (j = 0; j < sw->queued->trees[i].num_nodes; ++j) {
-            sw->queued->trees[i].edges[j] = -1;
-            sw->held->trees[i].edges[j] = -1;
+        for (j = 0; j < p->num_nodes; ++j) { // <------------- Uses direct access to buffer
+            p->edges[j] = -1; // <---------------------------- Uses direct access to buffer
+            q->edges[j] = -1; // <------------------------------ Uses direct access to buffer
         }
+        p = p->next;
+        q = q->next;
     }
 //    
 //    printf("New addition sequence:\n");
@@ -341,12 +345,13 @@ static void mpl_try_all_sites
             
             if (t->score > sw->shortest) {
                 // TODO: This can be made more efficient with the treelist.
+                mpl_topol* p = sw->held->trees;
                 double longest = 0.0;
                 long it = 0;
-                longest = sw->held->trees[0].score;
+                longest = p->score; // <------------------------ Uses direct access to buffer
                 for (it = 0; it < sw->held->num_trees; ++it) {
-                    if (sw->held->trees[it].score > longest) {
-                        longest = sw->held->trees[it].score;
+                    if (p->score > longest) { // <------------- Uses direct access to buffer
+                        longest = p->score;
                     }
                 }
                 sw->longest = longest;
