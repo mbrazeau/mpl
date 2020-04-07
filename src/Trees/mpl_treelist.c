@@ -68,13 +68,7 @@ void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
         mpl_treelist_resize(tl->num_taxa, maxtrees - tl->max_trees, tl);
     }
     
-    printf("Resize tree list to %lu trees for a total of: ", tl->max_trees);
-    size_t tlbytes = 0;
-    tlbytes += sizeof(mpl_topol);
-    tlbytes += tl->trees[0].num_nodes * sizeof(long);
-    tlbytes *= tl->max_trees;
-    printf("%lu bytypes\n", tlbytes);
-    
+//    printf("Resize tree list to %lu trees for a total of: ", tl->max_trees);
 }
 
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
