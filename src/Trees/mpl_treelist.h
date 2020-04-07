@@ -26,7 +26,7 @@ typedef struct _treelist {
     long        rep_index;
     mpl_topol*  trees;
     mpl_topol*  back;
-    mpl_topol*  head;
+    mpl_topol*  head; // TODO: Get rid of this?
     mpl_topol*  pool;
     
 } mpl_treelist;
@@ -37,7 +37,7 @@ void            mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 mpl_topol*      mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl);
 long            mpl_treelist_get_numtrees(const mpl_treelist* tl);
 void            mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl);
-mpl_topol*      mpl_treelist_get_topol(long tnum, mpl_treelist* tl);
+mpl_topol*      mpl_treelist_get_topol(const long tnum, mpl_treelist* tl);
 void            mpl_treelist_reset_head(mpl_treelist* tl);
 void mpl_treelist_restart_rep(mpl_treelist* tl);
 void            mpl_treelist_reverse_head(mpl_treelist* tl);
