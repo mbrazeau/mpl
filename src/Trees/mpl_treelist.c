@@ -304,6 +304,18 @@ void mpl_treelist_restart_rep(mpl_treelist* tl)
     tl->head = &tl->trees[tl->num_trees-1];
 }
 
+void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
+{
+    assert(head != NULL);
+    
+    if (head->next != NULL) {
+        tl->back->next = tl->pool; // Push the last trees into the pool
+        tl->pool = head->next;
+        head->next = NULL;
+        tl->num_trees = head->index + 1;
+    }
+}
+
 void mpl_treelist_clear_rep(mpl_treelist* tl)
 {
     tl->num_trees = tl->num_trees - tl->rep_num_trees;
