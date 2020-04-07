@@ -25,10 +25,8 @@ typedef struct _treelist {
     long        rep_num_trees;
     long        rep_index;
     mpl_topol*  trees;
-    mpl_topol*  front;
     mpl_topol*  back;
     mpl_topol*  head;
-    mpl_topol*  repstart;
     mpl_topol*  pool;
     
 } mpl_treelist;
