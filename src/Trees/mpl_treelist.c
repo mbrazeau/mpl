@@ -80,20 +80,18 @@ void mpl_treelist_delete(mpl_treelist** tl)
 
 
 // TODO: Re-write this
+// TODO: Test this
 void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 {
     if (maxtrees < tl->num_trees) {
-        tl->num_trees = tl->max_trees;
-        tl->back = &tl->trees[tl->num_trees-1];
-        
-        // TODO: Remove any dependencies on tl.head
-        if (tl->head > tl->back) {
-            tl->head = NULL;
-        }
+        // TODO: Decide what to do here when maxtrees is set to something
+        printf("WARNING: Reducing buffer size after allocation not implemented.\n");
+        // less than what's currently stored/allowed. Possibly ignore this.
     }
     
     if (maxtrees > tl->max_trees) {
         mpl_treelist_resize(tl->num_taxa, maxtrees - tl->max_trees, tl);
+        assert(tl->max_trees == maxtrees);
     }
     
 //    printf("Resize tree list to %lu trees for a total of: ", tl->max_trees);
@@ -101,8 +99,12 @@ void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
+    int idx = 0;
+    
+    // First check if there's enough room
     if (tl->num_trees >= tl->max_trees) {
-        
+       
+        // If not, check if an increase in the buffer size is allowed.
         if (tl->increase_rate == 0) {
             return NULL;
         }
@@ -120,6 +122,7 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
     
     // Put the tree to the back of the list
     if (tl->back != NULL) {
+        idx = tl->back->index+1;
         tl->back->next = top;
     } else {
         assert(tl->trees == NULL);
@@ -127,6 +130,7 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
     }
     
     tl->back = top;
+    tl->back->index = idx;
     top->next = NULL; // Sanity precaution
     ++tl->num_trees;
 
@@ -147,26 +151,28 @@ long mpl_treelist_get_numtrees(const mpl_treelist* tl)
 // TODO: This will need replacing
 void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
 {
-    long i = 0;
-    long lcount = 0;
-    double biglen = 0.0;
-    double shortlen = 0.0;
-    long longest = 0;
+    long        i = 0;
+    long        lcount = 0;
+    double      biglen = 0.0;
+    double      shortlen = 0.0;
+    mpl_topol*  longest = NULL;
+    mpl_topol*  p = NULL;
+    
     
     if (tl->num_trees == tl->max_trees) {
-        shortlen = tl->trees[0].score;
-        for (i = 0; i < tl->num_trees; ++i) {
-            if (tl->trees[i].score > biglen) {
-                biglen = tl->trees[i].score;
-                longest = i;
+        shortlen = tl->trees->score;
+        p = tl->trees->next;
+        while (p != NULL) {
+            if (p->score > biglen) {
+                biglen = p->score;
+                longest = p;
                 lcount = 1;
-            }
-            else if (tl->trees[i].score == biglen) {
+            } else if (p->score == biglen) { // <<<============================= USE ALMOST EQUAL
                 ++lcount;
+            } else if (p->score < shortlen) {
+                shortlen = p->score;
             }
-            else if (tl->trees[i].score < shortlen) {
-                shortlen = tl->trees[i].score;
-            }
+            p = p->next;
         }
     }
     
@@ -174,34 +180,11 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
         return;
     }
     
-//    if (tl->num_trees == tl->max_trees) {
-//        if (biglen == shortlen) {
-//            // Randomly break ties.
-//            assert(lcount > -1);
-//            unsigned choice = mpl_rng_between(0, (unsigned)lcount+1);
-//            if (choice == lcount) {
-//                // The choice is the new tree, so just exit
-//                return;
-//            }
-//            long j = 0;
-//            for (i = 0; i < tl->num_trees; ++i) {
-//                if (tl->trees[i].score == biglen) {
-//                    if (j == choice) {
-//                        longest = choice;
-//                        break;
-//                    }
-//                    ++j;
-//                }
-//            }
-//        }
-//    }
-    
-    mpl_topol* top = &tl->trees[longest];
+    mpl_topol* top = longest;
     mpl_tree_record_topol(top, t);
     
     if (tl->num_trees == 0) {
-        tl->back = &tl->trees[0];
-        tl->head = tl->back;
+        tl->back = top;
         ++tl->num_trees;
     }
 }
@@ -293,15 +276,8 @@ void mpl_treelist_clear_all(mpl_treelist* tl)
     }
     tl->trees = NULL;
     tl->num_trees       = 0;
-    tl->head            = NULL;
     tl->back            = NULL;
- //   tl->repstart        = NULL;
-    
-}
 
-void mpl_treelist_restart_rep(mpl_treelist* tl)
-{
-    tl->head = &tl->trees[tl->num_trees-1];
 }
 
 void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
@@ -309,10 +285,11 @@ void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
     assert(head != NULL);
     
     if (head->next != NULL) {
-        tl->back->next = tl->pool; // Push the last trees into the pool
-        tl->pool = head->next;
-        head->next = NULL;
-        tl->num_trees = head->index + 1;
+        tl->back->next = tl->pool; // Connect back of list to front of pool.
+        tl->pool = head->next; // Point pool to front of list segment being removed.
+        head->next = NULL; // Cut segment off back of head.
+        tl->back = head; // Reset the back of the list to the head.
+        tl->num_trees = head->index + 1; // Reset the number of trees in the list.
     }
 }
 
@@ -327,7 +304,7 @@ void mpl_treelist_clear_rep(mpl_treelist* tl)
     else {
         tl->back = NULL;
     }
-    tl->head = NULL;
+//    tl->head = NULL;
 //    tl->back = tl->head;
 }
 
@@ -372,6 +349,7 @@ mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
 static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_treelist* tl)
 {
     int i = 0;
+    int ret = 0;
     mpl_topol* p = NULL;
     mpl_topol* q = NULL;
     
@@ -383,7 +361,7 @@ static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_tr
     q = p = mpl_topol_new(num_taxa);
     if (p == NULL) {
         printf("Warning: insufficient memory for requested treelist extension\n");
-        return -1;
+        return -2;
     }
     
     ++tl->max_trees;
@@ -393,6 +371,7 @@ static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_tr
         p->next = mpl_topol_new(num_taxa);
         if (p->next == NULL) {
             printf("Warning: insufficient memory to complete requested treelist extension\n");
+            ret = -3;
             break;
         }
         ++tl->max_trees;
@@ -407,7 +386,7 @@ static int mpl_treelist_resize(const long num_taxa, const long extension, mpl_tr
     
     tl->pool = q;
 
-    return 0;
+    return ret;
 }
 
 mpl_topol* mpl_treelist_pool_fetch(mpl_treelist* tl)
