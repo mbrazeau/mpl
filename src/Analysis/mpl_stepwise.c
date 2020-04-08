@@ -329,8 +329,7 @@ static void mpl_try_all_sites
         if (sw->held->num_trees == 0) {
             sw->longest = sw->shortest = t->score;
             mpl_treelist_add_tree(false, t, sw->held);
-        }
-        else if (sw->held->num_trees < sw->held->max_trees) {
+        } else if (sw->held->num_trees < sw->held->max_trees) {
             mpl_treelist_add_tree(false, t, sw->held);
             
             if (t->score < sw->shortest) {
@@ -339,12 +338,12 @@ static void mpl_try_all_sites
             else if (t->score > sw->longest) {
                 sw->longest = t->score;
             }
-        }
-        else if (t->score <= sw->longest) {
-            mpl_treelist_overwrite_longest(t, sw->held);
-            
+        } else if (t->score <= sw->longest) {
+
             if (t->score > sw->shortest) {
-                // TODO: This can be made more efficient with the treelist.
+                if (sw->held->num_trees > 1) {
+                    mpl_treelist_overwrite_longest(t, sw->held);
+                }
                 mpl_topol* p = sw->held->trees;
                 double longest = 0.0;
                 long it = 0;
@@ -355,8 +354,8 @@ static void mpl_try_all_sites
                     }
                 }
                 sw->longest = longest;
-            }
-            else if (t->score < sw->shortest) {
+            } else if (t->score <= sw->shortest) {
+                mpl_treelist_overwrite_longest(t, sw->held);
                 sw->shortest = t->score;
             }
         }
