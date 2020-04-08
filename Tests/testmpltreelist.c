@@ -300,7 +300,7 @@ int test_buffer_clearing (void)
     
     mpl_treelist_clear_all(tl);
     
-    if (tl->head != NULL) {
+    if (tl->trees != NULL) {
         ++failn;
         pfail;
     }
