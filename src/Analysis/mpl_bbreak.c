@@ -224,20 +224,20 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             bbk->head = current;
 
             if (i == 0) {
-                bbk->shortest = current->score;
+                bbk->shortest = bbk->head->score;
             }
             
             if (bbk->nratchets > 0) {
                 mpl_do_ratchet_search(t, bbk);
             } else {
                 if (bbk->shortest == 0) {
-                    bbk->shortest = current->score;
+                    bbk->shortest = bbk->head->score;
                 }
     
-                bbk->bestinrep = current->score;
+                bbk->bestinrep = bbk->head->score;
                 bbk->hitisland = false;
     
-                mpl_swap_all(t, bbk); // Do the branch-breaking
+                mpl_swap_all(t, bbk); // Do the branch-swapping on this tree
             }
 
             // If no better equal or tree was found in this replicate,
@@ -338,7 +338,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 
 //        assert(0);
         
-        mpl_treelist_newrep(false, t, bbk->treelist);
+        mpl_treelist_newrep(false, t, bbk->treelist); // REPLACE
         
         // Nixon 3:
         mpl_do_ratchet_weights();
@@ -361,16 +361,11 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->savecount = 1;
         current = bbk->treelist->back;
         mpl_tree_read_topol(t, current);
-        mpl_treelist_reverse_head(bbk->treelist);
+        mpl_treelist_reverse_head(bbk->treelist); // REPLACE
         current->score = oldbest;//mpl_length_only_parsimony(-1.0, t);
         
         // TODO: The routine needs to be smart enough here to reset the buffer
         // etc. if this modified current tree is in fact best overall.
-//        if (current->score < bbk->shortest) {
-//            mpl_treelist_clear_all(bbk->treelist);
-//            mpl_treelist_add_tree(false, t, bbk->treelist);
-//            bbk->shortest = bbk->bestinrep = oldbest = current->score;
-//        }
 
         assert(current->index == index);
 
@@ -384,13 +379,12 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         mpl_tree_read_topol(t, current);
         
         if (bbk->bestinrep > bbk->shortest || bbk->hitisland == true) {
-            mpl_treelist_clear_rep(bbk->treelist);
+            mpl_treelist_clear_rep(bbk->treelist); /// REPLACE
         }
 
         // Nixon 6
     }
 
-//    printf("\n\tBest tree found: %.0f steps.\n", bbk->shortest);
     bbk->savelim = oldsavelim;
 }
 
