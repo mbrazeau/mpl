@@ -45,6 +45,7 @@ mpl_topol*      mpl_treelist_new_rep(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_new_subrep(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_get_shortest(mpl_treelist* tl);
 //void            mpl_treelist_clear_rep(mpl_treelist* tl);
+void            mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl);
 void            mpl_treelist_clear_all(mpl_treelist* tl);
 mpl_topol*      mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl);
 void            mpl_treelist_clear_rep(mpl_treelist* tl);

@@ -100,7 +100,9 @@ void mpl_treelist_set_maxtrees(const long maxtrees, mpl_treelist* tl)
 mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelist* tl)
 {
     int idx = 0;
+    mpl_topol* p = NULL;
     
+
     // First check if there's enough room
     if (tl->num_trees >= tl->max_trees) {
        
@@ -112,7 +114,7 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
         // TODO: Check return of this
         mpl_treelist_resize(t->num_taxa, tl->increase_rate, tl);
     }
-
+    
     mpl_topol* top = mpl_treelist_pool_fetch(tl);
     if (top == NULL) {
         return NULL;
@@ -120,6 +122,20 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
     
     mpl_tree_record_topol(top, t);
     
+    if (checkdupes == true) {
+        p = tl->trees;
+        while (p != NULL) {
+            if (mpl_topol_compare(top, p) == 0) {
+                // Put the topology back on the pool.
+                if (tl->pool != NULL) {
+                    top->next = tl->pool;
+                }
+                tl->pool = top;
+                return p;
+            }
+            p = p->next;
+        }
+    }
     // Put the tree to the back of the list
     if (tl->back != NULL) {
         idx = tl->back->index+1;
@@ -138,7 +154,6 @@ mpl_topol* mpl_treelist_add_tree(const bool checkdupes, mpl_tree* t, mpl_treelis
     
     // TODO: Rebase the topology if the tree is unrooted
     // TODO: This can only be done once you decide how to record topologies which may have less than the maximum number of tips...
-
     return NULL;
 }
 
@@ -253,7 +268,11 @@ mpl_topol* mpl_treelist_get_shortest(mpl_treelist* tl)
 
 void mpl_treelist_clear_all(mpl_treelist* tl)
 {
-    tl->back = tl->pool;
+    if (tl->back != NULL) {
+        tl->back->next = tl->pool;
+    } else {
+        assert(tl->trees == NULL);
+    }
     if (tl->trees != NULL) {
         tl->pool = tl->trees;
     }
@@ -268,11 +287,13 @@ void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
     assert(head != NULL);
     
     if (head->next != NULL) {
+        assert(tl->back->next == NULL);
         tl->back->next = tl->pool; // Connect back of list to front of pool.
         tl->pool = head->next; // Point pool to front of list segment being removed.
         head->next = NULL; // Cut segment off back of head.
         tl->back = head; // Reset the back of the list to the head.
         tl->num_trees = head->index + 1; // Reset the number of trees in the list.
+        assert(tl->pool != NULL);
     }
 }
 
@@ -387,9 +408,9 @@ mpl_topol* mpl_treelist_pool_fetch(mpl_treelist* tl)
     
     ret = tl->pool;
     p = ret->next;
-    ret->next = NULL; // Pops the topology
     tl->pool = p;
-    
+    ret->next = NULL; // Pops the topology
+
     return ret;
 }
 

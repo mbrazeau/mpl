@@ -195,16 +195,7 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
         ++sw->next;
         // Swap results and queue bufers
         mpl_switch_tree_buffers(sw);
-//
-//        timeout = (float)clock()/CLOCKS_PER_SEC;
-//
-//        timeused  = timeout - timein;
-//        printf("Round %li of stepwise addition completed\n", i+1);
-//        printf("Time used: %f seconds\n", timeused);
-        
     }
-
-//    mpl_tempreset_natype();
 }
 
 
@@ -305,8 +296,9 @@ static void mpl_try_all_sites
     long i = 0;
     long nsites = 0;
     double sttlen = 0.0;
-//    double besttry = 0.0;
-//    double worsttry = 0.0;
+
+    sw->shortest = MPL_MAXSCORE;
+    sw->longest = MPL_MAXSCORE;
     
     // Store all the sites locally, as traversals on the tree during
     // checking may modify the list.
@@ -314,18 +306,14 @@ static void mpl_try_all_sites
     nsites = sw->nsites;
     
     sttlen = mpl_fullpass_parsimony(t);
-//    mpl_src_root_parsimony(n);
-//    mpl_scoretree_copy_original_characters();
-    
+
     for (i = 0; i < nsites; ++i) {
 
         // Test insertion at
         mpl_node_bin_connect(sw->sites[i], NULL, n);
-        
-//        t->score = mpl_fullpass_parsimony(t);
-//        t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
         t->score = sttlen + mpl_score_try_parsimony(-1.0, -1.0, n, sw->sites[i], t);
         
+        // Check the result and save as appropriate
         if (sw->held->num_trees == 0) {
             sw->longest = sw->shortest = t->score;
             mpl_treelist_add_tree(false, t, sw->held);
@@ -339,21 +327,20 @@ static void mpl_try_all_sites
                 sw->longest = t->score;
             }
         } else if (t->score <= sw->longest) {
-
             if (t->score > sw->shortest) {
                 if (sw->held->num_trees > 1) {
                     mpl_treelist_overwrite_longest(t, sw->held);
-                }
-                mpl_topol* p = sw->held->trees;
-                double longest = 0.0;
-                long it = 0;
-                longest = p->score; // <------------------------ Uses direct access to buffer
-                for (it = 0; it < sw->held->num_trees; ++it) {
-                    if (p->score > longest) { // <------------- Uses direct access to buffer
-                        longest = p->score;
+                    mpl_topol* p = sw->held->trees;
+                    double longest = 0.0;
+                    long it = 0;
+                    longest = p->score;
+                    for (it = 0; it < sw->held->num_trees; ++it) {
+                        if (p->score > longest) {
+                            longest = p->score;
+                        }
                     }
+                    sw->longest = longest;
                 }
-                sw->longest = longest;
             } else if (t->score <= sw->shortest) {
                 mpl_treelist_overwrite_longest(t, sw->held);
                 sw->shortest = t->score;

@@ -241,7 +241,7 @@ int test_single_rep_hsearch (void)
     char* rawmatrix =
 
 // Vinther
-    "1010?10?0-0000000000000000000000000000-00-00-00000-0000-0\
+   "1010?10?0-0000000000000000000000000000-00-00-00000-0000-0\
     111111110-111?010111111111111?10000000-00-00-00000-0000-0\
     111111110-1111010111111011101010000000-00-00-00000-0000-0\
     111111110-1110010111100000001000000000-00-00-00000-0000-0\
@@ -271,7 +271,7 @@ int test_single_rep_hsearch (void)
     mpl_matrix_set_ncols(nchar, m);
     mpl_matrix_set_nnodes(2 * ntax, m);
     mpl_matrix_attach_rawdata(rawmatrix, m);
-//    mpl_matrix_set_gap_handle(GAP_MISSING, m);
+    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);
     mpl_init_parsimony(m);
     
@@ -290,9 +290,11 @@ int test_single_rep_hsearch (void)
     // Now the bbkreak struct can be initialised
     mpl_bbreak_init(&s, &bbk);
     bbk.bbktype = MPL_TBR_T;
-    bbk.numreps = 10;
+    bbk.numreps = 1;
     bbk.nratchets = 0;
+    bbk.savelim = 0;
 //    bbk.bbktype = MPL_SPR_T;
+    mpl_rng_set_seed(4);
     mpl_stepwise_init(MPL_AST_RANDOM, bbk.numtaxa, 1, &bbk.stepwise);
     mpl_do_bbreak(&bbk);
     
