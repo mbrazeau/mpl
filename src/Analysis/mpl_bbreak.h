@@ -44,6 +44,7 @@ typedef struct _bbreak {
     unsigned long   num_rearrangs; // TODO: Need to support 32-bit int range because this will easily overflow on 32-bit machine. Probably just use a float or double
     mpl_treelist*   treelist;
     mpl_topol*      head;
+    mpl_topol*      repstart;
     mpl_stepwise    stepwise;
     
     double          keepscore; // Allowance for longer trees
