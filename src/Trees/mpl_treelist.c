@@ -148,7 +148,7 @@ long mpl_treelist_get_numtrees(const mpl_treelist* tl)
     return tl->num_trees;
 }
 
-// TODO: This will need replacing
+// TODO: This function needs serious checking
 void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
 {
     long        i = 0;
@@ -161,6 +161,8 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
     
     if (tl->num_trees == tl->max_trees) {
         shortlen = tl->trees->score;
+        biglen = tl->trees->score;
+        longest = tl->trees;
         p = tl->trees->next;
         while (p != NULL) {
             if (p->score > biglen) {
@@ -184,6 +186,8 @@ void mpl_treelist_overwrite_longest(mpl_tree* t, mpl_treelist* tl)
     mpl_tree_record_topol(top, t);
     
     if (tl->num_trees == 0) {
+        assert(tl->trees == NULL);
+        tl->trees = top;
         tl->back = top;
         ++tl->num_trees;
     }
@@ -214,36 +218,15 @@ void mpl_treelist_reset_head(mpl_treelist* tl)
 // TODO: DELETE
 void mpl_treelist_reverse_head(mpl_treelist* tl)
 {
-    if (tl->head != NULL) {
-/*        if (tl->head == tl->front) {
-            tl->head = NULL;
-        }
-        else {
-            --tl->head;
-        }*/
-    }
-    else {
-        tl->head = tl->back;
-    }
+    
 }
 
-// TODO: DELETE
+// TODO: CHANGE IMPLEMENTATION & INTERFACE
 mpl_topol* mpl_treelist_get_next(mpl_treelist* tl)
 {
     mpl_topol* ret = NULL;
     
-    if (tl->head != NULL) {
-        
-        ret = tl->head;
-        
-        if (tl->head == tl->back) {
-            tl->head = NULL;
-        }
-        else {
-            ++tl->head;
-        }
-    }
-    
+
     return ret;
 }
 
@@ -308,15 +291,16 @@ void mpl_treelist_clear_rep(mpl_treelist* tl)
 //    tl->back = tl->head;
 }
 
+// TODO: DELETE
 mpl_topol* mpl_treelist_new_subrep(mpl_treelist* tl)
 {
-    // TODO: DELTE
 //    tl->head = tl->repstart;
     tl->rep_num_trees = 0;
     
-    return tl->head;
+    return NULL; //tl->head;
 }
 
+// TODO: DELETE AND REPLACE WITH FXN IN SEARCH OR BBREAK
 mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
 {
     // TODO: DELETE
@@ -328,9 +312,9 @@ mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
     
     if (ret == NULL || checknew == false) {
 //        tl->repstart = tl->head;
-        tl->head = tl->back;
-        tl->rep_index = tl->back->index;
-        ret = tl->head;
+//        tl->head = tl->back;
+//        tl->rep_index = tl->back->index;
+//        ret = tl->head;
     }
     else {
         ret = NULL;
