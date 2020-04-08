@@ -284,7 +284,12 @@ void mpl_treelist_clear_all(mpl_treelist* tl)
 
 void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
 {
-    assert(head != NULL);
+    //assert(head != NULL);
+    
+    if (head == NULL) {
+        mpl_treelist_clear_all(tl);
+        return;
+    }
     
     if (head->next != NULL) {
         tl->back->next = tl->pool; // Connect back of list to front of pool.

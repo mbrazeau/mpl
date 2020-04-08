@@ -27,10 +27,12 @@ typedef struct _bbreak {
     long            nratchets; // Number of ratchet iterations
     long            savelim;
     long            savecount;
+    long            rep_ntrees;
     int             nsubs;
     int             maxsubs;
     int             maxhits;
     int             nhits;
+    bool            foundbetter;
     bool            hitisland;
     bool            doislandcheck;
     mpl_bbreak_t    bbktype;
