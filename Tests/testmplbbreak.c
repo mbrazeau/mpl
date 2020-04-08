@@ -312,7 +312,7 @@ int test_single_rep_hsearch (void)
         free(nwkresult);
     }
     
-    if (bbk.shortest != 79.0) {
+    if (bbk.shortest != 78.0) {
         ++failn;
         pfail;
     }
@@ -320,7 +320,7 @@ int test_single_rep_hsearch (void)
         ppass;
     }
     
-    if (bbk.treelist->num_trees != 52) {
+    if (bbk.treelist->num_trees != 66) {
         ++failn;
         pfail;
     }

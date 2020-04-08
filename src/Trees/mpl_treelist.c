@@ -287,13 +287,11 @@ void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
     assert(head != NULL);
     
     if (head->next != NULL) {
-        assert(tl->back->next == NULL);
         tl->back->next = tl->pool; // Connect back of list to front of pool.
         tl->pool = head->next; // Point pool to front of list segment being removed.
         head->next = NULL; // Cut segment off back of head.
         tl->back = head; // Reset the back of the list to the head.
         tl->num_trees = head->index + 1; // Reset the number of trees in the list.
-        assert(tl->pool != NULL);
     }
 }
 

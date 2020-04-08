@@ -178,8 +178,6 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
     
     for (i = 0; i < bbk->numreps; ++i) {
         
-        bbk->hitisland = false;
-        
         printf("Replicate: %li\n", i+1);
         // If the buffer is empty get one or more trees by stepwise addition
         // Otheriwse, starttrees is the bbk buffer
@@ -193,6 +191,13 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                      // could be programmed in the future.
         
         for (j = 0; j < nstarts; ++j) {
+            
+            bbk->hitisland = false;
+            
+            if (i > 0) {
+                bbk->repstart = bbk->treelist->back;
+            }
+            
             if (bbk->stepwise.astype != MPL_AST_INMEM) {
                 // Add the first tree from the rep in the buffer
                 top = mpl_treelist_get_shortest(bbk->stepwise.queued);
@@ -203,8 +208,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
               //current = mpl_treelist_newrep(true, t, bbk->treelist); // <----- Replace with own bbreak function
                 
                 // If the starting tree is already in the list, skip rep.
-                if (mpl_treelist_add_tree(true, t, bbk->treelist)!= NULL) {
-                    mpl_treelist_clear_rep(bbk->treelist); // <----------------- Replace with own bbreak function
+                if (mpl_treelist_add_tree(true, t, bbk->treelist) != NULL) {
+                    mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
                     break;
                 }
                 
@@ -217,8 +222,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             }
 
             bbk->head = current;
-            bbk->repstart = bbk->treelist->back;
-            
+
             if (i == 0) {
                 bbk->shortest = current->score;
             }
@@ -244,16 +248,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                            bbk->treelist->num_trees);
                     
                     fflush(stdout);
-//                    timeout = (float)clock()/CLOCKS_PER_SEC;
-//
-//                    if (timeout - tkeep > 10) {
-//                        mpl_bbreak_print_status(i, bbk);
-//                        tkeep = timeout;
-//                    }
-    
+
                     mpl_tree_read_topol(t, bbk->head);
-                    //                t->score = mpl_fullpass_parsimony(t);
-                    //                mpl_tree_rebase(0, t);
                     mpl_branch_swap(t, bbk);
     
                     if (bbk->head == NULL) {
@@ -265,23 +261,21 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                     if (search_interrupt == 1) {
                         break;
                     }
-                    
-//                    mpl_bbreak_print_status(i + 1, bbk);
-                    
+
                 } while (bbk->head != NULL);
-                
             }
-//
+            
+            // If no better equal or tree was found in this replicate,
+            // wipe the rep
+            if ((bbk->bestinrep > bbk->shortest)) {
+                mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
+                //mpl_treelist_clear_rep(bbk->treelist);
+            }
+
             printf("\n\tReplicate completed.\n");
             printf("\tShortest tree found: %.0f steps\n", bbk->bestinrep);
             printf("\tNumber of trees saved: %li\n\n",
-                   bbk->treelist->num_trees);
-
-            // If no better equal or tree was found in this replicate,
-            // wipe the rep
-            if (bbk->bestinrep > bbk->shortest) {
-                mpl_treelist_clear_rep(bbk->treelist);
-            }
+                   bbk->treelist->num_trees); // Use arithmetic on indices
 
             if (search_interrupt == 1) {
                 break;
@@ -645,6 +639,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             mpl_topol* ret = 0;
                             bbk->bestinrep = t->score;
                             mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
+                            bbk->head = bbk->repstart;
                             //mpl_treelist_clear_rep(bbk->treelist);
                             clips[i]->clipmark = false;
                             // doislandcheck is a flag to check for duplicates
@@ -652,8 +647,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                                         t,
                                                         bbk->treelist);
                             clips[i]->lock = false;
-                            
-                            assert(bbk->treelist->pool != NULL);
                             if (ret != NULL
                                 && bbk->doislandcheck == true) {
                                 if (t->score == bbk->shortest) {
@@ -670,7 +663,6 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         }
                     } else {
                         mpl_treelist_add_tree(true, t, bbk->treelist);
-                        assert(bbk->treelist->pool != NULL);
                     }
                 }
             
