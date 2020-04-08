@@ -208,7 +208,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
             }
             else {
                 current = mpl_treelist_get_topol(0, bbk->treelist);
-                bbk->treelist->head = &bbk->treelist->trees[0]; // <------------ Direct access to tree list
+                //bbk->treelist->head = &bbk->treelist->trees[0]; // <------------ Direct access to tree list
             }
 
             if (i == 0) {
