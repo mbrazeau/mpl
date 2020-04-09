@@ -60,20 +60,20 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 
 typedef enum {
     
-    MPL_SUCCESS         =  0,
-    MPL_ERR             = -1,
-    MPL_NOMEM           = -2,
-    MPL_OUTOFBOUNDS     = -3,
-    MPL_UNEXPNULLPTR    = -4,
-    MPL_NOTIMPLEMENTED  = -5,
+    MPL_SUCCESS         =  0,  // No error
+    MPL_ERR             = -1,  // General error
+    MPL_NOMEM           = -2,  // Insufficient memory
+    MPL_OUTOFBOUNDS     = -3,  // Subscript or index is out of buffer's bounds
+    MPL_UNEXPNULLPTR    = -4,  // Function expects non-NULL pointer
+    MPL_NOTIMPLEMENTED  = -5,  // The requested routine is not implemented
     MPL_NODIMENSIONS    = -6,  // Input matrix has no known dimensions
     MPL_ILLEGOVERWRITE  = -7,  // Attempt to inexplicitly overwrite data
-    MPL_BADPARAM        = -8,
-    MPL_NOSEMICOLON     = -9,
-    MPL_PARENTHMSM      = -10,
-    MPL_BADDIMENSIONS   = -11,
-    MPL_BADSYMBOL       = -12,
-    MPL_NOTREES         = -13,
+    MPL_BADPARAM        = -8,  // Some inappropriate parameter passed to the function
+    MPL_NOSEMICOLON     = -9,  // Expected terminal semicolon in input
+    MPL_PARENTHMSM      = -10, // Mismatched parentheses
+    MPL_BADDIMENSIONS   = -11, // Input matrix has dimensions error
+    MPL_BADSYMBOL       = -12, // Input uses unrecognised symbol
+    MPL_NOTREES         = -13, // There are no trees in memory
     MPL_NOTREADY        = -14  // Dataset not ready for attempted operation
     
 } MPL_RETURN;
