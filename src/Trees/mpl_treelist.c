@@ -300,54 +300,14 @@ void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
     }
 }
 
-void mpl_treelist_clear_rep(mpl_treelist* tl)
+int mpl_treelist_add_from_newick(const char* nwkstr, mpl_treelist* tl)
 {
-    tl->num_trees = tl->num_trees - tl->rep_num_trees;
-    tl->rep_num_trees = 0;
-    assert(tl->num_trees >= 0);
-    if (tl->num_trees > 0) {
-        tl->back = &tl->trees[tl->num_trees-1];
-    }
-    else {
-        tl->back = NULL;
-    }
-//    tl->head = NULL;
-//    tl->back = tl->head;
-}
-
-// TODO: DELETE
-mpl_topol* mpl_treelist_new_subrep(mpl_treelist* tl)
-{
-//    tl->head = tl->repstart;
-    tl->rep_num_trees = 0;
+    int ret = 0;
     
-    return NULL; //tl->head;
-}
-
-// TODO: DELETE AND REPLACE WITH FXN IN SEARCH OR BBREAK
-mpl_topol* mpl_treelist_newrep(bool checknew, mpl_tree* t, mpl_treelist* tl)
-{
-    // TODO: DELETE
-    mpl_topol* ret = NULL;
     
-    tl->rep_num_trees   = 0;
-    
-    ret = mpl_treelist_add_tree(checknew, t, tl);
-    
-    if (ret == NULL || checknew == false) {
-//        tl->repstart = tl->head;
-//        tl->head = tl->back;
-//        tl->rep_index = tl->back->index;
-//        ret = tl->head;
-    }
-    else {
-        ret = NULL;
-    }
     
     return ret;
 }
-
-
 
 /*
  *  PRIVATE FUNCTION DEFINITIONS
