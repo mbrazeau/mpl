@@ -21,7 +21,29 @@ static int mpl_newick_verify
 static long mpl_newick_traverse
 (char** ncur, long* index, long* order, mpl_topol *top, mpl_newick_rdr* rdr);
 
-int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr)
+mpl_newick_rdr* mpl_newick_rdr_new(const long num_taxa)
+{
+    mpl_newick_rdr* rdr = NULL;
+    
+    rdr = (mpl_newick_rdr*)safe_calloc(1, sizeof(mpl_newick_rdr));
+    
+    if (rdr != NULL) {
+        mpl_newick_rdr_init(num_taxa, rdr);
+    }
+    
+    return rdr;
+}
+
+void mpl_newick_rdr_delete(mpl_newick_rdr** rdr)
+{
+    if (rdr != NULL) {
+        safe_free((*rdr)->namebuffer);
+        free(*rdr);
+        *rdr = NULL;
+    }
+}
+
+int mpl_newick_rdr_init(const long num_taxa, mpl_newick_rdr* rdr)
 {
     int ret = -1;
     

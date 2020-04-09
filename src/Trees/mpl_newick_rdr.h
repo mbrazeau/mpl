@@ -22,7 +22,9 @@ typedef struct _nwk_rdr {
     
 } mpl_newick_rdr;
 
-int mpl_newick_rdr_init(long num_taxa, mpl_newick_rdr* rdr);
+mpl_newick_rdr* mpl_newick_rdr_new(const long num_taxa);
+void mpl_newick_rdr_delete(mpl_newick_rdr** rdr);
+int mpl_newick_rdr_init(const long num_taxa, mpl_newick_rdr* rdr);
 int mpl_newick_rdr_cleanup(mpl_newick_rdr* rdr);
 int mpl_newick_read(const char* nwkstr, mpl_topol* top, mpl_newick_rdr* rdr);
 #endif /* mpl_newick_rdr_h */

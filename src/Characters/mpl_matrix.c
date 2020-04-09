@@ -311,6 +311,21 @@ MPL_RETURN mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m)
     return MPL_SUCCESS;
 }
 
+MPL_RETURN mpl_matrix_ready(mpl_matrix* m)
+{
+    RET_IF_NULL(m);
+    
+    if (m->optimality == OPTIM_PARSIM) {
+        if (m->parsets != NULL) {
+            return MPL_SUCCESS;
+        }
+        
+        return MPL_NOTREADY; 
+    }
+    else {
+        return MPL_NOTIMPLEMENTED;
+    }
+}
 
 MPL_RETURN mpl_matrix_apply_data(mpl_matrix* m)
 {

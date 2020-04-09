@@ -64,5 +64,5 @@ MPL_RETURN  mpl_matrix_set_gap_handle(const mpl_gap_t gaptype, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_apply_data(mpl_matrix* m);
 MPL_RETURN  mpl_matrix_add_symbol(const char symb, mpl_matrix* m);
 MPL_RETURN  mpl_matrix_report(mpl_matrix *m);
-
+MPL_RETURN  mpl_matrix_ready(mpl_matrix* m);
 #endif /* mpl_matrix_h */

@@ -364,15 +364,15 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         // Reset head to last tree in buffer
         bbk->savecount = 1;
-        current = bbk->treelist->back;
-        mpl_tree_read_topol(t, current);
+//        current = bbk->treelist->back;
+        mpl_tree_read_topol(t, ratchead);
         mpl_treelist_reverse_head(bbk->treelist); // REPLACE
-        current->score = oldbest;//mpl_length_only_parsimony(-1.0, t);
+        ratchead->score = oldbest;//mpl_length_only_parsimony(-1.0, t);
         
         // TODO: The routine needs to be smart enough here to reset the buffer
         // etc. if this modified current tree is in fact best overall.
 
-        assert(current->index == index);
+        //assert(current->index == index);
         
         bbk->head = bbk->treelist->back;
         mpl_swap_all(t, bbk);
