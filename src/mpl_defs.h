@@ -73,7 +73,8 @@ typedef enum {
     MPL_PARENTHMSM      = -10,
     MPL_BADDIMENSIONS   = -11,
     MPL_BADSYMBOL       = -12,
-    MPL_NOTREES         = -13
+    MPL_NOTREES         = -13,
+    MPL_NOTREADY        = -14  // Dataset not ready for attempted operation
     
 } MPL_RETURN;
 
