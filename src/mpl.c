@@ -49,6 +49,7 @@ mpl_handle* mpl_handle_new(void)
         newhandl->results   = NULL;
         newhandl->matrix    = NULL;
         newhandl->treebuf   = NULL;
+        newhandl->newickrdr = NULL;
     }
     
     return newhandl;
@@ -69,7 +70,9 @@ int mpl_handle_delete(mpl_handle** handl)
     mpl_matrix_delete(&(*handl)->matrix);
     // ret = Cleanup treebuf
     mpl_treelist_delete(&(*handl)->treebuf);
-    
+    // ret = Cleanup newickrdr
+    mpl_newick_rdr_delete(&(*handl)->newickrdr);
+
     free(*handl);
     *handl = NULL;
 
@@ -117,11 +120,10 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
         mpl_search_set_stepw_t(DEFAULT_ASTYPE, handl->search);
         mpl_search_set_bbreak_t(DEFAULT_BBREAK, handl->search);
         
-        
         // TODO: Check all returns. If any are NULL, then cleanup and return error
+        handl->newickrdr = mpl_newick_rdr_new(ntax);
         
         return MPL_SUCCESS;
-    
     }
     
     return MPL_ILLEGOVERWRITE;
@@ -268,6 +270,41 @@ int mpl_do_search(mpl_handle* handl)
     
     ret = mpl_search_execute(handl->search);
 
+    return ret;
+}
+
+double mpl_score_tree(const long index, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+    
+    // Needs to check if data is loaded and ready for analysis
+    
+    return ret;
+}
+
+int mpl_clear_trees(mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+
+    if (handl->treebuf != NULL) {
+        mpl_treelist_clear_all(handl->treebuf);
+        ret = MPL_SUCCESS;
+    } else {
+        ret = MPL_NOTREES;
+    }
+
+    return ret;
+}
+
+int mpl_add_newick(const char* newick, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+    
+    
+    
     return ret;
 }
 
