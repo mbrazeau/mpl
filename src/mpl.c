@@ -273,13 +273,54 @@ int mpl_do_search(mpl_handle* handl)
     return ret;
 }
 
-double mpl_score_tree(const long index, mpl_handle* handl)
+int mpl_score_tree(double* score, const long index, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
+    
+    mpl_tree* t = NULL;
+    mpl_topol* top = NULL;
     MPL_RETURN ret = MPL_ERR;
     
-    // Needs to check if data is loaded and ready for analysis
+    if (index < 0 || index > handl->treebuf->num_trees) {
+        return MPL_OUTOFBOUNDS;
+    }
     
+    // Needs to check if data is loaded and ready for analysis
+    if ((ret = mpl_matrix_ready(handl->matrix))) {
+        
+        ret = mpl_matrix_apply_data(handl->matrix);
+        if (ret != MPL_SUCCESS) {
+            return ret;
+        }
+        
+        ret = mpl_init_parsimony(handl->matrix);
+        if (ret != MPL_SUCCESS) {
+            return ret;
+        }
+        
+        ret = MPL_SUCCESS;
+       
+    }
+    
+    t = mpl_new_tree(handl->ntax); // TODO: This needs to get the active number of taxa in the dataset
+    top = mpl_treelist_get_topol(index, handl->treebuf);
+    
+    if (top == NULL) {
+        if (handl->treebuf->num_trees == 0) {
+            return MPL_NOTREES;
+        } else if (index >= handl->treebuf->num_trees) {
+            return MPL_OUTOFBOUNDS;
+        } else {
+            return MPL_ERR;
+        }
+    }
+    
+    mpl_tree_read_topol(t, top);
+    
+    *score = mpl_fullpass_parsimony(t);
+    
+    mpl_delete_tree(&t);
+
     return ret;
 }
 
@@ -303,7 +344,16 @@ int mpl_add_newick(const char* newick, mpl_handle* handl)
     RET_IF_NULL(handl);
     MPL_RETURN ret = MPL_ERR;
     
+    mpl_tree* t = mpl_new_tree(handl->ntax);
     
+    mpl_topol* top = mpl_topol_new(handl->ntax); // Sub in fetch from list (can avoid 'regrowing' tree)
+    mpl_newick_read(newick, top, handl->newickrdr);
+    mpl_tree_read_topol(t, top);
+    
+    mpl_treelist_add_tree(false, t, handl->treebuf);
+    
+    mpl_topol_delete(&top);
+    mpl_delete_tree(&t);
     
     return ret;
 }
