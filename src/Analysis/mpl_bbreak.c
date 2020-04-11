@@ -287,7 +287,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
 void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 {
     int i = 0;
-    mpl_topol* current = NULL;
+//    mpl_topol* current = NULL;
     double oldbest = 0.0;
     long oldsavelim = 0;
     
@@ -297,6 +297,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     if (bbk->shortest == 0) {
         bbk->shortest = t->score;
     }
+    
+    oldbest = bbk->bestinrep;
     
     bbk->rep_ntrees = 1;
     oldsavelim = bbk->savelim;
@@ -308,11 +310,10 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     
     // Swap the starting tree
     mpl_topol* ratchead = bbk->treelist->back;
-    mpl_swap_all(true, t, bbk);
+    mpl_swap_all(false, t, bbk);
     
     // Nixon 2:
     mpl_tree_read_topol(t, ratchead);
-    oldbest = bbk->bestinrep;
     //bbk->rep_ntrees = 0;
 
     for (i = 0; i < bbk->nratchets; ++i) {
@@ -337,6 +338,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->savelim = 1;
         mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
         mpl_treelist_add_tree(false, t, bbk->treelist);
+        ratchead = bbk->treelist->back;
         bbk->rep_ntrees = 1;
         
         mpl_swap_all(false, t, bbk);
@@ -347,10 +349,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         mpl_reset_std_weights();
         
         // Reset head to last tree in buffer
-        bbk->bestinrep = oldbest;
+        //bbk->bestinrep = oldbest;
         bbk->head = bbk->treelist->back;
-        //bbk->head->score = oldbest;
-        //bbk->rep_ntrees = 1;
         mpl_tree_read_topol(t, bbk->head);
         mpl_swap_all(false, t, bbk);
 
@@ -358,14 +358,13 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
             oldbest = bbk->bestinrep;
         }
 
-        if (bbk->bestinrep > bbk->shortest || bbk->hitisland == true) {
-            mpl_treelist_clear_back_to(ratchead, bbk->treelist);
-            assert(ratchead == bbk->treelist->back);
-        }
-        
         bbk->head = bbk->treelist->back;
         mpl_tree_read_topol(t, bbk->head);
         
+        if (bbk->bestinrep > bbk->shortest || bbk->hitisland == true) {
+            mpl_treelist_clear_back_to(ratchead, bbk->treelist);
+        }
+
         if (search_interrupt == 1) {
             break;
         }
@@ -563,8 +562,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 else {
                     limit = bbk->bestinrep;
                 }
+                
                 score = mpl_score_try_parsimony(tgtlen + srclen,
-                                                limit,
+                                                bbk->bestinrep,
                                                 clips[i],
                                                 tgts[j],
                                                 t);
@@ -574,15 +574,11 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
 //                t->score = mpl_fullpass_parsimony(t);
 //                t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
                 
-                if (bbk->bestinrep == 0.0) {
-                    bbk->bestinrep = t->score;
-                }
-                
                 if (t->score <= bbk->bestinrep) {
                     if (t->score < bbk->bestinrep) {
 
                         bbk->hitisland = false;
-                        bbk->foundbetter = true;
+                        bbk->foundbetter = true; // Either better overall or for rep
                         
                         if (t->score < bbk->shortest) {
                             bbk->shortest   = t->score;
