@@ -47,6 +47,7 @@ typedef struct _bbreak {
     mpl_treelist*   treelist;
     mpl_topol*      head;
     mpl_topol*      repstart;
+    mpl_topol*      ratchhead;
     mpl_stepwise    stepwise;
     
     double          keepscore; // Allowance for longer trees
