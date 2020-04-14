@@ -577,14 +577,13 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                                 t);
 
                 t->score = (score + tgtlen + srclen);
-////
 //                t->score = mpl_fullpass_parsimony(t);
 //                t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
+//                if ((t->score == 379) && (bbk->treelist->num_trees == 8)) {
+//                    printf("Hit the jackpot\n");
+//                }
                 
                 if (t->score <= bbk->bestinrep) {
-//                    if (t->score == bbk->shortest) {
-//                        ++bbk->nhits;
-//                    }
                     if (t->score < bbk->bestinrep) {
 
                         bbk->hitisland = false;
@@ -593,40 +592,30 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         if (t->score < bbk->shortest) {
                             bbk->shortest   = t->score;
                             bbk->bestinrep  = t->score;
-                            bbk->rep_ntrees = 1;
                             mpl_treelist_clear_all(bbk->treelist);
-                            clips[i]->clipmark = false;
-                            mpl_treelist_add_tree(false, t, bbk->treelist);
-                            bbk->ratchhead = bbk->treelist->trees;
-                            bbk->head = bbk->treelist->trees;
                             bbk->repstart = NULL;
-                            clips[i]->lock = false;
-                            return;
-                        
+
                         } else {
-                            mpl_topol* ret = 0;
                             bbk->bestinrep = t->score;
-                            bbk->rep_ntrees = 1;
                             mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
-                            clips[i]->clipmark = false;
-                            // doislandcheck is a flag to check for duplicates
-                            ret = mpl_treelist_add_tree(bbk->doislandcheck,
-                                                        t,
-                                                        bbk->treelist);
-                            bbk->head = bbk->treelist->back;
-                            bbk->ratchhead = bbk->treelist->back;
-                            clips[i]->lock = false;
-                            if (ret != NULL
-                                && bbk->doislandcheck == true) {
-                                if (t->score == bbk->shortest) {
-                                    bbk->hitisland = true;
-                                    bbk->rep_ntrees = 0;
-                                    return;
-                                }
-                            }
-                            bbk->rep_ntrees = 1;
                         }
                         
+                        bbk->rep_ntrees = 1;
+                        mpl_topol* ret = 0;
+                        clips[i]->clipmark = false;
+                        ret = mpl_treelist_add_tree(bbk->doislandcheck,
+                                                    t,
+                                                    bbk->treelist);
+                        bbk->head = bbk->treelist->back;
+                        bbk->ratchhead = bbk->treelist->back;
+                        clips[i]->lock = false;
+                        if (ret != NULL && bbk->doislandcheck == true) {
+                            if (t->score == bbk->shortest) {
+                                bbk->hitisland = true;
+                                bbk->rep_ntrees = 0;
+                                return;
+                            }
+                        }
                         return;
                     } else if (bbk->savelim > 0) {
                         if (bbk->rep_ntrees < bbk->savelim) {
@@ -722,7 +711,6 @@ static void mpl_swap_all(const bool report, mpl_tree* t, mpl_bbreak* bbk)
         if (search_interrupt == 1) {
             break;
         }
-        
     } while (bbk->head != NULL);
 }
 

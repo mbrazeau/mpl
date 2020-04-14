@@ -552,6 +552,7 @@ int test_ratchet_search (void)
     bbk.numreps = 10;
     bbk.nratchets = 50;
     //    bbk.bbktype = MPL_SPR_T;
+    mpl_rng_set_seed(MPL_DEFAULT_RSEED);
     mpl_stepwise_init(MPL_AST_RANDOM, bbk.numtaxa, 1, &bbk.stepwise);
     mpl_do_bbreak(&bbk);
     
