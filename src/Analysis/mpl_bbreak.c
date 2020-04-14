@@ -220,8 +220,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 bbk->head = mpl_treelist_get_shortest(bbk->treelist);
                 bbk->shortest = bbk->bestinrep = bbk->head->score;
             } else {
-                bbk->head = bbk->treelist->back;
-                bbk->bestinrep = bbk->head->score;
+                bbk->head       = bbk->treelist->back;
+                bbk->bestinrep  = bbk->head->score;
             }
             
             if (bbk->bestinrep < bbk->shortest) {
@@ -341,10 +341,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->doislandcheck = false;
         bbk->bestinrep = MPL_MAXSCORE;
         
-        mpl_treelist_clear_back_to(bbk->ratchhead, bbk->treelist);
-        mpl_treelist_add_tree(false, t, bbk->treelist);
         bbk->savelim = 1;
-        bbk->rep_ntrees = 1;
         bbk->head = bbk->treelist->back;
 
         mpl_swap_all(false, t, bbk);
@@ -361,8 +358,12 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->head = bbk->treelist->back;
         mpl_tree_read_topol(t, bbk->head);
         // TODO: Reinstate the full score as limit
-//        bbk->head->score = t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
-//        bbk->bestinrep = t->score;
+        bbk->head->score = t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
+        if (t->score < oldbest) {
+            oldbest = bbk->bestinrep = t->score;
+        } else {
+            bbk->bestinrep = oldbest;
+        }
         mpl_swap_all(false, t, bbk);
 
         bbk->head = bbk->treelist->back;//bbk->ratchhead;
@@ -579,10 +580,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 t->score = (score + tgtlen + srclen);
 //                t->score = mpl_fullpass_parsimony(t);
 //                t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
-//                if ((t->score == 379) && (bbk->treelist->num_trees == 8)) {
-//                    printf("Hit the jackpot\n");
-//                }
-                
+
                 if (t->score <= bbk->bestinrep) {
                     if (t->score < bbk->bestinrep) {
 
@@ -591,16 +589,14 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                         
                         if (t->score < bbk->shortest) {
                             bbk->shortest   = t->score;
-                            bbk->bestinrep  = t->score;
                             mpl_treelist_clear_all(bbk->treelist);
                             bbk->repstart = NULL;
 
                         } else {
-                            bbk->bestinrep = t->score;
                             mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
                         }
+                        bbk->bestinrep = t->score;
                         
-                        bbk->rep_ntrees = 1;
                         mpl_topol* ret = 0;
                         clips[i]->clipmark = false;
                         ret = mpl_treelist_add_tree(bbk->doislandcheck,
@@ -616,14 +612,17 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                 return;
                             }
                         }
+                        bbk->rep_ntrees = 1;
                         return;
                     } else if (bbk->savelim > 0) {
                         if (bbk->rep_ntrees < bbk->savelim) {
                             mpl_treelist_add_tree(true, t, bbk->treelist);
+                            bbk->ratchhead = bbk->treelist->back;
                             ++bbk->rep_ntrees;
                         }
                     } else {
                         mpl_treelist_add_tree(true, t, bbk->treelist);
+                        bbk->ratchhead = bbk->treelist->back;
                         ++bbk->rep_ntrees;
                     }
                 }
