@@ -56,6 +56,7 @@ typedef struct mpl_parsdat {
     bool            isNAtype;
     mpl_dnfxn       downfxn1;
     mpl_dnfxn       downfxn2;
+    mpl_dnfxn       rednfxn2; // Downpass function for length recalculation
     mpl_upfxn       upfxn1;
     mpl_upfxn       upfxn2;
     mpl_branchfxn   tipfxn1;
@@ -83,8 +84,8 @@ double mpl_fitch_downpass
 void mpl_fitch_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd);
-void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
-void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+void mpl_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+void mpl_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 double mpl_fitch_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
 double mpl_fitch_na_tip2tip_check
@@ -107,7 +108,7 @@ double mpl_fitch_na_second_downpass
 void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
-void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
+void mpl_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
 double mpl_na_only_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
@@ -176,7 +177,7 @@ double mpl_fitch_na_recalc_second_downpass
 void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd);
 int mpl_fitch_na_recalc_first_uppass
  (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
-void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
+void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 static inline unsigned int mpl_parsim_closed_interval
  (mpl_discr* res, mpl_discr a, mpl_discr b);
 double mpl_wagner_downpass
@@ -195,6 +196,16 @@ double mpl_wagner_na_second_downpass
  (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_wagner_na_second_uppass
  (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+double mpl_wagner_na_recalc_second_downpass
+ (const long left, const long right, const long n, mpl_parsdat* pd);
+double mpl_wagner_na_local_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd);
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);

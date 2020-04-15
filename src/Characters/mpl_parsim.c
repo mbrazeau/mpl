@@ -38,70 +38,64 @@ void tempchangebuf_selective_reset(mpl_matrix *m)
     }
 }
 
+// Settings for parsimony types
 
 static const mpl_parsdat Fitch_Std = {
-    
     .parstype   = MPL_FITCH_T,
     .isNAtype   = false,
     .downfxn1   = &mpl_fitch_downpass,
     .upfxn1     = &mpl_fitch_uppass,
     .downfxn2   = NULL,
     .upfxn2     = NULL,
-    .tipfxn1    = &mpl_fitch_tip_update,
+    .tipfxn1    = &mpl_tip_update,
     .tipfxn2    = NULL,
     .rootfxn    = &mpl_fitch_root,
     .locfxn     = &mpl_fitch_local_check,
     .srcroot    = &mpl_do_src_root
-    
-    
 };
 
 static const mpl_parsdat Fitch_NA = {
-    
     .parstype   = MPL_FITCH_T,
     .isNAtype   = true,
     .downfxn1   = &mpl_fitch_na_first_downpass,
     .upfxn1     = &mpl_fitch_na_first_uppass,
     .downfxn2   = &mpl_fitch_na_second_downpass,
+    .rednfxn2   = &mpl_fitch_na_recalc_second_downpass,
     .upfxn2     = &mpl_fitch_na_second_uppass,
-    .tipfxn1    = &mpl_fitch_na_tip_update,
-    .tipfxn2    = &mpl_fitch_na_tip_finalize,
+    .tipfxn1    = &mpl_na_tip_update,
+    .tipfxn2    = &mpl_na_tip_finalize,
     .rootfxn    = &mpl_fitch_na_root,
     .locfxn     = &mpl_fitch_na_local_check,
     .srcroot    = &mpl_na_do_src_root
 };
 
-
 static const mpl_parsdat Wagner_Std = {
-
     .parstype   = MPL_WAGNER_T,
     .isNAtype   = false,
-    // TODO: CHANGE THESE
     .downfxn1   = &mpl_wagner_downpass,
     .upfxn1     = &mpl_wagner_uppass,
     .downfxn2   = NULL,
     .upfxn2     = NULL,
-    .tipfxn1    = &mpl_fitch_tip_update,
+    .tipfxn1    = &mpl_tip_update,
     .tipfxn2    = NULL,
     .rootfxn    = &mpl_fitch_root,
     .locfxn     = &mpl_wagner_local_check,
     .srcroot    = &mpl_do_src_root
-    
 };
 
 static const mpl_parsdat Wagner_NA = {
-    
     .parstype   = MPL_WAGNER_T,
     .isNAtype   = true,
-    .downfxn1   = &mpl_fitch_na_first_downpass,     // Keep same
-    .upfxn1     = &mpl_fitch_na_first_uppass,       // Keep same
-    .downfxn2   = &mpl_wagner_na_second_downpass,    // New fxn
-    .upfxn2     = &mpl_wagner_na_second_uppass,      // New fxn
-    .tipfxn1    = &mpl_fitch_na_tip_update,         // Keep same
-    .tipfxn2    = &mpl_fitch_na_tip_finalize,       // TODO: Check if this needs new fxn
-    .rootfxn    = &mpl_fitch_na_root,               // Keep same
-    .locfxn     = &mpl_fitch_na_local_check,        // Keep same
-    .srcroot    = &mpl_na_do_src_root               // Keep same
+    .downfxn1   = &mpl_fitch_na_first_downpass,
+    .upfxn1     = &mpl_fitch_na_first_uppass,
+    .downfxn2   = &mpl_wagner_na_second_downpass,
+    .upfxn2     = &mpl_wagner_na_second_uppass,
+    .rednfxn2   = &mpl_wagner_na_recalc_second_downpass,
+    .tipfxn1    = &mpl_na_tip_update,
+    .tipfxn2    = &mpl_na_tip_finalize,
+    .rootfxn    = &mpl_fitch_na_root,
+    .locfxn     = &mpl_wagner_na_local_check,
+    .srcroot    = &mpl_na_do_src_root
 };
 
 // Data from the discrete character charbuf
@@ -507,7 +501,7 @@ void mpl_fitch_uppass
 }
 
 
-void mpl_fitch_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
+void mpl_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i = 0;
     const long end = pd->end;
@@ -689,7 +683,7 @@ void mpl_fitch_na_first_uppass
 }
 
 
-void mpl_fitch_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
+void mpl_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -897,7 +891,7 @@ void mpl_fitch_na_second_uppass
     }
 }
 
-void mpl_fitch_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
+void mpl_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -1034,7 +1028,7 @@ int mpl_fitch_na_recalc_first_uppass
     return chgs;
 }
 
-void mpl_fitch_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
+void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 {
     size_t i = 0;
     size_t j = 0;
@@ -1278,7 +1272,7 @@ void mpl_wagner_uppass
 {
     long i;
     const long end = pd->end;
-    mpl_discr fin = 0;
+    mpl_discr fin = 0UL;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1286,6 +1280,7 @@ void mpl_wagner_uppass
         
         if (fin != upset[anc][i]) {
             mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
+            fin |= (dnset[left][i] | dnset[right][i]);
             fin = (fin & upset[anc][i]) | dnset[n][i];
         }
         
@@ -1389,7 +1384,7 @@ void mpl_wagner_na_second_uppass
     long i;
     const long end = pd->end;
     mpl_discr t = 0;
-//    mpl_discr fin = 0;
+    mpl_discr fin = 0UL;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1400,34 +1395,21 @@ void mpl_wagner_na_second_uppass
                 t = upset[anc][i] & dnsetf[n][i];
                 
                 if (t == upset[anc][i]) {
-                    
                     upset[n][i] = t;  // B1
-                    
                 }
                 else {
                     // TODO: FINISH THIS
-                    if (dnsetf[left][i] & dnsetf[right][i]) {
-                        upset[n][i] = (dnsetf[n][i] | (upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i])));// B2
-                    } else {
-                        if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
-                            
-                            mpl_parsim_closed_interval(&t,
-                                                       dnsetf[left][i] & ISAPPLIC,
-                                                       dnsetf[right][i] & ISAPPLIC);
-                            
-                            if ((upset[anc][i] & (dnsetf[left][i] | dnsetf[right][i]))) {
-                                upset[n][i] = upset[anc][i]; // B3
-                            }
-                            else {
-                                upset[n][i] = (upset[anc][i]   |
-                                               dnsetf[left][i] |
-                                               dnsetf[right][i])
-                                               & ISAPPLIC; // B4
-                            }
+                    fin = upset[anc][i] & dnsetf[n][i];
+                    if (fin != upset[anc][i]) {
+                        if ((dnsetf[left][i] | dnsetf[right][i]) & NA) { // If one descendant is inapplicable
+                            fin = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                         } else {
-                            upset[n][i] = upset[anc][i] | dnsetf[n][i]; // B5
+                            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]); // Creates smallest closed interval
+                            fin |= (dnset[left][i] | dnset[right][i]); // Adding these states creates the largest closed interval
                         }
+                        fin = (fin & upset[anc][i]) | dnset[n][i];
                     }
+                    upset[n][i] = fin;
                 }
             }
             else {
@@ -1443,6 +1425,150 @@ void mpl_wagner_na_second_uppass
 //        assert(upset[n][i] & ISAPPLIC || upset[n][i] == NA);
         assert(upset[n][i]);
     }
+}
+
+double mpl_wagner_na_local_check
+(const double lim,
+ const double base,
+ const long src,
+ const long tgt1,
+ const long tgt2,
+ const long troot,
+ mpl_parsdat* pd)
+{
+    // For any characters that can be checked without direct reopt at this point
+    // calculate the length and check if it exceeds the limit. If limit is
+    // never hit, then the calling function may need to perform a full check
+    // on inapplicable characters.
+    
+    size_t i;
+    const long end   = pd->end;
+    double score     = 0.0;
+    double cminscore = pd->cminscore; // Sum of all applicable changes
+    double testscore = 0.0;
+    double recall    = pd->crecall;
+    
+    for (i = pd->start; i < end; ++i) {
+        if (upset[src][i] & ISAPPLIC) {
+            if (rtset[tgt1][i] & ISAPPLIC) {
+                if (!(rtset[tgt1][i] & upset[src][i])) {
+                    score += (weights[i] * mpl_parsim_closed_interval(NULL,
+                                                                      upset[tgt1][i] | upset[tgt2][i],
+                                                                      dnset[src][i]));
+                }
+            } else if (upset[src][i] < MISSING) {
+                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                } else {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                }
+            }
+        } else {
+            if (rtset[tgt1][i] & NA) {
+                if (tempact[troot][i] && tempact[src][i]) {
+                    score += weights[i];
+                }
+            } else {
+                pd->indexbuf[pd->nchars] = i;
+                ++pd->nchars;
+                pd->scorerecall += (changes[i] * weights[i]);
+                pd->minscore    += (changes[i] * weights[i]);
+            }
+        }
+        
+//        assert(recall >= 0);
+        // NOTE: It's possible that the complexity of checking this offsets the
+        // efficiency of terminating the loop early.
+        if (lim > -1.0) {
+            cminscore -= (applicchgs[i] * weights[i]);
+            recall -= (changes[i] * weights[i]);
+            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
+            if (testscore > lim) {
+                pd->minscore += cminscore;
+                pd->scorerecall += recall;
+                return score;
+            }
+        }
+    }
+    
+    return score;
+}
+
+double mpl_wagner_na_recalc_second_downpass
+ (const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    size_t i;
+    size_t j;
+    long end = pd->end;
+    mpl_discr t = 0;
+    double cost = 0.0;
+    
+    long* restrict indices = pd->indexbuf;
+    end = pd->nchars;
+    
+    // If possible, limit reconstructions to characters updated at this node.
+    if (pd->usndidx == true) {
+        indices = pd->ndindexbufs[n];
+        end = pd->nndindices[n];
+    }
+
+    for (j = 0; j < end; ++j) {
+        
+        i = indices[j];
+        
+        // Deduct the old score added at this node for this character
+        cost -= (nodechanges[n][i] * weights[i]);
+
+        if (prupset[n][i] & ISAPPLIC) {
+            
+            t = dnsetf[left][i] & dnsetf[right][i];
+            
+            if (t) {
+                if (t & ISAPPLIC) {
+                    dnsetf[n][i] = t & ISAPPLIC;
+                } else {
+                    dnsetf[n][i] = t;
+                }
+            } else {
+                
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+                    cost += (weights[i] *
+                             mpl_parsim_closed_interval(&dnsetf[n][i],
+                                                        dnsetf[left][i] & ISAPPLIC,
+                                                        dnsetf[right][i] & ISAPPLIC));
+                } else if (actives[left][i] && actives[right][i]) {
+                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                    cost += weights[i];
+                }
+            }
+        } else {
+            dnsetf[n][i] = prupset[n][i];
+            if (actives[left][i] && actives[right][i]) {
+                cost += weights[i];
+            }
+        }
+        
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        
+        // Reset all the descendant buffers
+        dnset[left][i]    = tempdn[left][i];
+        dnsetf[left][i]   = tempdnf[left][i];
+        prupset[left][i]  = tempprup[left][i];
+        actives[left][i]  = tempact[left][i];
+        dnset[right][i]   = tempdn[right][i];
+        dnsetf[right][i]  = tempdnf[right][i];
+        prupset[right][i] = tempprup[right][i];
+        actives[right][i] = tempact[right][i];
+    }
+    
+
+    return cost;
 }
 
 /// External interface functions
@@ -1644,8 +1770,7 @@ void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
     int i = 0;
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            mpl_fitch_na_recalc_tip_update(n, anc, &m->parsets[i]);
-//           m->parsets[i].tipfxn1(n, anc, &m->parsets[i]);
+            mpl_na_recalc_tip_update(n, anc, &m->parsets[i]);
         }
     }
 }
@@ -1658,8 +1783,7 @@ double mpl_na_only_parsim_second_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].doeschange = 0;
-            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
+            score += m->parsets[i].rednfxn2(left, right, n, &m->parsets[i]);
         }
     }
     
@@ -1847,19 +1971,11 @@ double mpl_parsim_local_check
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-//      m->parsets[i].tryscore = 0.0;
         m->parsets[i].scorerecall = 0.0;
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
         score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
         cscore += score;
-        
-//        if (lim > -1.0) {
-//            if (score > lim) {
-//                return score;
-//            }
-//        }
-//      m->parsets[i].tryscore = score;
     }
     
     return score;
