@@ -99,6 +99,7 @@ double mpl_fitch_na_tip2tip_check
 void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd);
 double mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
+double mpl_wagner_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_fitch_na_first_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_fitch_na_first_uppass

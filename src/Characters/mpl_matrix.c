@@ -483,6 +483,7 @@ static void mpl_matrix_delete_parsets(mpl_matrix* m)
 
         free(m->parsets);
         m->parsets = NULL;
+        m->nparsets = 0;
     }
 }
 
@@ -495,6 +496,9 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     int joint_pars_types = 0;
     long current_range = 0;
     mpl_parsim_t ptype = 0;
+    
+    // Clear any prior parsimony sets:
+    mpl_matrix_delete_parsets(m);
 
     // Count set parsimony types
     memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
@@ -537,8 +541,6 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         numna += m->nasbytype[i];
     }
     
-    // Clear any prior parsimony sets:
-    mpl_matrix_delete_parsets(m);
     // Set up the parsimony sets
     m->nparsets = joint_pars_types;
     m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));

@@ -579,7 +579,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 }
                 
                 score = mpl_score_try_parsimony(tgtlen + srclen,
-                                                bbk->bestinrep,
+                                                -1.0,
+                                                //bbk->bestinrep,
                                                 clips[i],
                                                 tgts[j],
                                                 t);

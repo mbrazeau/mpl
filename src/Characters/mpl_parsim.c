@@ -95,7 +95,7 @@ static const mpl_parsdat Wagner_NA = {
     .tipfxn2    = &mpl_na_tip_finalize,
     .rootfxn    = &mpl_fitch_na_root,
     .locfxn     = &mpl_wagner_na_local_check,
-    .srcroot    = &mpl_na_do_src_root
+    .srcroot    = &mpl_wagner_na_do_src_root
 };
 
 // Data from the discrete character charbuf
@@ -1446,10 +1446,10 @@ double mpl_wagner_na_local_check
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
-            if (rtset[tgt1][i] & ISAPPLIC) {
-                if (!(rtset[tgt1][i] & upset[src][i])) {
+            if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) {
+                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
                     score += (weights[i] * mpl_parsim_closed_interval(NULL,
-                                                                      upset[tgt1][i] | upset[tgt2][i],
+                                                                      (upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC,
                                                                       dnset[src][i]));
                 }
             } else if (upset[src][i] < MISSING) {
@@ -1853,13 +1853,6 @@ double mpl_wagner_src_root(const long left, const long right, const long n, mpl_
     long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        // Try same as fitch
-//        dnset[n][i] = upset[left][i] | upset[right][i];
-//        dnset[n][i] = dnset[left][i] & dnset[right][i];
-//
-//        if (!dnset[n][i]) {
-//            mpl_parsim_closed_interval(&dnset[n][i], dnset[left][i], dnset[right][i]);
-//        }
         mpl_parsim_closed_interval(&dnset[n][i], upset[left][i], upset[right][i]);
         dnset[n][i] |= (upset[left][i] | upset[right][i]);
     }
@@ -1880,6 +1873,30 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
             upset[n][i] &= ISAPPLIC;
         }
 ////
+        tempup[n][i]  = upset[n][i];
+    }
+    
+    return 0.0;
+}
+
+double mpl_wagner_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
+            mpl_parsim_closed_interval(&upset[n][i], upset[left][i], upset[right][i]);
+            upset[n][i] |= (upset[left][i] | upset[right][i]);
+        } else {
+            upset[n][i] = upset[left][i] | upset[right][i];
+        }
+
+        if (upset[n][i] & ISAPPLIC) {
+            upset[n][i] &= ISAPPLIC;
+        }
+        ////
         tempup[n][i]  = upset[n][i];
     }
     

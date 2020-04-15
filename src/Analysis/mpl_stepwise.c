@@ -297,8 +297,8 @@ static void mpl_try_all_sites
     long nsites = 0;
     double sttlen = 0.0;
 
-    sw->shortest = MPL_MAXSCORE;
-    sw->longest = MPL_MAXSCORE;
+    sw->shortest    = MPL_MAXSCORE;
+    sw->longest     = MPL_MAXSCORE;
     
     // Store all the sites locally, as traversals on the tree during
     // checking may modify the list.
