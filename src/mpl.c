@@ -173,6 +173,8 @@ int mpl_attach_symbols(const char* symbols, mpl_handle* handl)
 int mpl_set_parsim_t(const long index, const mpl_parsim_t ptype, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
+   
+    // TODO: Need to check if this changes any existing settings and then re-set the types
     
     return mpl_matrix_set_parsim_t(index, ptype, handl->matrix);
 }
@@ -286,22 +288,16 @@ int mpl_score_tree(double* score, const long index, mpl_handle* handl)
     }
     
     // Needs to check if data is loaded and ready for analysis
-    if ((ret = mpl_matrix_ready(handl->matrix))) {
-        
-        ret = mpl_matrix_apply_data(handl->matrix);
-        if (ret != MPL_SUCCESS) {
-            return ret;
-        }
-        
-        ret = mpl_init_parsimony(handl->matrix);
-        if (ret != MPL_SUCCESS) {
-            return ret;
-        }
-        
-        ret = MPL_SUCCESS;
-       
+    ret = mpl_matrix_apply_data(handl->matrix);
+    if (ret != MPL_SUCCESS) {
+        return ret;
     }
     
+    ret = mpl_init_parsimony(handl->matrix);
+    if (ret != MPL_SUCCESS) {
+        return ret;
+    }
+
     t = mpl_new_tree(handl->ntax); // TODO: This needs to get the active number of taxa in the dataset
     top = mpl_treelist_get_topol(index, handl->treebuf);
     
