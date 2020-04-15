@@ -80,7 +80,7 @@ static const mpl_parsdat Wagner_Std = {
     .tipfxn2    = NULL,
     .rootfxn    = &mpl_fitch_root,
     .locfxn     = &mpl_wagner_local_check,
-    .srcroot    = &mpl_do_src_root
+    .srcroot    = &mpl_wagner_src_root
 };
 
 static const mpl_parsdat Wagner_NA = {
@@ -1301,19 +1301,15 @@ double mpl_wagner_local_check
     const long end = pd->end;
     double score = 0.0;
     
-//    if (lim < 0.0) {
-        for (i = pd->start; i < end; ++i) {
-            if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
-                score += (weights[i] * mpl_parsim_closed_interval(NULL,
-                                       upset[tgt1][i] | upset[tgt2][i],
-                                       dnset[src][i]));
-            }
+    for (i = pd->start; i < end; ++i) {
+        if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+            score += (weights[i] * mpl_parsim_closed_interval(NULL,
+                                                              upset[tgt1][i] | upset[tgt2][i],
+                                                              dnset[src][i]));
         }
-//    }
-//    else {
-//        TODO: Version allowing break from loop
-//    }
-    
+    }
+//  TODO: Version allowing break from loop
+
     return score;
 }
 
@@ -1851,6 +1847,26 @@ double mpl_do_src_root(const long left, const long right, const long n, mpl_pars
 }
 
 
+double mpl_wagner_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i = 0;
+    long end = pd->end;
+    
+    for (i = pd->start; i < end; ++i) {
+        // Try same as fitch
+//        dnset[n][i] = upset[left][i] | upset[right][i];
+//        dnset[n][i] = dnset[left][i] & dnset[right][i];
+//
+//        if (!dnset[n][i]) {
+//            mpl_parsim_closed_interval(&dnset[n][i], dnset[left][i], dnset[right][i]);
+//        }
+        mpl_parsim_closed_interval(&dnset[n][i], upset[left][i], upset[right][i]);
+        dnset[n][i] |= (upset[left][i] | upset[right][i]);
+    }
+    
+    return 0.0;
+}
+
 double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
@@ -1958,7 +1974,7 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
         if (m->parsets[i].isNAtype == true) {
             // TODO: This fitch NA first downpass might need to be removed?
             mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
-            mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]);
+            mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]); // <<================= FIX THIS FOR WAGNER
         }
     }
 }

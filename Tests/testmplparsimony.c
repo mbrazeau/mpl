@@ -215,6 +215,10 @@ int test_wagner_fullpass_parsimony (void)
     for (i = 0; i < nchar; ++i) {
         mpl_matrix_set_parsim_t(i, MPL_WAGNER_T, m);
     }
+//    mpl_matrix_set_parsim_t(3, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(4, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(8, MPL_WAGNER_T, m);
+    
     mpl_matrix_apply_data(m);
     
     mpl_tree* t = mpl_new_tree(ntax);

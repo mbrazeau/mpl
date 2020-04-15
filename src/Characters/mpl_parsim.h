@@ -206,6 +206,7 @@ double mpl_wagner_na_local_check
  const long tgt2,
  const long troot,
  mpl_parsdat* pd);
+double mpl_wagner_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 
 void mpl_parsim_do_root(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_finalize_root(const long n, const long anc, mpl_matrix* m);

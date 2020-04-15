@@ -224,6 +224,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                 bbk->bestinrep  = bbk->head->score;
             }
             
+            printf("\nScore of starting tree: %.0f\n\n", bbk->head->score);
+            
             if (bbk->bestinrep < bbk->shortest) {
                 bbk->shortest = bbk->bestinrep;
                 mpl_treelist_clear_all(bbk->treelist);
