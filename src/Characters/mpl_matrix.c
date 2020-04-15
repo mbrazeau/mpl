@@ -17,6 +17,8 @@
 #include "mpl_charbuf.h"
 #include "mpl_parsim.h"
 
+static void mpl_matrix_reset(mpl_matrix* m);
+static void mpl_matrix_delete_parsets(mpl_matrix* m);
 static void mpl_set_matrix_defaults(mpl_matrix* m);
 static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m);
 static void mpl_matrix_setup_parsimony(mpl_matrix* m);
@@ -471,6 +473,21 @@ static MPL_RETURN mpl_matrix_verify_data(mpl_matrix* m)
     return ret;
 }
 
+static void mpl_matrix_reset(mpl_matrix* m)
+{
+    int i = 0;
+    mpl_matrix_delete_parsets(m);
+    for (i = 0; i < m->num_cols; ++i) {
+        m->charinfo[i].num_gaps = 0;
+    }
+    m->nparsets = 0;
+    m->nparsimtypes = 0;
+    memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
+    memset(m->nasbytype, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
+    
+    // Delete the parsets
+}
+
 static void mpl_matrix_delete_parsets(mpl_matrix* m)
 {
     int i = 0;
@@ -498,7 +515,7 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     mpl_parsim_t ptype = 0;
     
     // Clear any prior parsimony sets:
-    mpl_matrix_delete_parsets(m);
+    mpl_matrix_reset(m);
 
     // Count set parsimony types
     memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
@@ -543,13 +560,14 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     
     // Set up the parsimony sets
     m->nparsets = joint_pars_types;
+    assert(m->parsets == NULL);
     m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));
     // TODO: CHECK RETURN MORE SAFELY?
     assert(m->parsets != NULL);
     
     // Set and size the standard parsimony sets
     j = 0;
-    for (i = 0; i < /*m->nparsimtypes*/MPL_PARSIM_T_MAX; ++i) {
+    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
         // Check how many standard characters in this type
         if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
             
@@ -568,7 +586,7 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     
     
     // Set and size the inapplic parsimony sets
-    for (i = 0; i < /*m->nparsimtypes*/MPL_PARSIM_T_MAX; ++i) {
+    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
         // Check how many standard characters in this type
         if (m->nasbytype[i] > 0) {
             
@@ -606,9 +624,9 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         }
         if (m->charinfo[i].isparsinform == true) {
             ++m->ninform;
-        } else {
+        } /*else {
             printf("Character %i deemed uninformative\n", i+1);
-        }
+        }*/
     }
     
 }
@@ -629,7 +647,7 @@ static void mpl_matrix_write_discr_parsim_to_buffer
 (mpl_parsdat* pd, mpl_matrix* m)
 {
     long i = 0;
-    
+
     mpl_discr* colbuf = NULL;
     colbuf = (mpl_discr*)safe_calloc(m->num_rows, sizeof(mpl_discr));
     
@@ -697,14 +715,13 @@ static void mpl_count_inapplics_by_parstype(mpl_matrix* m)
     long i = 0;
     
     memset(m->nasbytype, 0, MPL_PARSIM_T_MAX * sizeof(int));
-    
-    
+
     for (i = 0; i < m->num_cols; ++i) {
         
         m->charinfo[i].num_gaps = mpl_matrix_count_gaps_in_column((const long)i, (const mpl_matrix*)m);
         
         if (m->charinfo[i].num_gaps > 2) {
-            ++m->nasbytype[m->charinfo[i].datatype];
+            ++m->nasbytype[m->charinfo[i].parsimtype];
         }
     }
 }
