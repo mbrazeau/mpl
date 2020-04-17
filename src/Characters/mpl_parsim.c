@@ -1520,6 +1520,8 @@ void mpl_wagner_na_second_uppass
     const long end = pd->end;
     mpl_discr t = 0;
     mpl_discr fin = 0UL;
+    mpl_discr du;
+    mpl_discr x;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1533,14 +1535,43 @@ void mpl_wagner_na_second_uppass
                     upset[n][i] = t;  // B1
                 }
                 else {
-                    // TODO: FINISH THIS
                     fin = upset[anc][i] & dnsetf[n][i];
                     if (fin != upset[anc][i]) {
                         if ((dnsetf[left][i] | dnsetf[right][i]) & NA) { // If one descendant is inapplicable
                             fin = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                            
                         } else {
-                            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]); // Creates smallest closed interval
-                            fin |= (dnset[left][i] | dnset[right][i]); // Adding these states creates the largest closed interval
+                            du = dnset[left][i] | dnset[right][i];
+                            if (du & upset[anc][i]) {
+                                x = (du | dnset[n][i]) & upset[anc][i];
+                                if (x & dnset[n][i]) {
+                                    fin = x;
+                                } else {
+                                    if (x > dnset[n][i]) {
+                                        while (!(x & dnset[n][i])) {
+                                            x |= (x >> 1);
+                                        }
+                                    } else {
+                                        while (!(x & dnset[n][i])) {
+                                            x |= (x << 1);
+                                        }
+                                    }
+                                    fin = x;
+                                }
+                            } else {
+                                if (du > upset[anc][i]) {
+                                    du = du & (-du);
+                                } else {
+                                    du = mpl_discr_hibit(du);
+                                }
+                                
+                                if (dnset[n][i] > upset[anc][i]) {
+                                    x = dnset[n][i] & (-dnset[n][i]);
+                                } else {
+                                    x = mpl_discr_hibit(dnset[n][i]);
+                                }
+                                mpl_parsim_closed_interval(&fin, x, du);
+                            }
                         }
                         fin = (fin & upset[anc][i]) | dnset[n][i];
                     }
@@ -1553,6 +1584,13 @@ void mpl_wagner_na_second_uppass
         }
         else {
             upset[n][i] = dnsetf[n][i];
+        }
+        
+        if (upset[n][i] & upset[anc][i]) {
+            rtset[n][i] = (upset[n][i] | upset[anc][i]);
+        } else {
+            mpl_parsim_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
+            rtset[n][i] |= (upset[n][i] | upset[anc][i]);
         }
         
         tempup[n][i] = upset[n][i];
