@@ -33,6 +33,15 @@ typedef unsigned int mpl_discr;
 #define VALIDSYMB   VALID_NEXMAT_PUNC VALID_XREAD_MATPUNC VALID_WILDCARD \
 VALID_STATESYMB VALID_WS
 
+static inline unsigned int mpl_discr_hibit (unsigned int n)
+{
+    n |= (n >>  1);
+    n |= (n >>  2);
+    n |= (n >>  4);
+    n |= (n >>  8);
+    n |= (n >> 16);
+    return n - (n >> 1);
+}
 
 
 #endif /* mpl_chardegs_h */

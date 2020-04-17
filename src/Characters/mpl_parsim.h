@@ -56,6 +56,7 @@ typedef struct mpl_parsdat {
     bool            isNAtype;
     mpl_dnfxn       downfxn1;
     mpl_dnfxn       downfxn2;
+    mpl_dnfxn       rrupdate;
     mpl_dnfxn       rednfxn2; // Downpass function for length recalculation
     mpl_upfxn       upfxn1;
     mpl_upfxn       upfxn2;
@@ -74,113 +75,54 @@ void mpl_parsim_init_parsdat(const long start, const long end, mpl_parsdat* pd);
 void mpl_parsim_setup_nodal_index_buffers(const long nnodes, mpl_parsdat* pd);
 void mpl_parsim_cleanup_parsdat(mpl_parsdat* pd);
 void mpl_parsim_reset_nchanges(mpl_parsdat* pd);
-void mpl_parsim_set_type
-(const mpl_gap_t gaphandl, const mpl_parsim_t ptype, mpl_parsdat* pd);
-void mpl_parsim_add_data_column_to_buffer
-(mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd);
+void mpl_parsim_set_type (const mpl_gap_t gaphandl, const mpl_parsim_t ptype, mpl_parsdat* pd);
+void mpl_parsim_add_data_column_to_buffer (mpl_discr* col, mpl_charinfo* ci, mpl_charbuf* cb, mpl_parsdat* pd);
 void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd);
-double mpl_fitch_downpass
-(const long left, const long right, const long n, mpl_parsdat* pd);
-void mpl_fitch_uppass
-(const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+double mpl_fitch_downpass (const long left, const long right, const long n, mpl_parsdat* pd);
+void mpl_fitch_uppass (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_fitch_root(const long n, const long anc, mpl_parsdat* pd);
 void mpl_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
 void mpl_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
-double mpl_fitch_local_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
-double mpl_fitch_na_tip2tip_check
-(const double lim,
- const double base,
- const long src,
- const long tgt1,
- const long tgt2,
- const long troot,
- mpl_parsdat* pd);
+double mpl_fitch_local_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
+double mpl_fitch_na_tip2tip_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
 void mpl_fitch_na_root(const long n, const long anc, mpl_parsdat* pd);
 double mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_wagner_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd);
-double mpl_fitch_na_first_downpass
-(const long left, const long right, const long n, mpl_parsdat* pd);
-void mpl_fitch_na_first_uppass
-(const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
-double mpl_fitch_na_second_downpass
-(const long left, const long right, const long n, mpl_parsdat* pd);
+double mpl_fitch_na_first_downpass (const long left, const long right, const long n, mpl_parsdat* pd);
+void mpl_fitch_na_first_uppass (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+double mpl_fitch_na_second_downpass (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_fitch_na_root_finalize(const long n, const long anc, mpl_parsdat* pd);
-void mpl_fitch_na_second_uppass
-(const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+void mpl_fitch_na_second_uppass (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd);
-double mpl_na_only_parsim_first_downpass
-(const long left, const long right, const long n, mpl_matrix* m);
+double mpl_na_only_parsim_first_downpass (const long left, const long right, const long n, mpl_matrix* m);
 void mpl_na_only_parsim_do_root(const long n, const long anc, mpl_matrix* m);
-int mpl_na_only_parsim_first_uppass
-(const long left, const long right, const long n, const long anc, mpl_matrix* m);
+int mpl_na_only_parsim_first_uppass (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
-double mpl_na_only_parsim_second_downpass
-(const long left, const long right, const long n, mpl_matrix* m);
-double mpl_fitch_na_local_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
-
-double mpl_fitch_na_local_fork2fork
-(const double lim,
- const long src,
- const long srclef,
- const long srcrig,
- const long tgt1lef,
- const long tgt1rig,
- const long tgt1,
- const long tgt2,
- const long tgt2anc,
- const long tgt2sib,
- const long troot,
- mpl_parsdat* pd);
-
+double mpl_na_only_parsim_second_downpass (const long left, const long right, const long n, mpl_matrix* m);
+double mpl_wagner_na_down_reroot (const long left, const long right, const long n, mpl_parsdat* pd);
+double mpl_fitch_na_down_reroot (const long left, const long right, const long n, mpl_parsdat* pd);
+double mpl_fitch_na_local_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
 void mpl_parsim_reset_scores(mpl_matrix* m);
 double mpl_parsim_get_std_scores(mpl_matrix* m);
 double mpl_parsim_get_na_scores(mpl_matrix* m);
-double mpl_parsim_first_downpass
-(const long left, const long right, const long n, mpl_matrix* m);
-void mpl_parsim_first_uppass
-(const long left, const long right, const long n, const long anc, mpl_matrix* m);
-double mpl_parsim_second_downpass
-(const long left, const long right, const long n, mpl_matrix* m);
-double mpl_fitch_na_second_downpass2
-(const long left, const long right, const long n, mpl_parsdat* pd);
-void mpl_parsim_second_uppass
-(const long left, const long right, const long n, const long anc, mpl_matrix* m);
+double mpl_parsim_first_downpass (const long left, const long right, const long n, mpl_matrix* m);
+void mpl_parsim_first_uppass (const long left, const long right, const long n, const long anc, mpl_matrix* m);
+double mpl_parsim_second_downpass (const long left, const long right, const long n, mpl_matrix* m);
+double mpl_fitch_na_down_reroot (const long left, const long right, const long n, mpl_parsdat* pd);
+void mpl_parsim_second_uppass (const long left, const long right, const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matrix* m);
 void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl_matrix* m);
 void mpl_parsim_do_src_tip(const long n, mpl_matrix* m);
 void mpl_parsim_update_active_sets(const long left, const long right, const long n, mpl_matrix* m);
-double mpl_parsim_local_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
-double mpl_parsim_tip2tip_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
-
-double mpl_fitch_na_local_recheck
-(const double lim,
- const double base,
- const long src,
- const long tgt1,
- const long tgt2,
- const long troot,
- mpl_parsdat* pd);
-
-double mpl_parsim_local_recheck
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
-
-double
-mpl_fitch_na_recalc_first_downpass
- (const long left, const long right, const long n, mpl_parsdat* restrict pd);
-double mpl_fitch_na_recalc_second_downpass
-(const long left, const long right, const long n, mpl_parsdat* restrict pd);
+double mpl_parsim_local_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m);
+double mpl_fitch_na_recalc_first_downpass(const long left, const long right, const long n, mpl_parsdat* restrict pd);
+double mpl_fitch_na_recalc_second_downpass(const long left, const long right, const long n, mpl_parsdat* restrict pd);
 void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd);
-int mpl_fitch_na_recalc_first_uppass
- (const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
+int mpl_fitch_na_recalc_first_uppass(const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
-static inline unsigned int mpl_parsim_closed_interval
- (mpl_discr* res, mpl_discr a, mpl_discr b);
+static inline unsigned int mpl_parsim_closed_interval(mpl_discr* res, mpl_discr a, mpl_discr b);
 double mpl_wagner_downpass
  (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_wagner_uppass

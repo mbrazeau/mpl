@@ -60,6 +60,7 @@ static const mpl_parsdat Fitch_NA = {
     .downfxn1   = &mpl_fitch_na_first_downpass,
     .upfxn1     = &mpl_fitch_na_first_uppass,
     .downfxn2   = &mpl_fitch_na_second_downpass,
+    .rrupdate   = &mpl_fitch_na_down_reroot,
     .rednfxn2   = &mpl_fitch_na_recalc_second_downpass,
     .upfxn2     = &mpl_fitch_na_second_uppass,
     .tipfxn1    = &mpl_na_tip_update,
@@ -89,6 +90,7 @@ static const mpl_parsdat Wagner_NA = {
     .downfxn1   = &mpl_fitch_na_first_downpass,
     .upfxn1     = &mpl_fitch_na_first_uppass,
     .downfxn2   = &mpl_wagner_na_second_downpass,
+    .rrupdate   = &mpl_wagner_na_down_reroot,
     .upfxn2     = &mpl_wagner_na_second_uppass,
     .rednfxn2   = &mpl_wagner_na_recalc_second_downpass,
     .tipfxn1    = &mpl_na_tip_update,
@@ -723,8 +725,6 @@ double mpl_fitch_na_second_downpass
     mpl_discr t = 0;
     double cost = 0.0;
     
-//    pd->nndindices[n] = 0L;
-    
     for (i = pd->start; i < end; ++i) {
         
         nodechanges[n][i] = 0L;
@@ -771,7 +771,7 @@ double mpl_fitch_na_second_downpass
     return cost;
 }
 
-double mpl_fitch_na_second_downpass2
+double mpl_fitch_na_down_reroot
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
@@ -1243,6 +1243,33 @@ static inline unsigned int mpl_parsim_closed_interval
     return steps;
 }
 
+static inline unsigned int mpl_parsim_largest_closed_interval
+ (mpl_discr* res, mpl_discr a, mpl_discr b)
+{
+    unsigned int steps = 0;
+    mpl_discr c = 0;
+    mpl_discr d = 0;
+    
+    if (b > a) {
+        c = b;
+        b = a;
+        a = c;
+    }
+    
+    //d = a & (-a);
+    
+    while(!(d & b)) {
+        ++steps;
+        d |= a >> steps;
+    }
+    
+    if (res != NULL) {
+        *res = d | b;
+    }
+    
+    return steps;
+}
+
 double mpl_wagner_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
@@ -1273,18 +1300,57 @@ void mpl_wagner_uppass
     long i;
     const long end = pd->end;
     mpl_discr fin = 0UL;
-    
+    mpl_discr du;
+    mpl_discr x;
     for (i = pd->start; i < end; ++i) {
         
         fin = upset[anc][i] & dnset[n][i];
         
         if (fin != upset[anc][i]) {
-            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
-            fin |= (dnset[left][i] | dnset[right][i]);
-            fin = (fin & upset[anc][i]) | dnset[n][i];
+            du = dnset[left][i] | dnset[right][i];
+            if (du & upset[anc][i]) {
+                x = (du | dnset[n][i]) & upset[anc][i];
+                if (x & dnset[n][i]) {
+                    fin = x;
+                } else {
+                    // fin = largest closed interval between x and the state
+                    //       in dnset[n][i] closest to x
+                    if (x > dnset[n][i]) {
+                        while (!(x & dnset[n][i])) {
+                            x |= (x >> 1);
+                        }
+                    } else {
+                        while (!(x & dnset[n][i])) {
+                            x |= (x << 1);
+                        }
+                    }
+                    fin = x;
+                }
+            } else {
+                if (du > upset[anc][i]) {
+                    du = du & (-du);
+                } else {
+                    du = mpl_discr_hibit(du);
+                }
+                
+                if (dnset[n][i] > upset[anc][i]) {
+                    x = dnset[n][i] & (-dnset[n][i]);
+                } else {
+                    x = mpl_discr_hibit(dnset[n][i]);
+                }
+                mpl_parsim_closed_interval(&fin, x, du);
+            }
         }
-        
         upset[n][i] = fin;
+//        mpl_parsim_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
+//        rtset[n][i] |= (upset[n][i] | upset[anc][i]);
+//        if (fin != upset[anc][i]) {
+////            if ((dnset[left][i] | dnset[right][i]) & upset[anc][i]) {
+//            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
+//            fin |= (dnset[left][i] | dnset[right][i]); // Creates largest closed interval
+//            fin = (fin & upset[anc][i]) | dnset[n][i];
+//        }
+//        upset[n][i] = fin;
     }
 }
 
@@ -1300,11 +1366,19 @@ double mpl_wagner_local_check
     long i;
     const long end = pd->end;
     double score = 0.0;
+    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
-        if (!((upset[tgt1][i] | upset[tgt2][i]) & dnset[src][i])) {
+        if (!(upset[tgt1][i] & upset[tgt2][i])) {
+            mpl_parsim_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
+            t |= (upset[tgt1][i] | upset[tgt2][i]);
+        } else {
+            t = (upset[tgt1][i] | upset[tgt2][i]);
+        }
+       
+        if (!(t & dnset[src][i])) {
             score += (weights[i] * mpl_parsim_closed_interval(NULL,
-                                                              upset[tgt1][i] | upset[tgt2][i],
+                                                              t,
                                                               dnset[src][i]));
         }
     }
@@ -1338,7 +1412,7 @@ double mpl_wagner_na_second_downpass
                     dnsetf[n][i] = t;
                 }
             } else {
-                
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     cost += (weights[i] *
                              mpl_parsim_closed_interval(&dnsetf[n][i],
@@ -1348,7 +1422,6 @@ double mpl_wagner_na_second_downpass
                     ++applicchgs[i];
                     nodechanges[n][i] = 1L;
                 } else if (actives[left][i] && actives[right][i]) {
-                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                     cost += weights[i];
                     ++changes[i];
                     nodechanges[n][i] = 1L;
@@ -1362,7 +1435,9 @@ double mpl_wagner_na_second_downpass
                 nodechanges[n][i] = 1L;
             }
         }
-//        assert(upset[n][i]);
+#ifdef DEBUG
+        assert(dnsetf[n][i]);
+#endif
         actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         
         tempact[n][i] = actives[n][i];
@@ -1374,6 +1449,58 @@ double mpl_wagner_na_second_downpass
     return cost;
 }
 
+double mpl_wagner_na_down_reroot
+ (const long left, const long right, const long n, mpl_parsdat* pd)
+{
+    long i;
+    long end = pd->end;
+    mpl_discr t = 0;
+    double cost = 0.0;
+    
+    //    pd->nndindices[n] = 0L;
+    
+    for (i = pd->start; i < end; ++i) {
+        
+        nodechanges[n][i] = 0L;
+        
+        if (prupset[n][i] & ISAPPLIC) {
+            
+            t = dnsetf[left][i] & dnsetf[right][i];
+            
+            if (t) {
+                if (t & ISAPPLIC) {
+                    dnsetf[n][i] = t & ISAPPLIC;
+                } else {
+                    dnsetf[n][i] = t;
+                }
+            } else {
+                
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+                    mpl_parsim_closed_interval(&dnsetf[n][i],
+                                            dnsetf[left][i] & ISAPPLIC,
+                                            dnsetf[right][i] & ISAPPLIC);
+                    nodechanges[n][i] = 1L;
+                } else if (actives[left][i] && actives[right][i]) {
+                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
+                    nodechanges[n][i] = 1L;
+                }
+            }
+        } else {
+            dnsetf[n][i] = prupset[n][i];
+            if (actives[left][i] && actives[right][i]) {
+                nodechanges[n][i] = 1L;
+            }
+        }
+       
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        tempact[n][i] = actives[n][i];
+        tempdnf[n][i] = dnsetf[n][i];
+    }
+    
+    pd->score += cost;
+    
+    return cost;
+}
 void mpl_wagner_na_second_uppass
 (const long left, const long right, const long n, const long anc, mpl_parsdat* pd)
 {
@@ -1419,7 +1546,9 @@ void mpl_wagner_na_second_uppass
         tempup[n][i] = upset[n][i];
 //        assert(!(upset[n][i] & NA && upset[n][i] & ISAPPLIC));
 //        assert(upset[n][i] & ISAPPLIC || upset[n][i] == NA);
+#ifdef DEBUG
         assert(upset[n][i]);
+#endif
     }
 }
 
@@ -1443,13 +1572,17 @@ double mpl_wagner_na_local_check
     double cminscore = pd->cminscore; // Sum of all applicable changes
     double testscore = 0.0;
     double recall    = pd->crecall;
+    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
             if ((upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC) {
-                if (!((upset[tgt1][i] | upset[tgt2][i]) & upset[src][i])) {
+                mpl_parsim_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
+                t |= (upset[tgt1][i] | upset[tgt2][i]);
+                t &= ISAPPLIC;
+                if (!(t & upset[src][i])) {
                     score += (weights[i] * mpl_parsim_closed_interval(NULL,
-                                                                      (upset[tgt1][i] | upset[tgt2][i]) & ISAPPLIC,
+                                                                      t,
                                                                       dnset[src][i]));
                 }
             } else if (upset[src][i] < MISSING) {
@@ -1466,7 +1599,7 @@ double mpl_wagner_na_local_check
                 }
             }
         } else {
-            if (rtset[tgt1][i] & NA) {
+            if ((upset[tgt1][i] | upset[tgt2][i]) & NA) {
                 if (tempact[troot][i] && tempact[src][i]) {
                     score += weights[i];
                 }
@@ -1853,8 +1986,13 @@ double mpl_wagner_src_root(const long left, const long right, const long n, mpl_
     long end = pd->end;
     
     for (i = pd->start; i < end; ++i) {
-        mpl_parsim_closed_interval(&dnset[n][i], upset[left][i], upset[right][i]);
-        dnset[n][i] |= (upset[left][i] | upset[right][i]);
+        dnset[n][i] = 0UL;
+        if (!(upset[left][i] & upset[right][i])) {
+            mpl_parsim_closed_interval(&dnset[n][i], upset[left][i], upset[right][i]);
+            dnset[n][i] |= (upset[left][i] | upset[right][i]);
+        } else {
+            dnset[n][i] = (upset[left][i] | upset[right][i]);
+        }
     }
     
     return 0.0;
@@ -1890,7 +2028,7 @@ double mpl_wagner_na_do_src_root(const long left, const long right, const long n
             mpl_parsim_closed_interval(&upset[n][i], upset[left][i], upset[right][i]);
             upset[n][i] |= (upset[left][i] | upset[right][i]);
         } else {
-            upset[n][i] = upset[left][i] | upset[right][i];
+            upset[n][i] |= upset[left][i] | upset[right][i];
         }
 
         if (upset[n][i] & ISAPPLIC) {
@@ -1991,7 +2129,7 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
         if (m->parsets[i].isNAtype == true) {
             // TODO: This fitch NA first downpass might need to be removed?
             mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
-            mpl_fitch_na_second_downpass2(left, right, n, &m->parsets[i]); // <<================= FIX THIS FOR WAGNER
+            m->parsets[i].rrupdate(left, right, n, &m->parsets[i]); // <<================= FIX THIS FOR WAGNER
         }
     }
 }
