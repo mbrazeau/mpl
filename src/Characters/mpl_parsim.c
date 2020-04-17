@@ -516,7 +516,14 @@ void mpl_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
         }
         
-        rtset[tipn][i] = upset[tipn][i] | upset[anc][i];
+        if (pd->parstype == MPL_WAGNER_T && !(upset[tipn][i] & upset[anc][i])) {
+            mpl_parsim_closed_interval(&rtset[tipn][i], upset[tipn][i], upset[anc][i]);
+            rtset[tipn][i] |= upset[tipn][i] | upset[anc][i];
+        } else {
+            rtset[tipn][i] = upset[tipn][i] | upset[anc][i];
+        }
+        
+        
 //        tempdn[tipn][i] = dnset[tipn][i];
 //        tempup[tipn][i] = upset[tipn][i];
     }
@@ -1313,8 +1320,6 @@ void mpl_wagner_uppass
                 if (x & dnset[n][i]) {
                     fin = x;
                 } else {
-                    // fin = largest closed interval between x and the state
-                    //       in dnset[n][i] closest to x
                     if (x > dnset[n][i]) {
                         while (!(x & dnset[n][i])) {
                             x |= (x >> 1);
@@ -1342,8 +1347,15 @@ void mpl_wagner_uppass
             }
         }
         upset[n][i] = fin;
-//        mpl_parsim_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
-//        rtset[n][i] |= (upset[n][i] | upset[anc][i]);
+
+        if (upset[n][i] & upset[anc][i]) {
+            rtset[n][i] = (upset[n][i] | upset[anc][i]);
+        } else {
+            mpl_parsim_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
+            rtset[n][i] |= (upset[n][i] | upset[anc][i]);
+        }
+        
+//        Ronquist version (doesn't work)
 //        if (fin != upset[anc][i]) {
 ////            if ((dnset[left][i] | dnset[right][i]) & upset[anc][i]) {
 //            mpl_parsim_closed_interval(&fin, dnset[left][i], dnset[right][i]);
@@ -1366,19 +1378,19 @@ double mpl_wagner_local_check
     long i;
     const long end = pd->end;
     double score = 0.0;
-    mpl_discr t = 0UL;
+//    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
-        if (!(upset[tgt1][i] & upset[tgt2][i])) {
-            mpl_parsim_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
-            t |= (upset[tgt1][i] | upset[tgt2][i]);
-        } else {
-            t = (upset[tgt1][i] | upset[tgt2][i]);
-        }
-       
-        if (!(t & dnset[src][i])) {
+//        if (!(upset[tgt1][i] & upset[tgt2][i])) {
+//            mpl_parsim_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
+//            t |= (upset[tgt1][i] | upset[tgt2][i]);
+//        } else {
+//            t = (upset[tgt1][i] | upset[tgt2][i]);
+//        }
+//
+        if (!(rtset[tgt1][i] & dnset[src][i])) {
             score += (weights[i] * mpl_parsim_closed_interval(NULL,
-                                                              t,
+                                                              rtset[tgt1][i],
                                                               dnset[src][i]));
         }
     }
