@@ -122,7 +122,7 @@ double mpl_fitch_na_recalc_second_downpass(const long left, const long right, co
 void mpl_fitch_na_recalc_root(const long n, const long anc, mpl_parsdat* pd);
 int mpl_fitch_na_recalc_first_uppass(const long left, const long right, const long n, const long anc, mpl_parsdat* pd);
 void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd);
-static inline unsigned int mpl_parsim_closed_interval(mpl_discr* res, mpl_discr a, mpl_discr b);
+static inline unsigned int mpl_smallest_closed_interval(mpl_discr* res, mpl_discr a, mpl_discr b);
 double mpl_wagner_downpass
  (const long left, const long right, const long n, mpl_parsdat* pd);
 void mpl_wagner_uppass
