@@ -1410,6 +1410,7 @@ double mpl_wagner_na_second_downpass
     long end = pd->end;
     mpl_discr t = 0;
     double cost = 0.0;
+    long lchanges = 0;
     
 //    pd->nndindices[n] = 0L;
     
@@ -1430,13 +1431,13 @@ double mpl_wagner_na_second_downpass
             } else {
                 dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-                    cost += (weights[i] *
-                             mpl_smallest_closed_interval(&dnsetf[n][i],
-                                                        dnsetf[left][i] & ISAPPLIC,
-                                                        dnsetf[right][i] & ISAPPLIC));
-                    ++changes[i];
-                    ++applicchgs[i];
-                    nodechanges[n][i] = 1L;
+                    lchanges = mpl_smallest_closed_interval(&dnsetf[n][i],
+                                                            dnsetf[left][i] & ISAPPLIC,
+                                                            dnsetf[right][i] & ISAPPLIC);
+                    cost += (weights[i] * lchanges);
+                    changes[i] += lchanges;
+                    applicchgs[i] += lchanges;
+                    nodechanges[n][i] = lchanges;
                 } else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                     ++changes[i];
@@ -1472,6 +1473,7 @@ double mpl_wagner_na_down_reroot
     long end = pd->end;
     mpl_discr t = 0;
     double cost = 0.0;
+    long lchanges = 0;
     
     //    pd->nndindices[n] = 0L;
     
@@ -1492,10 +1494,10 @@ double mpl_wagner_na_down_reroot
             } else {
                 
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
-                    mpl_smallest_closed_interval(&dnsetf[n][i],
-                                            dnsetf[left][i] & ISAPPLIC,
-                                            dnsetf[right][i] & ISAPPLIC);
-                    nodechanges[n][i] = 1L;
+                    lchanges = mpl_smallest_closed_interval(&dnsetf[n][i],
+                                                           dnsetf[left][i] & ISAPPLIC,
+                                                           dnsetf[right][i] & ISAPPLIC);
+                    nodechanges[n][i] = lchanges;
                 } else if (actives[left][i] && actives[right][i]) {
                     dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                     nodechanges[n][i] = 1L;
@@ -1611,17 +1613,14 @@ double mpl_wagner_na_local_check
     double cminscore = pd->cminscore; // Sum of all applicable changes
     double testscore = 0.0;
     double recall    = pd->crecall;
-    mpl_discr t = 0UL;
+//    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
             if ((rtset[tgt1][i]) & ISAPPLIC) {
-                mpl_smallest_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
-                t |= (upset[tgt1][i] | upset[tgt2][i]);
-                t &= ISAPPLIC;
-                if (!(t & upset[src][i])) {
+                if (!(rtset[tgt1][i] & upset[src][i])) {
                     score += (weights[i] * mpl_smallest_closed_interval(NULL,
-                                                                      t,
+                                                                      rtset[tgt1][i] * ISAPPLIC,
                                                                       dnset[src][i]));
                 }
             } else if (upset[src][i] < MISSING) {
