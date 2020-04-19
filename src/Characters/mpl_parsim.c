@@ -1255,7 +1255,7 @@ static inline unsigned int mpl_smallest_closed_interval
     return steps;
 }
 
-static inline unsigned int mpl_parsim_largest_closed_interval
+static inline unsigned int mpl_largest_closed_interval
  (mpl_discr* res, mpl_discr a, mpl_discr b)
 {
     mpl_discr c = 0;
@@ -1382,16 +1382,8 @@ double mpl_wagner_local_check
     long i;
     const long end = pd->end;
     double score = 0.0;
-//    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
-//        if (!(upset[tgt1][i] & upset[tgt2][i])) {
-//            mpl_parsim_closed_interval(&t, upset[tgt1][i], upset[tgt2][i]);
-//            t |= (upset[tgt1][i] | upset[tgt2][i]);
-//        } else {
-//            t = (upset[tgt1][i] | upset[tgt2][i]);
-//        }
-//
         if (!(rtset[tgt1][i] & dnset[src][i])) {
             score += (weights[i] * mpl_smallest_closed_interval(NULL,
                                                               rtset[tgt1][i],
@@ -1492,14 +1484,13 @@ double mpl_wagner_na_down_reroot
                     dnsetf[n][i] = t;
                 }
             } else {
-                
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     lchanges = mpl_smallest_closed_interval(&dnsetf[n][i],
                                                            dnsetf[left][i] & ISAPPLIC,
                                                            dnsetf[right][i] & ISAPPLIC);
                     nodechanges[n][i] = lchanges;
                 } else if (actives[left][i] && actives[right][i]) {
-                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                     nodechanges[n][i] = 1L;
                 }
             }
@@ -1535,36 +1526,48 @@ void mpl_wagner_na_second_uppass
             if (upset[anc][i] & ISAPPLIC) {
                 fin = upset[anc][i] & dnsetf[n][i];
                 if (fin != upset[anc][i]) {
-                    du = (dnset[left][i] | dnset[right][i]) & ISAPPLIC;
-                    if (du & upset[anc][i]) {
-                        x = (du | dnset[n][i]) & upset[anc][i];
-                        if (x & dnset[n][i]) {
-                            fin = x;
-                        } else {
-                            if (x > dnset[n][i]) {
-                                while (!(x & dnset[n][i])) {
-                                    x |= (x >> 1);
-                                }
-                            } else {
-                                while (!(x & dnset[n][i])) {
-                                    x |= (x << 1);
-                                }
-                            }
-                            fin = x;
-                        }
+                    du = (dnsetf[left][i] | dnsetf[right][i]);// & ISAPPLIC;
+                    if (du & NA) {
+                        mpl_smallest_closed_interval(&fin, dnsetf[n][i], upset[anc][i]);
                     } else {
-                        if (du > upset[anc][i]) {
-                            du = du & (-du);
+                        if (du & upset[anc][i]) {
+                            x = (du | dnsetf[n][i]) & upset[anc][i];
+                            if (x & dnsetf[n][i]) {
+                                fin = x;
+                            } else {
+                                if (x > dnsetf[n][i]) {
+                                    while (!(x & dnsetf[n][i])) {
+                                        x |= (x >> 1);
+                                    }
+                                } else {
+                                    while (!(x & dnsetf[n][i])) {
+                                        x |= (x << 1);
+                                    }
+                                }
+                                fin = x;
+                            }
                         } else {
-                            du = mpl_discr_hibit(du);
+                            if (du > upset[anc][i]) {
+                                du = du & (-du);
+                            } else {
+                                du = mpl_discr_hibit(du);
+                            }
+                            
+                            if (dnsetf[n][i] > upset[anc][i]) {
+                                x = dnsetf[n][i] & (-dnsetf[n][i]);
+                            } else {
+                                x = mpl_discr_hibit(dnsetf[n][i]);
+                            }
+                            mpl_smallest_closed_interval(&fin, x, du);
+                            
+//                            if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
+//                                if (fin > upset[anc][i]) {
+//                                    mpl_smallest_closed_interval(&fin, fin, mpl_discr_hibit(upset[anc][i]));
+//                                } else {
+//                                    mpl_smallest_closed_interval(&fin, fin, upset[anc][i] & (-upset[anc][i]));
+//                                }
+//                            }
                         }
-                        
-                        if (dnset[n][i] > upset[anc][i]) {
-                            x = dnset[n][i] & (-dnset[n][i]);
-                        } else {
-                            x = mpl_discr_hibit(dnset[n][i]);
-                        }
-                        mpl_smallest_closed_interval(&fin, x, du);
                     }
                 }
                 upset[n][i] = fin;  // B1
@@ -1580,8 +1583,13 @@ void mpl_wagner_na_second_uppass
         if (upset[n][i] & upset[anc][i]) {
             rtset[n][i] = (upset[n][i] | upset[anc][i]);
         } else {
-            mpl_smallest_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
-            rtset[n][i] |= (upset[n][i] | upset[anc][i]);
+            if (!((upset[n][i] | upset[anc][i]) & NA)) {
+                mpl_smallest_closed_interval(&rtset[n][i], upset[n][i], upset[anc][i]);
+                rtset[n][i] |= (upset[n][i] | upset[anc][i]);
+            } else {
+                rtset[n][i] = (upset[n][i] | upset[anc][i]);
+            }
+            
         }
         
         tempup[n][i] = upset[n][i];
@@ -1620,8 +1628,8 @@ double mpl_wagner_na_local_check
             if ((rtset[tgt1][i]) & ISAPPLIC) {
                 if (!(rtset[tgt1][i] & upset[src][i])) {
                     score += (weights[i] * mpl_smallest_closed_interval(NULL,
-                                                                      rtset[tgt1][i] * ISAPPLIC,
-                                                                      dnset[src][i]));
+                                                                      rtset[tgt1][i] & ISAPPLIC,
+                                                                      upset[src][i]));
                 }
             } else if (upset[src][i] < MISSING) {
                 if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
@@ -1703,14 +1711,13 @@ double mpl_wagner_na_recalc_second_downpass
                     dnsetf[n][i] = t;
                 }
             } else {
-                
+                dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                 if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
                     cost += (weights[i] *
                              mpl_smallest_closed_interval(&dnsetf[n][i],
                                                         dnsetf[left][i] & ISAPPLIC,
                                                         dnsetf[right][i] & ISAPPLIC));
                 } else if (actives[left][i] && actives[right][i]) {
-                    dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
                     cost += weights[i];
                 }
             }
@@ -2063,10 +2070,14 @@ double mpl_wagner_na_do_src_root(const long left, const long right, const long n
     for (i = pd->start; i < end; ++i) {
         
         if (upset[left][i] & ISAPPLIC && upset[right][i] & ISAPPLIC) {
-            mpl_smallest_closed_interval(&upset[n][i], upset[left][i], upset[right][i]);
-            upset[n][i] |= (upset[left][i] | upset[right][i]);
+            if (upset[left][i] & upset[right][i]) {
+                upset[n][i] = upset[left][i] | upset[right][i];
+            } else {
+                mpl_smallest_closed_interval(&upset[n][i], upset[left][i], upset[right][i]);
+                upset[n][i] |= (upset[left][i] | upset[right][i]);
+            }
         } else {
-            upset[n][i] |= upset[left][i] | upset[right][i];
+            upset[n][i] = upset[left][i] | upset[right][i];
         }
 
         if (upset[n][i] & ISAPPLIC) {
@@ -2163,11 +2174,10 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-//        m->parsets[i].downfxn1(left, right, n, &m->parsets[i]);
         if (m->parsets[i].isNAtype == true) {
             // TODO: This fitch NA first downpass might need to be removed?
             mpl_fitch_na_first_downpass(left, right, n, &m->parsets[i]);
-            m->parsets[i].rrupdate(left, right, n, &m->parsets[i]); // <<================= FIX THIS FOR WAGNER
+            m->parsets[i].rrupdate(left, right, n, &m->parsets[i]);
         }
     }
 }

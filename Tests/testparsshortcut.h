@@ -17,5 +17,6 @@ int test_parsimony_shortcut_with_breakout (void);
 int test_larger_parsimony_shortcut_with_rerooting (void);
 int test_parsimony_shortcut_multiple_tree (void);
 int test_parsimony_shortcut_with_wagner (void);
+int test_parsimony_shortcut_with_na_wagner (void);
 
 #endif /* testparsshortcut_h */

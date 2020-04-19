@@ -1592,3 +1592,308 @@ int test_parsimony_shortcut_with_wagner (void)
     printf("Failed %i times\n", failn);
     return failn;
 }
+
+int test_parsimony_shortcut_with_na_wagner (void)
+{
+    theader("Test parsimony shortcut with ordered characters and inapplicability");
+    
+    int failn = 0;
+    
+    //    int ntax = 28;
+    //    int nchar = 95;
+    long ntax = Brazeau.ntax;
+    long nchar = Brazeau.nchar;
+    double testscore = 0.0;
+    
+    char* matrix = Brazeau.chardat;
+    
+    // Miyashita et al.
+    int ntests = 1;
+    char* testtree[] ={
+        "(1,(2,((8,(72,((95,(((28,(71,(45,(((22,(75,(((31,(12,((13,(3,40)),(54,65)))),(43,63)),(26,33)))),(49,(46,(((69,(27,(16,(((17,(4,19)),(76,((39,(15,23)),(38,59)))),(60,74))))),(37,(52,57))),(9,(68,(18,(77,(7,62))))))))),(24,(50,(((79,(14,(41,((56,(47,(88,89))),(55,90))))),(94,((73,((30,35),((81,(34,64)),(80,(82,(83,86)))))),((58,91),(87,(84,85)))))),(36,(93,(66,92)))))))))),(32,44)),(48,(21,(25,(10,(20,42))))))),(29,((70,(5,11)),(51,53)))))),(78,(61,(6,67))))));",
+    };
+    
+    long maxswaps = (2 * ntax-3) * ((ntax - 3) * (ntax - 3));
+    int testscores[maxswaps + 1];
+    
+    mpl_matrix* m = NULL;
+    
+    // Setup the input data
+    m = mpl_matrix_new();
+    mpl_matrix_init(ntax, nchar, 2 * nchar, m);
+    mpl_matrix_attach_rawdata(matrix, m);
+    //    mpl_matrix_set_gap_handle(GAP_MISSING, m);
+    size_t i = 0;
+    int numord = 8;
+    int ordered[] = {64, 84, 125, 164, 260, 262, 266, 268};
+    for (i = 0; i < numord; ++i) {
+        mpl_matrix_set_parsim_t(ordered[i]-1, MPL_WAGNER_T, m);
+    }
+//    mpl_matrix_set_gap_handle(GAP_MISSING, m);
+    mpl_matrix_apply_data(m);
+    mpl_init_parsimony(m);
+    
+    // Setup the input tree
+    mpl_tree* t = NULL;
+    t = mpl_new_tree(ntax);
+    
+    // Setup a newick reader
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    
+    // Setup a topology for the newick reader
+    mpl_topol* top = NULL;
+    top = mpl_topol_new(ntax);
+    
+    //    mpl_newick_read(testtree, top, &rdr);
+    
+    // Set up the tree according to the input newick
+    //    mpl_tree_read_topol(t, top);
+    
+    // Calculate the length of the tree given the data and parameters
+    //    testscore = mpl_fullpass_parsimony(t);
+    
+    // Store this as a test length
+    
+//    long i = 0;
+    long j = 0;
+    
+    for (j = 0; j < ntests; ++j) {
+        mpl_newick_read(testtree[j], top, &rdr);
+        mpl_tree_read_topol(t, top);
+        testscore = mpl_fullpass_parsimony(t);
+        
+        printf("\nScore of the whole tree: %.0f\n", testscore);
+        
+        mpl_tree_traverse(t);
+        
+        long maxnodes = t->size;
+        double tgtlen = 0.0;
+        double srclen = 0.0;
+        double reclen = 0.0;
+        mpl_node* src = NULL;
+        mpl_node* site = NULL;
+        mpl_node* left = NULL;
+        mpl_node* right = NULL;
+        
+        // Perform all clippings on the tree
+        // For each clipping...
+        int c = 0;
+        
+        // Create the buffer of swaps
+        for (i = 1; i < maxnodes-2; ++i) { // TODO: May be able to use -1
+            
+            // Clip the tree:
+            src = t->postord_all[i];
+            site = mpl_node_get_sib(src);
+            
+            if (src->anc->left == src) {
+                right = site;
+                left = NULL; // Simply precautionary
+            }
+            else {
+                left = site;
+                right = NULL;
+            }
+            
+            mpl_node_bin_clip(src);
+            
+            mpl_node* rtlef = NULL;
+            mpl_node* rtrig = NULL;
+            mpl_node* oldnbr = NULL;
+            mpl_node* newnbr = NULL;
+            mpl_node** srcs = (mpl_node**)safe_calloc(2 * ntax, sizeof(mpl_node*));
+            mpl_node** srcbuf = srcs;
+            mpl_node** rt = NULL;
+            
+            // Set up the src pointers
+            if (src->tip == 0) {
+                //            printf("working on fork\n");
+                rtlef = src->left;
+                rtrig = src->right;
+                *srcs = src->left;
+                ++srcs;
+                if (src->right->tip == 0) {
+                    *srcs = src->right->left;
+                    ++srcs;
+                    *srcs = src->right->right;
+                    ++srcs;
+                }
+            }
+            else {
+                //            printf("working on tip: %li\n", src->tip);
+                *srcs = src;
+                ++srcs;
+            }
+            
+            // Perform all rerootings
+            
+            
+            int rroots = 0;
+            
+            for (rt = srcbuf; rt < srcs; ++rt) {
+                
+                //            rroots = 0;
+                
+                rroots = mpl_test_bbreak_tbr_reroot(*rt, src);
+
+                newnbr = *rt;
+                
+                if ((*rt)->tip == 0) {
+                    *srcs = (*rt)->left;
+                    ++srcs;
+                    *srcs = (*rt)->right;
+                    ++srcs;
+                }
+                
+                if (src->tip == 0) {
+                    if (oldnbr != NULL) {
+                        if (oldnbr->tip > 0) {
+                            oldnbr = oldnbr->anc;
+                        }
+//                        mpl_update_src_actives(oldnbr, src);
+                    }
+                }
+//                mpl_src_root_parsimony(src);
+                
+                oldnbr = newnbr;
+                // Calculuate the length of reinsertion to same spot
+                // Compare with test length
+                // Reconnect at clipsite:
+                
+                mpl_node_bin_connect(left, right, src);
+                
+                // Calculate the length of reinserting to same spot
+                testscores[c] = (int)mpl_fullpass_parsimony(t);
+                
+                ++c;
+                
+                mpl_node_bin_clip(src);
+                
+            }
+            
+            mpl_node_bin_connect(left, right, src);
+            
+            free(srcbuf);
+        }
+        
+        mpl_tree_read_topol(t, top);
+        src = NULL;
+        site = NULL;
+        left = NULL;
+        right = NULL;
+        c = 0;
+        for (i = 1; i < maxnodes-2; ++i) { // TODO: May be able to use -1
+            
+            // Clip the tree:
+            src = t->postord_all[i];
+            site = mpl_node_get_sib(src);
+            
+            if (src->anc->left == src) {
+                right = site;
+                left = NULL; // Simply precautionary
+            }
+            else {
+                left = site;
+                right = NULL;
+            }
+            
+            mpl_node_bin_clip(src);
+            
+            // Calculate the length of each subtree
+            tgtlen = 0.0;
+            srclen = 0.0;
+            tgtlen = mpl_fullpass_parsimony(t);
+            if (src->tip == 0) {
+                srclen = mpl_fullpass_subtree(src, t);
+            }
+            
+            mpl_node* rtlef = NULL;
+            mpl_node* rtrig = NULL;
+            mpl_node* oldnbr = NULL;
+            mpl_node* newnbr = NULL;
+            mpl_node** srcs = (mpl_node**)safe_calloc(2 * ntax, sizeof(mpl_node*));
+            mpl_node** srcbuf = srcs;
+            mpl_node** rt = NULL;
+            
+            // Set up the src pointers
+            if (src->tip == 0) {
+                //            printf("working on fork\n");
+                rtlef = src->left;
+                rtrig = src->right;
+                *srcs = src->left;
+                ++srcs;
+                if (src->right->tip == 0) {
+                    *srcs = src->right->left;
+                    ++srcs;
+                    *srcs = src->right->right;
+                    ++srcs;
+                }
+            }
+            else {
+                //            printf("working on tip: %li\n", src->tip);
+                *srcs = src;
+                ++srcs;
+            }
+            
+            int rroots = 0;
+            
+            for (rt = srcbuf; rt < srcs; ++rt) {
+                
+                rroots = mpl_test_bbreak_tbr_reroot(*rt, src);
+                
+                newnbr = *rt;
+                
+                if ((*rt)->tip == 0) {
+                    *srcs = (*rt)->left;
+                    ++srcs;
+                    *srcs = (*rt)->right;
+                    ++srcs;
+                }
+                
+                if (src->tip == 0) {
+                    if (oldnbr != NULL) {
+                        if (oldnbr->tip > 0) {
+                            oldnbr = oldnbr->anc;
+                        }
+                        mpl_update_src_actives(oldnbr, src);
+                    }
+                }
+                mpl_src_root_parsimony(src);
+                
+                oldnbr = newnbr;
+                
+                mpl_node_bin_connect(left, right, src);
+                
+                // Calculate the length of reinserting to same spot
+                
+                reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, site, t);
+                mpl_tree_traverse(t);
+                reclen += tgtlen + srclen;
+                
+                if (reclen != testscores[c]) {
+                    ++failn;
+                    pfail;
+                }
+                else {
+                    ppass;
+                }
+                
+                ++c;
+                
+                mpl_node_bin_clip(src);
+                
+            }
+            
+            mpl_node_bin_connect(left, right, src);
+            
+            free(srcbuf);
+        }
+        
+    }
+    
+    //printf("\nScores: %i", c);
+    printf("Failed %i times\n", failn);
+    return failn;
+}
+
