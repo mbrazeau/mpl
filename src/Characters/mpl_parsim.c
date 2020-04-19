@@ -2187,13 +2187,20 @@ double mpl_parsim_local_check
 {
     double score = 0.0;
     double cscore = base;
-    int i;
+    double minscores = 0.0;
+    int i, j;
+    
+    // TODO: need to add theoretical minimum scores from any remaining partitions
+    // so that breaks occur at correct time (not prematurely)
     
     for (i = 0; i < m->nparsets; ++i) {
+        for (j = i+1; j < m->nparsets; ++j) {
+            minscores += m->parsets[j].cminscore;
+        }
         m->parsets[i].scorerecall = 0.0;
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
-        score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        score += m->parsets[i].locfxn(lim+minscores, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
         cscore += score;
     }
     

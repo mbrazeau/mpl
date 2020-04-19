@@ -43,12 +43,12 @@ typedef struct mpl_parsdat {
     long**          ndindexbufs;
     bool            usndidx; // Flag for using node indices
     double          minscore;
+    double          absminscore; // Absolute minimum score for partition
     double          cminscore; // A current minimum score based on state of tree and applicable-only changes
     double          crecall;
     long*           minchanges;
     int             doeschange; // Number of times a character changes
-    double          scorerecall; // For characters needing full-pass estimation
-                                 // during a partial reopt.
+    double          scorerecall; // For characters needing full-pass estimation during a partial reopt.
     double          score; // The score for this parsimony type.
     double          tryscore; // Temporary score for an insertion attempt.
     mpl_charbuf*    cbuf; // The buffer to which this subset refers
