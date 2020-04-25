@@ -1979,12 +1979,12 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             dnset[n][i]     = tempdn[n][i];
             dnsetf[n][i]    = tempdnf[n][i];
             prupset[n][i]   = tempprup[n][i];
-            upset[n][i]     = tempup[n][i];
+//            upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
             dnset[anc][i]   = tempdn[anc][i];
             dnsetf[anc][i]  = tempdnf[anc][i];
             prupset[anc][i] = tempprup[anc][i];
-            upset[anc][i]   = tempup[anc][i];
+//            upset[anc][i]   = tempup[anc][i];
             actives[anc][i] = tempact[anc][i];
         }
     } else {
@@ -1995,7 +1995,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
             dnset[n][i]     = tempdn[n][i];
             dnsetf[n][i]    = tempdnf[n][i];
             prupset[n][i]   = tempprup[n][i];
-            upset[n][i]     = tempup[n][i];
+//            upset[n][i]     = tempup[n][i];
             actives[n][i]   = tempact[n][i];
         }
     }
@@ -2187,20 +2187,16 @@ double mpl_parsim_local_check
 {
     double score = 0.0;
     double cscore = base;
-    double minscores = 0.0;
-    int i, j;
+    int i;
     
     // TODO: need to add theoretical minimum scores from any remaining partitions
     // so that breaks occur at correct time (not prematurely)
     
     for (i = 0; i < m->nparsets; ++i) {
-        for (j = i+1; j < m->nparsets; ++j) {
-            minscores += m->parsets[j].cminscore;
-        }
         m->parsets[i].scorerecall = 0.0;
         m->parsets[i].nchars = 0;
         m->parsets[i].minscore = 0.0;
-        score += m->parsets[i].locfxn(lim+minscores, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
+        score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
         cscore += score;
     }
     
