@@ -451,9 +451,7 @@ double mpl_fitch_downpass
         if (!dnset[n][i]) {
             dnset[n][i] = dnset[left][i] | dnset[right][i];
             cost += weights[i];
-#ifdef DEBUG
-            ++changes[i];
-#endif
+            ++changes[i];   
         }
     }
     
@@ -1212,14 +1210,19 @@ double mpl_fitch_na_local_check
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            cminscore -= (applicchgs[i] * weights[i]);
-            recall -= (changes[i] * weights[i]);
-            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
-            if (testscore > lim) {
-                pd->minscore += cminscore;
-                pd->scorerecall += recall;
+            if ((score + base) > lim) {
+                pd->minscore += (score + base);
+                pd->scorerecall = 0;
                 return score;
             }
+//            cminscore -= (applicchgs[i] * weights[i]);
+//            recall -= (changes[i] * weights[i]);
+//            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
+//            if (testscore > lim) {
+//                pd->minscore += cminscore;
+//                pd->scorerecall += recall;
+//                return score;
+//            }
         }
     }
     
@@ -1772,7 +1775,6 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
     
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].score = 0.0;
-        
         // Re-set the nodal index buffers
         if (m->parsets[i].isNAtype == true) {
             for (j = 0; j < m->parsets[i].nnodes; ++j) {
@@ -1972,7 +1974,7 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long* restrict indices = pd->indexbuf;
 //    mpl_discr* dnsetn, dnsetfn, prupsetn, activesn, tempdnn, tempdnfn, temprupn, tempactn;
 //    mpl_discr* dnsetan, dnsetfan, prupsetan, activesan, tempdnan, tempdnfan, temprupan, tempactan;
-//    
+//
 //    dnsetn = dnset[n];
 //    dnsetfn = dnsetf[n];
 //    prupsetn = prupset[n];
@@ -2205,11 +2207,8 @@ double mpl_parsim_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
-    double cscore = base;
+    double cscore = m->naminscore;//base;
     int i;
-    
-    // TODO: need to add theoretical minimum scores from any remaining partitions
-    // so that breaks occur at correct time (not prematurely)
     
     for (i = 0; i < m->nparsets; ++i) {
         m->parsets[i].scorerecall = 0.0;
