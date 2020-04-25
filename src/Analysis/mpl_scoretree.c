@@ -563,7 +563,7 @@ double mpl_score_try_parsimony
     }
 
     // This gives a minimum number of steps added with a quick check.
-    score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
+    score = mpl_parsim_local_check(-1.0, sttlen, src->mem_index,
                                    tgt->mem_index,
                                    tgt->anc->anc->mem_index,
                                    t->base->mem_index, glmatrix);
@@ -595,9 +595,9 @@ double mpl_score_try_parsimony
     return score;
 }
 
-void mpl_scoretree_calc_abs_minscores(void)
+double mpl_scoretree_calc_abs_minscores(void)
 {
-    mpl_parsim_calc_abs_minscore(glmatrix);
+    return mpl_parsim_calc_abs_minscore(glmatrix);
 }
 
 void mpl_scoretree_copy_original_characters(void)
