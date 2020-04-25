@@ -1970,6 +1970,25 @@ void mpl_reset_root_buffers(const long n, const long anc, mpl_parsdat* pd)
     long j = 0;
     long i = 0;
     long* restrict indices = pd->indexbuf;
+//    mpl_discr* dnsetn, dnsetfn, prupsetn, activesn, tempdnn, tempdnfn, temprupn, tempactn;
+//    mpl_discr* dnsetan, dnsetfan, prupsetan, activesan, tempdnan, tempdnfan, temprupan, tempactan;
+//    
+//    dnsetn = dnset[n];
+//    dnsetfn = dnsetf[n];
+//    prupsetn = prupset[n];
+//    activesn = actives[n];
+//    tempdnn = tempdn[n];
+//    tempdnfn = tempdnf[n];
+//    temprupn = tempprup[n];
+//    tempactn = tempact[n];
+//    dnsetan = dnset[anc];
+//    dnsetfan = dnsetf[anc];
+//    prupsetan = prupset[anc];
+//    activesan = actives[anc];
+//    tempdnan = tempdn[anc];
+//    tempdnfan = tempdnf[anc];
+//    temprupan = tempprup[anc];
+//    tempactan = tempact[anc];
     
     if (anc > -1) {
         for (j = pd->nchars; j-- ; ) {
