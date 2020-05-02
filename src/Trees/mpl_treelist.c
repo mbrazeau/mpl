@@ -35,7 +35,7 @@ mpl_treelist* mpl_treelist_new(const long num_taxa, const long max_trees, const 
         q = p = mpl_topol_new(num_taxa);
         if (p == NULL) {
             printf("Warning: insufficient memory for requested treelist\n");
-            return -1;
+            return NULL;
         }
 
         // Run the factory
