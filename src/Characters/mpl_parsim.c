@@ -1541,6 +1541,9 @@ void mpl_wagner_na_second_uppass
                     du = (dnsetf[left][i] | dnsetf[right][i]);// & ISAPPLIC;
                     if (du & NA) {
                         mpl_smallest_closed_interval(&fin, dnsetf[n][i], upset[anc][i]);
+//                        if (dnsetf[n][i] & upset[anc][i]) {
+                            fin |= (dnsetf[n][i] | upset[anc][i]);
+//                        }
                     } else {
                         if (du & upset[anc][i]) {
                             x = (du | dnsetf[n][i]) & upset[anc][i];
@@ -1571,14 +1574,6 @@ void mpl_wagner_na_second_uppass
                                 x = mpl_discr_hibit(dnsetf[n][i]);
                             }
                             mpl_smallest_closed_interval(&fin, x, du);
-                            
-//                            if ((dnsetf[left][i] | dnsetf[right][i]) & NA) {
-//                                if (fin > upset[anc][i]) {
-//                                    mpl_smallest_closed_interval(&fin, fin, mpl_discr_hibit(upset[anc][i]));
-//                                } else {
-//                                    mpl_smallest_closed_interval(&fin, fin, upset[anc][i] & (-upset[anc][i]));
-//                                }
-//                            }
                         }
                     }
                 }
