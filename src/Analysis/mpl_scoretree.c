@@ -558,12 +558,12 @@ double mpl_score_try_parsimony
     // this junction.
     
     // If the lim is set and the score exceeds the limit already, return score.
-    if (lim > 0) {
+    if (lim > -1.0) {
         diff = lim-sttlen;
     }
 
     // This gives a minimum number of steps added with a quick check.
-    score = mpl_parsim_local_check(-1.0, sttlen, src->mem_index,
+    score = mpl_parsim_local_check(lim, sttlen, src->mem_index,
                                    tgt->mem_index,
                                    tgt->anc->anc->mem_index,
                                    t->base->mem_index, glmatrix);
@@ -597,7 +597,10 @@ double mpl_score_try_parsimony
 
 double mpl_scoretree_calc_abs_minscores(void)
 {
-    return mpl_parsim_calc_abs_minscore(glmatrix);
+    double naminscore = 0.0;
+    naminscore = mpl_parsim_calc_abs_minscore(glmatrix);
+    glmatrix->naminscore = naminscore;
+    return naminscore;
 }
 
 void mpl_scoretree_copy_original_characters(void)
