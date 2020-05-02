@@ -1540,10 +1540,11 @@ void mpl_wagner_na_second_uppass
                 if (fin != upset[anc][i]) {
                     du = (dnsetf[left][i] | dnsetf[right][i]);// & ISAPPLIC;
                     if (du & NA) {
-                        mpl_smallest_closed_interval(&fin, dnsetf[n][i], upset[anc][i]);
-//                        if (dnsetf[n][i] & upset[anc][i]) {
-                            fin |= (dnsetf[n][i] | upset[anc][i]);
-//                        }
+                        fin = NOCHARS;
+                        if (!(dnsetf[n][i] & upset[anc][i])) {
+                            mpl_smallest_closed_interval(&fin, dnsetf[n][i], upset[anc][i]);
+                        }
+                        fin |= (dnsetf[n][i] | upset[anc][i]);
                     } else {
                         if (du & upset[anc][i]) {
                             x = (du | dnsetf[n][i]) & upset[anc][i];
