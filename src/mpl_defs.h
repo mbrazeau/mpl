@@ -14,9 +14,9 @@
 //#include "Search/mpl_search.h"
 //#include "Results/mpl_results.h"
 #ifdef _WIN32
-#define restrict __restrict
+#define  restrict __restrict
 #else
-#define restrict restrict
+#define  restrict
 #endif
 
 #if defined(__GNUC__)
