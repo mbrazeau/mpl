@@ -345,8 +345,8 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         bbk->head = bbk->ratchhead;//bbk->treelist->back;
         mpl_tree_read_topol(t, bbk->head);
-        mpl_treelist_add_tree(false, t, bbk->treelist);
-        bbk->rep_ntrees = 0;
+        mpl_treelist_add_tree(true, t, bbk->treelist);
+        //bbk->rep_ntrees = 0;
         bbk->savelim = 1;
         mpl_swap_all(false, t, bbk);
 
@@ -355,12 +355,12 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Nixon 5; ============================================================
         mpl_reset_std_weights();
 
+        // Restore that tree
+        mpl_tree_read_topol(t, bbk->treelist->back);
+        mpl_treelist_clear_back_to(bbk->ratchhead, bbk->treelist);
+        // Get the current best score?
         // Reset head to last tree in buffer
         bbk->head = bbk->treelist->back;
-
-        // Restore that tree
-        mpl_tree_read_topol(t, bbk->head);
-        // Get the current best score?
         bbk->head->score = t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
         bbk->bestinrep = t->score;
         
