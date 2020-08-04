@@ -162,7 +162,7 @@ double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m);
 double mpl_parsim_calc_abs_minscore(mpl_matrix* m);
 int mpl_parsim_check_nas_updated(mpl_matrix* m);
 
-void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb);
+void mpl_parsim_do_ratchet_weights(const int factor, mpl_charbuf* cb);
 void mpl_parsim_reset_all_weights(mpl_charbuf* cb);
 void mpl_parsim_use_nodeidx(const bool useflag, mpl_matrix* m);
 void mpl_parsim_zero_na_nodal_changes(const long n, mpl_matrix *m);

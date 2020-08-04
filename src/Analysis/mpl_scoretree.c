@@ -619,7 +619,7 @@ void mpl_scoretree_restore_original_characters(mpl_matrix* m, mpl_tree* t)
 
 void mpl_do_ratchet_weights(void)
 {
-    mpl_parsim_do_ratchet_weights(&glmatrix->cbufs[0]);
+    mpl_parsim_do_ratchet_weights(2, &glmatrix->cbufs[0]);
 }
 
 void mpl_reset_std_weights(void)

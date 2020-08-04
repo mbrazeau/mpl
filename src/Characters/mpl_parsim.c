@@ -155,7 +155,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     regdist         = cb->regdist;
 }
 
-void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb)
+void mpl_parsim_do_ratchet_weights(const int factor, mpl_charbuf* cb)
 {
     
     long i = 0;
@@ -163,7 +163,7 @@ void mpl_parsim_do_ratchet_weights(mpl_charbuf* cb)
     // Take 10% of characters and double their weights
     for (i = 0; i < cb->num_chars; ++i) {
         if (preweight[i] > ((double)mpl_rng()/MPL_RAND_MAX)) {
-            weights[i] *= 2;
+            weights[i] *= factor;
         }
     }
 }
