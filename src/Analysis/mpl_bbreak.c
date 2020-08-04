@@ -328,7 +328,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         printf("\r                                                          ");
         printf("\r\tRatchet iteration %i. Best tree: %.0f steps",
                i + 1,
-               bbk->shortest);
+               oldbest);
         fflush(stdout);
 
         bbk->hitisland = false;
