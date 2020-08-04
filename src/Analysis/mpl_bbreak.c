@@ -287,10 +287,10 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
 void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 {
     int i = 0;
-//    mpl_topol* current = NULL;
-    double oldbest = 0.0;
-    double iterbest = 0.0;
-    long oldsavelim = 0;
+    
+    double  oldbest = 0.0;
+    double  iterbest = 0.0;
+    long    oldsavelim = 0;
     
     printf("Initiating ratchet search\n");
     
