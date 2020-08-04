@@ -134,7 +134,7 @@ int main(int argc, const char * argv[]) {
     fails += test_single_rep_hsearch();
     fails += test_mutliple_replicate_heuristic_search();
 //    fails += test_mutliple_replicate_heuristic_search_large();
-    fails += test_ratchet_search();
+//    fails += test_ratchet_search();
 
     printf("\n\nTest summary:\n\n");
     if (fails) {

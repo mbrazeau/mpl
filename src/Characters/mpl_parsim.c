@@ -1166,7 +1166,7 @@ double mpl_fitch_na_local_check
  const long tgt1,
  const long tgt2,
  const long troot,
- mpl_parsdat* pd)
+ mpl_parsdat* pd) 
 {
     // For any characters that can be checked without direct reopt at this point
     // calculate the length and check if it exceeds the limit. If limit is

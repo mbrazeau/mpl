@@ -93,9 +93,9 @@ void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
             (*i)++;
         }
         else {
-            if (n->bipart != NULL) {
-                mpl_bitset_OR(n->bipart, n->left->bipart, n->right->bipart);
-            }
+//            if (n->bipart != NULL) {
+//                mpl_bitset_OR(n->bipart, n->left->bipart, n->right->bipart);
+//            }
             t->postord_all[*i] = t->postord_intern[*j] = n;
             (*i)++;
             (*j)++;

@@ -345,7 +345,9 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         bbk->head = bbk->ratchhead;//bbk->treelist->back;
         mpl_tree_read_topol(t, bbk->head);
+        mpl_treelist_add_tree(false, t, bbk->treelist);
         bbk->rep_ntrees = 0;
+        bbk->savelim = 1;
         mpl_swap_all(false, t, bbk);
 
         bbk->doislandcheck = true;
@@ -363,6 +365,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->bestinrep = t->score;
         
         // Swap the tree
+        bbk->rep_ntrees = 0;
         mpl_swap_all(false, t, bbk);
         
         // Best tree for this iteration:
@@ -370,13 +373,14 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         
         if (iterbest <= oldbest) {
             bbk->ratchhead = bbk->treelist->back;
+        } else {
+            mpl_treelist_clear_back_to(bbk->ratchhead, bbk->treelist);
         }
 
         if (bbk->bestinrep < oldbest) {
             oldbest = bbk->bestinrep;
         }
         
-        mpl_treelist_clear_back_to(bbk->ratchhead, bbk->treelist);
         if (search_interrupt == 1) {
             break;
         }
@@ -590,7 +594,7 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 if (t->score <= bbk->bestinrep) {
                     if (t->score < bbk->bestinrep) {
 
-                        bbk->hitisland = false;
+                        bbk->hitisland   = false;
                         bbk->foundbetter = true; // Either better overall or for rep
                         
                         if (t->score < bbk->shortest) {
@@ -616,8 +620,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                                 bbk->rep_ntrees = 0;
                                 return;
                             }
+                        } else {
+                            bbk->rep_ntrees = 1;
                         }
-                        bbk->rep_ntrees = 1;
                         return;
                     } else if (bbk->savelim > 0) {
                         if (bbk->rep_ntrees < bbk->savelim) {

@@ -102,7 +102,7 @@ void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m);
 double mpl_na_only_parsim_second_downpass (const long left, const long right, const long n, mpl_matrix* m);
 double mpl_wagner_na_down_reroot (const long left, const long right, const long n, mpl_parsdat* pd);
 double mpl_fitch_na_down_reroot (const long left, const long right, const long n, mpl_parsdat* pd);
-double mpl_fitch_na_local_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd);
+double mpl_fitch_na_local_check (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_parsdat* pd) __attribute__((hot));
 void mpl_parsim_reset_scores(mpl_matrix* m);
 double mpl_parsim_get_std_scores(mpl_matrix* m);
 double mpl_parsim_get_na_scores(mpl_matrix* m);
