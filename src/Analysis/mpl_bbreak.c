@@ -355,7 +355,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         bbk->savelim = 1;
         mpl_swap_all(false, t, bbk);
 
-        bbk->doislandcheck = true;
+        bbk->doislandcheck = false;
         
         // Nixon 5; ============================================================
         mpl_reset_std_weights();
