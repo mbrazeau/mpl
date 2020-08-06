@@ -287,7 +287,7 @@ void mpl_treelist_clear_back_to(mpl_topol* head, mpl_treelist* tl)
     //assert(head != NULL);
     
     if (head == NULL) {
-        mpl_treelist_clear_all(tl);
+//        mpl_treelist_clear_all(tl);
         return;
     }
     
