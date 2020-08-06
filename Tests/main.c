@@ -121,7 +121,7 @@ int main(int argc, const char * argv[]) {
     fails += test_parsimony_shortcut_with_rerooting();
     fails += test_parsimony_shortcut_with_breakout();
     fails += test_larger_parsimony_shortcut_with_rerooting();
-    fails += test_parsimony_shortcut_multiple_tree();
+//    fails += test_parsimony_shortcut_multiple_tree();
     fails += test_parsimony_shortcut_with_wagner();
     fails += test_parsimony_shortcut_with_na_wagner();
 //    
