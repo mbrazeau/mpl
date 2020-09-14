@@ -611,19 +611,19 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                             bbk->shortest   = t->score;
                             mpl_treelist_clear_all(bbk->treelist);
                             bbk->repstart = NULL;
-
                         } else {
                             mpl_treelist_clear_back_to(bbk->repstart, bbk->treelist);
                         }
                         bbk->bestinrep = t->score;
                         
-                        mpl_topol* ret = 0;
+                        mpl_topol* ret = NULL;
                         clips[i]->clipmark = false;
                         ret = mpl_treelist_add_tree(bbk->doislandcheck,
                                                     t,
                                                     bbk->treelist);
                         bbk->head = bbk->treelist->back;
                         clips[i]->lock = false;
+                        
                         if (ret != NULL && bbk->doislandcheck == true) {
                             if (t->score == bbk->shortest) {
                                 bbk->hitisland = true;
