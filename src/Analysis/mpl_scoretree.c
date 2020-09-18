@@ -106,6 +106,7 @@ double mpl_length_only_parsimony(const double lim, mpl_tree* t)
     mpl_node* n;
     
     mpl_tree_traverse(t);
+    mpl_parsim_reset_scores(glmatrix);
     
     // Downpass
     for (i = 0; i < t->nintern; ++i) {
