@@ -1788,13 +1788,14 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
         }
     }
     
-    memset(changes, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
-    memset(applicchgs, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
-    memset(nusplits, 0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    memset(changes,     0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    memset(applicchgs,  0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    memset(nusplits,    0, m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+    
     // TODO: Get rid of the 2 * thing
     for (i = 0; i < (2 * m->cbufs[MPL_DISCR_T].row_max); ++i) {
-        memset(nodechanges[i], 0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
-        memset(rtset[i], 0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(mpl_discr));
+        memset(nodechanges[i],  0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(long));
+        memset(rtset[i],        0,  m->cbufs[MPL_DISCR_T].char_max * sizeof(mpl_discr));
     }
 }
 
