@@ -1402,7 +1402,6 @@ double mpl_wagner_local_check
                                                               dnset[src][i]));
         }
     }
-//  TODO: Version allowing break from loop
 
     return score;
 }

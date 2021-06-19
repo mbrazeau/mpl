@@ -28,6 +28,7 @@ typedef struct _matrix {
     char*           symbols;
     char*           rawdata;
     char***         rcells; // Raw input cells
+    mpl_discr**     bitmatrix;
     char            missingsymb;
     char            gapsymb;
     char            unknownsymb;

@@ -35,6 +35,9 @@ static mpl_discr mpl_char2bitset(const char c, const bool isNAtype, mpl_matrix* 
 static mpl_discr mpl_rawcharptr2bitset(char* cp, const long colnum, mpl_matrix* m);
 static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m);
 static void mpl_matrix_setup_cell_ptrs(mpl_matrix* m);
+static void mpl_matrix_count_num_states(mpl_matrix *m);
+static void mpl_matrix_setup_bitmatrix(mpl_matrix* m);
+
 /*******************************************************************************
  *                                                                             *
  *  PUBLIC FUNCTION DEFINITIONS                                                *
@@ -92,6 +95,14 @@ void mpl_matrix_delete(mpl_matrix** m)
             safe_free(mi->rcells[i]);
         }
         safe_free(mi->rcells);
+        
+#ifdef DEBUG
+        if (mi->bitmatrix != NULL)
+#endif
+        for (i = 0; i < mi->num_rows; ++i) {
+            safe_free(mi->bitmatrix[i]);
+        }
+        safe_free(mi->bitmatrix);
         
         safe_free(mi->parsets);
         free(mi);
@@ -189,7 +200,7 @@ long mpl_matrix_get_nnodes(const mpl_matrix* m)
 MPL_RETURN  mpl_matrix_init
 (const long nrows, const long ncols, const long nnodes, mpl_matrix* m)
 {
-//    long i = 0;
+    long i = 0;
 //    long j = 0;
     
     MPL_RETURN ret = MPL_SUCCESS;
@@ -204,6 +215,11 @@ MPL_RETURN  mpl_matrix_init
     
     if ((ret = mpl_matrix_set_nnodes(nnodes, m))) {
         return ret;
+    }
+    
+    m->bitmatrix = safe_calloc(m->num_rows, sizeof(mpl_discr*));
+    for (i = 0; i < m->num_rows; ++i) {
+        m->bitmatrix[i] = safe_calloc(m->num_cols, sizeof(mpl_discr));
     }
     
     return ret;
@@ -267,11 +283,24 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
         }
     }
 
+    if (m->bitmatrix == NULL) {
+        m->bitmatrix = safe_calloc(m->num_rows, sizeof(mpl_discr*));
+        for (i = 0; i < m->num_rows; ++i) {
+            m->bitmatrix[i] = safe_calloc(m->num_cols, sizeof(mpl_discr));
+        }
+    }
+    
     // Set all the char pointers to the 'cells'
     mpl_matrix_setup_cell_ptrs(m);
 
-    // TODO: This becomes more important with  other data  types
+    mpl_matrix_setup_bitmatrix(m);
+    mpl_matrix_count_num_states(m);
+    
+    // TODO: This becomes more important with other data types; maybe better after search initiated
     mpl_count_chartypes(m);
+    
+    
+    // TODO: It may be important to leave this part until a search is ready to be initiated.
     // Set up the databuffers needed: discrete, continuous, and "model"-based
     // For each type, set up enough memory to handle the characters
     for (i = 0; i < m->ndatypes; ++i) {
@@ -413,6 +442,35 @@ MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
  *                                                                             *
  ******************************************************************************/
 
+// TODO: Finish numstates counting!!!
+static void mpl_matrix_count_num_states(mpl_matrix *m)
+{
+    long i = 0;
+    long j = 0;
+    mpl_discr d = 0;
+    int num_states;
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        d = NOCHARS;
+        for (j = 0; j < m->num_rows; ++j) {
+            if (m->bitmatrix[j][i] < UNKNOWN && m->bitmatrix[j][i] > NA) {
+                d |= m->bitmatrix[j][i];
+            }
+        }
+        
+        MPL_POPCOUNTLL(num_states, d);
+        
+        if (m->gaphandl == GAP_INAPPLIC) {
+            if (d & NA) {
+                num_states -= 1;
+            }
+        }
+        
+        m->charinfo[i].num_states = num_states;
+    }
+    
+}
+
 static void mpl_set_matrix_defaults(mpl_matrix* m)
 {
     m->optimality   = OPTIM_PARSIM;
@@ -501,6 +559,18 @@ static void mpl_matrix_delete_parsets(mpl_matrix* m)
         free(m->parsets);
         m->parsets = NULL;
         m->nparsets = 0;
+    }
+}
+
+static void mpl_matrix_setup_bitmatrix(mpl_matrix* m)
+{
+    long i = 0;
+    long j = 0;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        for (j = 0; j < m->num_cols; ++j) {
+            m->bitmatrix[i][j] = mpl_rawcharptr2bitset(m->rcells[i][j], j, m);
+        }
     }
 }
 
