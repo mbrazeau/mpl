@@ -19,6 +19,9 @@ typedef struct _charinfo {
     
     long         index;
     int          num_states;
+    mpl_discr    states;
+    int          maxstate;
+    int          minstate;
     long         num_gaps;
     mpl_data_t   datatype;
     mpl_parsim_t parsimtype;
@@ -48,5 +51,7 @@ void mpl_charinfo_exclude(mpl_charinfo* ci);
 bool mpl_charinfo_isincluded(mpl_charinfo* ci);
 void mpl_charinfo_set_weight(double wt, mpl_charinfo* ci);
 double mpl_charinfo_get_weight(mpl_charinfo* ci);
+void mpl_charinfo_set_states(mpl_discr d, mpl_charinfo *ci);
+mpl_discr mpl_charinfo_get_states(mpl_charinfo *ci);
 
 #endif /* mpl_charinfo_h */

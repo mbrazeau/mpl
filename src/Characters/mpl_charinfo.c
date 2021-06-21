@@ -8,6 +8,8 @@
 
 #include "mpl_charinfo.h"
 
+void mpl_charinfo_set_hilobit(mpl_charinfo *ci);
+
 void mpl_charinfo_set_defaults(mpl_charinfo* ci)
 {
     ci->datatype        = DEFAULT_DATA_T;
@@ -71,4 +73,46 @@ void mpl_charinfo_set_weight(double wt, mpl_charinfo* ci)
 double mpl_charinfo_get_weight(mpl_charinfo* ci)
 {
     return ci->weight;
+}
+
+void mpl_charinfo_set_states(mpl_discr d, mpl_charinfo *ci)
+{
+    ci->states = d;
+    mpl_charinfo_set_hilobit(ci);
+}
+
+mpl_discr mpl_charinfo_get_states(mpl_charinfo *ci)
+{
+    return ci->states;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ *  PRIVATE FUNCTION DEFINITIONS                                               *
+ *                                                                             *
+ ******************************************************************************/
+
+/**
+ Sets the range for the non-trivial states in the character.
+ 
+ @param ci A pointer to the charinfo structure.
+ @return void.
+ */
+void mpl_charinfo_set_hilobit(mpl_charinfo *ci)
+{
+    mpl_discr d = ci->states;
+    
+    ci->maxstate = 0;
+    ci->minstate = 0;
+    
+    while (!(d & 1)) {
+        d = d >> 1;
+        ++ci->minstate;
+        ++ci->maxstate;
+    }
+    
+    while (d >> 1) {
+        d = d >> 1;
+        ++ci->maxstate;
+    }
 }

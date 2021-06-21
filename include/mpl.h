@@ -218,6 +218,7 @@ long        mpl_get_num_trees(mpl_handle handl);
 int         mpl_clear_trees(mpl_handle handl);
 int         mpl_add_newick(const char* newick, mpl_handle handl);
 char*       mpl_get_newick(const long tnum, mpl_handle handl);
+int         mpl_get_num_states(const int i, mpl_handle handl);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -197,6 +197,12 @@ long mpl_matrix_get_nnodes(const mpl_matrix* m)
     return m->num_nodes;
 }
 
+int mpl_matrix_get_num_states(const int idx, mpl_matrix *m)
+{
+    assert(idx < m->num_cols);
+    return m->charinfo[idx].num_states;
+}
+
 MPL_RETURN  mpl_matrix_init
 (const long nrows, const long ncols, const long nnodes, mpl_matrix* m)
 {
@@ -296,7 +302,7 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     mpl_matrix_setup_bitmatrix(m);
     mpl_matrix_count_num_states(m);
     
-    // TODO: This becomes more important with other data types; maybe better after search initiated
+    // TODO: This becomes more important with other data types; maybe better upon initiation of a search.
     mpl_count_chartypes(m);
     
     
@@ -442,7 +448,6 @@ MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
  *                                                                             *
  ******************************************************************************/
 
-// TODO: Finish numstates counting!!!
 static void mpl_matrix_count_num_states(mpl_matrix *m)
 {
     long i = 0;
@@ -467,6 +472,8 @@ static void mpl_matrix_count_num_states(mpl_matrix *m)
         }
         
         m->charinfo[i].num_states = num_states;
+        
+        mpl_charinfo_set_states(d, &m->charinfo[i]);
     }
     
 }
@@ -587,6 +594,57 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     // Clear any prior parsimony sets:
     mpl_matrix_reset(m);
 
+    /**
+     BEGIN NEW STUFF
+     */
+    
+    // Count number of states and the ranges?? Already done??
+    
+    // Count the number of inapplicables in each column:
+    for (i = 0; i < m->num_cols; ++i) {
+        numna = 0;
+        if (m->gaphandl == GAP_INAPPLIC) {
+            for (j = 0; j < m->num_rows; ++j) {
+                if (m->bitmatrix[i][j] == NA) {
+                    ++numna;
+                }
+            }
+        }
+        
+        m->charinfo[i].num_states = numna;
+    }
+    
+    numna = 0;
+    numstd = 0;
+    // Count n columns for standard Fitch characters
+    // Count n columns for standard Wagner characters
+    // Count n columns for inapplic Fitch characters
+    // Count n columns for inapplic Wagner characters
+    for (i = 0; i < m->num_cols; ++i) {
+        if (m->charinfo[i].parsimtype == MPL_FITCH_T) {
+            if (m->charinfo[i].num_gaps > 2) {
+                ++numna;
+            } else {
+                ++numstd;
+            }
+        } else if (m->charinfo[i].parsimtype == MPL_WAGNER_T) {
+            if (m->charinfo[i].num_gaps > 2) {
+                numna += m->charinfo[i].maxstate;
+            } else {
+                numstd += m->charinfo[i].maxstate;
+            }
+        } else {
+            assert(0); // Some undefined parsimony type or bigger glitch has happened
+            // TODO: Change this to return an error code?
+        }
+    }
+    
+    // Restore old initialisations
+    numna = 0;
+    /**
+     END NEW STUFF
+     */
+    
     // Count set parsimony types
     memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
     for (i = 0; i < m->num_cols; ++i) {
@@ -1003,11 +1061,11 @@ static mpl_discr mpl_rawcharptr2bitset
 (char* cp, const long colnum, mpl_matrix* m)
 {
     mpl_discr res = 0;
-    bool isNAtype = false;
+    bool isNAtype = true; // TODO: Just eliminate this and simplify the procedure
     
-    if (m->gaphandl == GAP_INAPPLIC && m->charinfo[colnum].num_gaps > 2) {
-        isNAtype = true;
-    }
+//    if (m->gaphandl == GAP_INAPPLIC && m->charinfo[colnum].num_gaps > 2) {
+//        isNAtype = true;
+//    }
     
     if (strchr(VALID_MPL_MATPUNC, *cp)) {
         

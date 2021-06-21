@@ -354,6 +354,19 @@ int mpl_add_newick(const char* newick, mpl_handle* handl)
     return ret;
 }
 
+int mpl_get_num_states(const int i, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    
+    MPL_RETURN ret = MPL_ERR;
+    
+    if (i >= handl->nchar) {
+        return MPL_OUTOFBOUNDS;
+    }
+    
+    return mpl_matrix_get_num_states(i, handl->matrix);
+}
+
 char* mpl_get_newick(const long tnum, mpl_handle* handl)
 {
     if (handl == NULL) {

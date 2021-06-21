@@ -479,7 +479,49 @@ int test_matrix_from_io_source (int argc, const char * argv[])
     return failn;
 }
 
-// Tests needed:
+int test_count_num_states (void)
+{
+    theader("Test counting states in simple matrix");
+    
+    int failn = 0;
+    
+    long i = 0;
+    long ncols = 15;
+    long nrows = 7;
+    
+    int statenums[]
+                 = { 2, 1, 1, 1, 2,
+                     2, 1, 2, 3, 2,
+                     1, 1, 2, 2, 4};
+    char* matrix = "10000 00010 00010\
+                    0-000 1-222 00110\
+                    0-000 1-222 00116\
+                    00000 1-222 0-115\
+                    00000 1-022 00114\
+                    0-000 1-022 00110\
+                    00001 00000 0000-;";
+    
+    mpl_matrix* m = NULL;
+    m = mpl_matrix_new();
+    
+    mpl_matrix_set_ncols(ncols, m);
+    mpl_matrix_set_nrows(nrows, m);
+    mpl_matrix_attach_rawdata(matrix, m);
+    
+    for (i = 0; i < ncols; ++i) {
+        if (statenums[i] != mpl_matrix_get_num_states(i, m)) {
+            ++failn;
+            pfail;
+        }
+        else {
+            ppass;
+        }
+    }
+    
+    return failn;
+}
+
+// TODO: Tests needed:
 // Bad dimensions
 // Unrecognized symbol(s)
 // Load matrix; change dimensions; reload matrix

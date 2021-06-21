@@ -24,5 +24,6 @@ long mpl_test_matrix_count_gaps_in_column(const long col, const mpl_matrix* m);
 void mpl_test_matrix_setup_parsimony(mpl_matrix* m);
 char* mpl_test_skip_closure (const char *closure, const char openc, const char closec);
 char* mpl_test_skip_whitespace (char* c);
+int test_count_num_states (void);
 
 #endif /* testmplmatrix_h */

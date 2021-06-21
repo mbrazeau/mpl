@@ -92,6 +92,7 @@ int main(int argc, const char * argv[]) {
     fails += test_skip_whitespace();
     fails += test_get_char_pointer_from_matrix();
     fails += test_counting_gaps_in_matrix_columns();
+    fails += test_count_num_states();
     // TODO: Restore this function:
 //    fails += test_parsimony_data_setup();
 //    fails += test_matrix_from_io_source(argc, argv);
