@@ -221,6 +221,14 @@ int test_wagner_fullpass_parsimony (void)
     
     mpl_matrix_apply_data(m);
     
+    int j = 0;
+    for (i = 0; i < m->cbufs[0].num_rows; ++i) {
+        for (j = 0; j < m->cbufs[0].num_chars; ++j) {
+            printf("%i", m->cbufs[0].dnset[i][j]);
+        }
+        printf("\n");
+    }
+    
     mpl_tree* t = mpl_new_tree(ntax);
     mpl_topol top;
     top.num_taxa = 1;
@@ -305,6 +313,18 @@ int test_fullpass_with_large_data_std_parsimony (void)
     mpl_matrix_attach_rawdata(rawmatrix, m);
     mpl_matrix_set_gap_handle(GAP_MISSING, m);
     mpl_matrix_apply_data(m);
+    
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < m->cbufs[0].num_rows; ++i) {
+        for (j = 0; j < m->cbufs[0].num_chars; ++j) {
+            printf("%i", m->cbufs[0].dnset[i][j]);
+            if (j % 5 == 0 && j > 0) {
+                printf(" ");
+            }
+        }
+        printf("\n");
+    }
     
     mpl_tree* t = mpl_new_tree(ntax);
     mpl_topol top;

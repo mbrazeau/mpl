@@ -37,6 +37,7 @@ static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m);
 static void mpl_matrix_setup_cell_ptrs(mpl_matrix* m);
 static void mpl_matrix_count_num_states(mpl_matrix *m);
 static void mpl_matrix_setup_bitmatrix(mpl_matrix* m);
+static mpl_discr* mpl_matrix_write_additive_binary(mpl_discr d, mpl_discr* p, mpl_discr* stop);
 
 /*******************************************************************************
  *                                                                             *
@@ -302,17 +303,17 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     mpl_matrix_setup_bitmatrix(m);
     mpl_matrix_count_num_states(m);
     
-    // TODO: This becomes more important with other data types; maybe better upon initiation of a search.
+    // TODO: This should be changed to something that checks for continuous, Sankoff, and other types
     mpl_count_chartypes(m);
     
     
     // TODO: It may be important to leave this part until a search is ready to be initiated.
     // Set up the databuffers needed: discrete, continuous, and "model"-based
     // For each type, set up enough memory to handle the characters
-    for (i = 0; i < m->ndatypes; ++i) {
-        // TODO: create a return from this and check it
-        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
-    }
+//    for (i = 0; i < m->ndatypes; ++i) {
+//        // TODO: create a return from this and check it
+//        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
+//    }
     
     return ret;
 }
@@ -585,11 +586,12 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
 {
     int i = 0;
     int j = 0;
+    int k = 0;
     long numstd = 0;
     long numna = 0;
-    int joint_pars_types = 0;
-    long current_range = 0;
-    mpl_parsim_t ptype = 0;
+//    int joint_pars_types = 0;
+//    long current_range = 0;
+//    mpl_parsim_t ptype = 0;
     
     // Clear any prior parsimony sets:
     mpl_matrix_reset(m);
@@ -598,28 +600,32 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
      BEGIN NEW STUFF
      */
     
-    // Count number of states and the ranges?? Already done??
-    
-    // Count the number of inapplicables in each column:
-    for (i = 0; i < m->num_cols; ++i) {
-        numna = 0;
-        if (m->gaphandl == GAP_INAPPLIC) {
-            for (j = 0; j < m->num_rows; ++j) {
+    // Switch everything to GAP_MISSING if that param is set:
+    if (m->gaphandl == GAP_MISSING) {
+        for (i = 0; i < m->num_rows; ++i) {
+            for (j = 0; j < m->num_cols; ++j) {
                 if (m->bitmatrix[i][j] == NA) {
-                    ++numna;
+                    m->bitmatrix[i][j] = MISSING;
                 }
             }
         }
+    }
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        numna = 0;
+        for (j = 0; j < m->num_rows; ++j) {
+            if (m->bitmatrix[j][i] == NA) {
+                ++numna;
+            }
+        }
         
-        m->charinfo[i].num_states = numna;
+        m->charinfo[i].num_gaps = numna;
     }
     
     numna = 0;
     numstd = 0;
-    // Count n columns for standard Fitch characters
-    // Count n columns for standard Wagner characters
-    // Count n columns for inapplic Fitch characters
-    // Count n columns for inapplic Wagner characters
+    
+    // Count the number of columns that will be needed in the data buffer.
     for (i = 0; i < m->num_cols; ++i) {
         if (m->charinfo[i].parsimtype == MPL_FITCH_T) {
             if (m->charinfo[i].num_gaps > 2) {
@@ -628,6 +634,8 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
                 ++numstd;
             }
         } else if (m->charinfo[i].parsimtype == MPL_WAGNER_T) {
+            // This determines the number of columns that will be needed when
+            // these characters are broken into non-additive binaries.
             if (m->charinfo[i].num_gaps > 2) {
                 numna += m->charinfo[i].maxstate;
             } else {
@@ -639,108 +647,166 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         }
     }
     
+    // TODO: Soon this buffer won't really be needed.
+    memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
+    
+    if (numstd > 0) {
+        ++m->nparsets;
+    }
+    if (numna > 0) {
+        ++m->nparsets;
+    }
+
+    assert(m->parsets == NULL);
+    m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));
+    // TODO: CHECK RETURN MORE SAFELY?
+    assert(m->parsets != NULL);
+    
+    i = 0;
+    if (numstd > 0) {
+        mpl_parsim_set_type(GAP_MISSING, MPL_FITCH_T, &m->parsets[i]);
+        m->parsets[i].start = 0;
+        m->parsets[i].end = numstd;
+        ++i;
+    }
+    if (numna > 0) {
+        mpl_parsim_set_type(GAP_INAPPLIC, MPL_FITCH_T, &m->parsets[i]);
+        m->parsets[i].start = numstd;
+        m->parsets[i].end = numstd + numna - 1;
+    }
+    
+    // Allocate the buffer
+    mpl_charbuf_cleanup(&m->cbufs[MPL_DISCR_T]);
+    mpl_charbuf_init(MPL_DISCR_T, m->num_rows, numstd + numna, &m->cbufs[MPL_DISCR_T]);
+    
+    // Write the data into the buffers as appropriate
+    mpl_discr *p = NULL;
+    for (i = 0; i < m->nparsets; ++i) {
+        // Write into buffer according to current parset.
+        // TODO: This needs to be changed for inapplicable data now.
+        for (j = 0; j < m->num_rows; ++j) {
+            p = m->cbufs[MPL_DISCR_T].dnset[j];
+            
+            for (k = 0; k < m->num_cols; ++k) {
+                if (m->charinfo[k].parsimtype == MPL_FITCH_T) {
+                    *p = m->bitmatrix[j][k];
+                    ++p;
+                }
+            }
+            
+            for (k = 0; k < m->num_cols; ++k) {
+                if (m->charinfo[k].parsimtype == MPL_WAGNER_T) {
+                    // TODO: This will create a problem because of the different numbers for NA/normal chars
+                    p = mpl_matrix_write_additive_binary(m->bitmatrix[j][k], p, p + (m->charinfo[k].maxstate));
+                }
+            }
+        }
+    }
+    
     // Restore old initialisations
     numna = 0;
     /**
      END NEW STUFF
      */
     
-    // Count set parsimony types
-    memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
-    for (i = 0; i < m->num_cols; ++i) {
-        ++m->parstypes[m->charinfo[i].parsimtype];
-    }
+//    // Count set parsimony types
+//    memset(m->parstypes, 0, MPL_PARSIM_T_MAX * sizeof(mpl_parsim_t));
+//    for (i = 0; i < m->num_cols; ++i) {
+//        ++m->parstypes[m->charinfo[i].parsimtype];
+//    }
+//
+//    m->nparsimtypes = 0;
+//    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
+//        if (m->parstypes[i] > 0) {
+//            ++m->nparsimtypes;
+//        }
+//    }
+//
+//    // Each parsimony type will have a certain number of columns with inapplicable
+//    // values. This then can be used to determine the number of columns in the
+//    // inapplicable parsimony type
+//
+//    if (m->gaphandl == GAP_INAPPLIC) {
+//        // Determine each column's inapplicable data count and assign whether
+//        // the column should be counted as having non-trivial NAs
+//        mpl_count_inapplics_by_parstype(m);
+//    }
+//
+//    // This determines the ranges for std type characters and inapplicable-type
+//    // characters in the main buffer.
+//    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
+//
+//        if (m->parstypes[i] > 0) {
+//            ++joint_pars_types;
+//        }
+//        if (m->nasbytype[i] > 0) {
+//            if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
+//                ++joint_pars_types;
+//            }
+//        }
+//
+//        numstd += m->parstypes[i] - m->nasbytype[i];
+//        assert(numstd >= 0);
+//        numna += m->nasbytype[i];
+//    }
     
-    m->nparsimtypes = 0;
-    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
-        if (m->parstypes[i] > 0) {
-            ++m->nparsimtypes;
-        }
-    }
+//    // Set up the parsimony sets
+//    m->nparsets = joint_pars_types;
+//    assert(m->parsets == NULL);
+//    m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));
+//    // TODO: CHECK RETURN MORE SAFELY?
+//    assert(m->parsets != NULL);
+//
+//    // Set and size the standard parsimony sets
+//    j = 0;
+//    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
+//        // Check how many standard characters in this type
+//        if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
+//
+//            ptype = (mpl_parsim_t)i; //m->charinfo[current_range].parsimtype;
+//            mpl_parsim_set_type(GAP_MISSING, ptype, &m->parsets[j]);
+//            // The range for this type is the current range index + size of the
+//            // type block
+    // TODO: The stuff in the function below needs restoring
     
-    // Each parsimony type will have a certain number of columns with inapplicable
-    // values. This then can be used to determine the number of columns in the
-    // inapplicable parsimony type
-
-    if (m->gaphandl == GAP_INAPPLIC) {
-        // Determine each column's inapplicable data count and assign whether
-        // the column should be counted as having non-trivial NAs
-        mpl_count_inapplics_by_parstype(m);
-    }
-    
-    // This determines the ranges for std type characters and inapplicable-type
-    // characters in the main buffer.
-    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
-        
-        if (m->parstypes[i] > 0) {
-            ++joint_pars_types;
-        }
-        if (m->nasbytype[i] > 0) {
-            if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
-                ++joint_pars_types;
-            }
-        }
-        
-        numstd += m->parstypes[i] - m->nasbytype[i];
-        assert(numstd >= 0);
-        numna += m->nasbytype[i];
-    }
-    
-    // Set up the parsimony sets
-    m->nparsets = joint_pars_types;
-    assert(m->parsets == NULL);
-    m->parsets = (mpl_parsdat*)safe_calloc(m->nparsets, sizeof(mpl_parsdat));
-    // TODO: CHECK RETURN MORE SAFELY?
-    assert(m->parsets != NULL);
-    
-    // Set and size the standard parsimony sets
-    j = 0;
-    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
-        // Check how many standard characters in this type
-        if ((m->parstypes[i] - m->nasbytype[i]) > 0) {
-            
-            ptype = (mpl_parsim_t)i; //m->charinfo[current_range].parsimtype;
-            mpl_parsim_set_type(GAP_MISSING, ptype, &m->parsets[j]);
-            // The range for this type is the current range index + size of the
-            // type block
-            mpl_parsim_init_parsdat
-            (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
-            
-            // Update current range
-            current_range += (m->parstypes[i] - m->nasbytype[i]);
-            ++j;
-        }
-    }
-    
-    
-    // Set and size the inapplic parsimony sets
-    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
-        // Check how many standard characters in this type
-        if (m->nasbytype[i] > 0) {
-            
-//            mpl_parsim_set_type(GAP_INAPPLIC, (mpl_parsim_t)i, &m->parsets[j]);
-            ptype = (mpl_parsim_t)i;//m->charinfo[current_range].parsimtype;
-            mpl_parsim_set_type(GAP_INAPPLIC, ptype, &m->parsets[j]);
-            
-            // The range for this type is the current range index + size of the
-            // type block
-            mpl_parsim_init_parsdat
-            (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
-
-            // Set up the nodal index storage
-            mpl_parsim_setup_nodal_index_buffers(2 * m->num_rows, &m->parsets[j]);
-            
-            // Update current range
-            current_range += m->nasbytype[i];
-            ++j;
-        }
-    }
-    
-    // Write the data into the buffers as appropriate
-    for (i = 0; i < m->nparsets; ++i) {
-        // Write into buffer
-        mpl_matrix_write_discr_parsim_to_buffer(&m->parsets[i], m);
-    }
+//            mpl_parsim_init_parsdat
+//            (current_range, current_range + (m->parstypes[i] - m->nasbytype[i]), &m->parsets[j]);
+//
+//            // Update current range
+//            current_range += (m->parstypes[i] - m->nasbytype[i]);
+//            ++j;
+//        }
+//    }
+//
+//
+//    // Set and size the inapplic parsimony sets
+//    for (i = 0; i < MPL_PARSIM_T_MAX; ++i) {
+//        // Check how many standard characters in this type
+//        if (m->nasbytype[i] > 0) {
+//
+////            mpl_parsim_set_type(GAP_INAPPLIC, (mpl_parsim_t)i, &m->parsets[j]);
+//            ptype = (mpl_parsim_t)i;//m->charinfo[current_range].parsimtype;
+//            mpl_parsim_set_type(GAP_INAPPLIC, ptype, &m->parsets[j]);
+//
+//            // The range for this type is the current range index + size of the
+//            // type block
+//            mpl_parsim_init_parsdat
+//            (current_range, current_range + m->nasbytype[i], &m->parsets[j]);
+//
+//            // Set up the nodal index storage
+//            mpl_parsim_setup_nodal_index_buffers(2 * m->num_rows, &m->parsets[j]);
+//
+//            // Update current range
+//            current_range += m->nasbytype[i];
+//            ++j;
+//        }
+//    }
+//
+//    // Write the data into the buffers as appropriate
+//    for (i = 0; i < m->nparsets; ++i) {
+//        // Write into buffer
+//        mpl_matrix_write_discr_parsim_to_buffer(&m->parsets[i], m);
+//    }
     
     // Analyse the informative characters
     m->ninform = 0;
@@ -757,6 +823,35 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
         }*/
     }
     
+}
+
+static mpl_discr* mpl_matrix_write_additive_binary(mpl_discr d, mpl_discr* p, mpl_discr* stop)
+{
+    mpl_discr *temp = p;
+    bool on = false;
+    
+    if (d == MISSING) {
+        while (p != stop) {
+            *p = MISSING;
+            ++p;
+        }
+        return p;
+    }
+
+    d = d >> 1;
+    
+    while (p != stop) {
+        // TODO: Now write the character as non-additive binary
+        if (d == 0) {
+            *p = 0x01;
+        } else {
+            *p = 0x02;
+        }
+        d = d >> 1;
+        ++p;
+    }
+    
+    return p;
 }
 
 static void mpl_matrix_convert_into_discrbuffer
