@@ -1179,9 +1179,9 @@ double mpl_fitch_na_local_check
     const long end   = pd->end;
     double score     = 0.0;
 //    long splits = 0;
-    double cminscore = pd->cminscore; // Sum of all applicable changes
-    double testscore = 0.0;
-    double recall    = pd->crecall;
+//    double cminscore = pd->cminscore; // Sum of all applicable changes
+//    double testscore = 0.0;
+//    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
@@ -2167,7 +2167,7 @@ void mpl_update_active_sets(const long left, const long right, const long n, mpl
     
     for (i = pd->start; i < end; ++i) {
 
-        actives[n][i] = (actives[left][i] | actives[right][i]) & actmask[i];
+        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
         tempact[n][i] = actives[n][i];
     }
 }

@@ -187,6 +187,7 @@ void mpl_charbuf_fill_na_additv_column
             cb->actives[i][cb->num_chars] = ISAPPLIC;
             cb->tempact[i][cb->num_chars] = ISAPPLIC;
             for (j = 1; j < max; ++j) {
+                cb->actmask[cb->num_chars + j] = 0;
                 cb->dnset[i][cb->num_chars + j] = MISSING;
                 cb->tempdn[i][cb->num_chars + j]  = MISSING;
                 cb->actives[i][cb->num_chars + j] = 0;
