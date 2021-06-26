@@ -12,6 +12,7 @@
 #include "mpl_utils.h"
 #include "mpl_charbuf.h"
 #include "mpl_charinfo.h"
+#include "mpl_matrix.h"
 
 static void mpl_charbuf_init_datatype(mpl_charbuf* cb);
 static void mpl_charbuf_delete_discr_buffer(long nrows, mpl_discr*** db);
@@ -25,7 +26,7 @@ void mpl_charbuf_init
     long i = 0;
     
     cb->num_rows = nrows; // Automatically size the rows as data will be added dynamically by column
-    cb->num_chars = ncols;
+    cb->num_chars = 0;
     cb->char_max = ncols;
     cb->row_max = nrows;
     cb->datype = datype;
@@ -77,10 +78,157 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempup);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->tempact);
     
-    
     memset(cb, 0, sizeof(mpl_charbuf));
 }
 
+void mpl_charbuf_fill_std_column
+(const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb)
+{
+    int i = 0;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        // TODO: For this and related fxns: this will need a conditional for included taxa
+        cb->dnset[i][cb->num_chars] = m->bitmatrix[i][col];
+    }
+    
+//    assert(col == ci->index);
+    ci->wtptr = &cb->weights[cb->num_chars];
+    cb->orig_indices[cb->num_chars] = col;
+    cb->weights[cb->num_chars] = ci->weight;
+    
+    ++cb->num_chars;
+}
+
+void mpl_charbuf_fill_std_additv_column
+(const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb)
+{
+    int i = 0;
+    int j = 0;
+    int max = 0;
+    mpl_discr d = 0;
+    
+    max = ci->maxstate;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        
+        d = m->bitmatrix[i][col];
+        if (d == MISSING) {
+            for (j = 0; j < max; ++j) {
+                cb->dnset[i][cb->num_chars + j] = MISSING;
+            }
+            continue;
+        }
+        
+        d = d >> 1;
+        for (j = 0; j < max; ++j) {
+            if (d == 0) {
+                cb->dnset[i][cb->num_chars + j] = 0x01;
+            } else {
+                cb->dnset[i][cb->num_chars + j] = 0x02;
+            }
+            d = d >> 1;
+        }
+    }
+    
+//    assert(col == ci->index);
+    
+    ci->wtptr = &cb->weights[cb->num_chars];
+    for (i = 0; i < max; ++i) {
+        cb->orig_indices[cb->num_chars + i] = col;
+        cb->weights[cb->num_chars + i] = ci->weight;
+    }
+    
+    cb->num_chars += max;
+}
+
+void mpl_charbuf_fill_na_column
+(const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb)
+{
+    int i = 0;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        // TODO: For this and related fxns: this will need a conditional for included taxa
+        cb->dnset[i][cb->num_chars]   = m->bitmatrix[i][col];
+        cb->tempdn[i][cb->num_chars]  = m->bitmatrix[i][col];
+        cb->prupset[i][cb->num_chars] = m->bitmatrix[i][col];
+        cb->upset[i][cb->num_chars]   = m->bitmatrix[i][col];
+        cb->actives[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
+        cb->tempact[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
+    }
+    
+//    assert(col == ci->index);
+    ci->wtptr = &cb->weights[cb->num_chars];
+    cb->orig_indices[cb->num_chars] = col;
+    cb->weights[cb->num_chars] = ci->weight;
+    
+    ++cb->num_chars;
+}
+
+void mpl_charbuf_fill_na_additv_column
+(const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb)
+{
+    int i = 0;
+    int j = 0;
+    int max = 0;
+    mpl_discr d = 0;
+    
+    max = ci->maxstate;
+    
+    for (i = 0; i < m->num_rows; ++i) {
+        
+        d = m->bitmatrix[i][col];
+        if (d == MISSING) {
+            for (j = 0; j < max; ++j) {
+                cb->dnset[i][cb->num_chars + j] = MISSING;
+            }
+            continue;
+        }
+        
+        if (d == NA) {
+            cb->dnset[i][cb->num_chars] = NA;
+            // HERE: Set up the actives appropriately: 0
+            
+            for (j = 1; j < max; ++j) {
+                cb->dnset[i][cb->num_chars + j] = NA;
+                // HERE: Set up the actives appropriately: 0
+            }
+            continue;
+        }
+        
+        d = d >> 1;
+        
+        cb->dnset[i][cb->num_chars] = 0x2;
+        cb->tempdn[i][cb->num_chars]  = 0x02;
+        cb->prupset[i][cb->num_chars + j] = 0x02;
+        cb->upset[i][cb->num_chars + j]   = 0x02;
+        cb->actives[i][cb->num_chars + j] = 0x02;
+        cb->tempact[i][cb->num_chars + j] = 0x02;
+        for (j = 1; j < max; ++j) {
+            if (d == 0) {
+                cb->dnset[i][cb->num_chars + j]   = 0x04;
+                cb->tempdn[i][cb->num_chars + j]  = 0x04;
+                cb->prupset[i][cb->num_chars + j] = 0x04;
+                cb->upset[i][cb->num_chars + j]   = 0x04;
+            } else {
+                cb->dnset[i][cb->num_chars + j]   = 0x06;
+                cb->tempdn[i][cb->num_chars + j]  = 0x06;
+                cb->prupset[i][cb->num_chars + j] = 0x06;
+                cb->upset[i][cb->num_chars + j]   = 0x06;
+            }
+            cb->actives[i][cb->num_chars + j] = 0;
+            cb->tempact[i][cb->num_chars + j] = 0;
+            d = d >> 1;
+        }
+    }
+    
+    ci->wtptr = &cb->weights[cb->num_chars];
+    for (i = 0; i < max; ++i) {
+        cb->orig_indices[cb->num_chars + i] = col;
+        cb->weights[cb->num_chars + i] = ci->weight;
+    }
+    
+    cb->num_chars += max;
+}
 
 void mpl_charbuf_add_data_column
 (const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb)

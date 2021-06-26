@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include "mpl_chardefs.h"
 
+typedef struct _matrix mpl_matrix;
 
 typedef struct _charinfo mpl_charinfo;
 /**
@@ -55,6 +56,14 @@ typedef struct _charbuf {
 void mpl_charbuf_init
 (const mpl_data_t datype, const long nrows, const long ncols, mpl_charbuf* cb);
 void mpl_charbuf_cleanup(mpl_charbuf* cb);
+void mpl_charbuf_fill_std_column
+ (const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb);
+void mpl_charbuf_fill_std_additv_column
+ (const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb);
+void mpl_charbuf_fill_na_column
+ (const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb);
+void mpl_charbuf_fill_na_additv_column
+ (const long col, mpl_charinfo* ci, mpl_matrix* m, mpl_charbuf* cb);
 void mpl_charbuf_add_data_column
 (const mpl_discr* datcol, const long colnum, mpl_charinfo* ci, mpl_charbuf* cb);
 void mpl_charbuf_store_discr_states(mpl_charbuf* cb);

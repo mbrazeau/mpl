@@ -18,7 +18,7 @@
 // TODO: 32 and 64 state sets?
 
 typedef struct mpl_pkbuf {
-    discr_t data;
+//    discr_t data;
 } mpl_pkbuf;
 
 #endif /* mpl_pkbuf_h */

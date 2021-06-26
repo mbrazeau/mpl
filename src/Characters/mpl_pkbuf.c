@@ -15,3 +15,6 @@ int mpl_pkbuf_2state_downpass(const int left, const int right, const int n, mpl_
 }
 
 int mpl_pkbuf_2state_uppass(void)
+{
+    return 0;
+}
