@@ -18,5 +18,6 @@ int test_fullpass_with_large_data_std_parsimony2 (void);
 int test_fullpass_with_inapplicables (void);
 int test_fullpass_with_multiple_inapplics (void);
 int test_multiple_small_matrices (void);
+int test_multiple_small_ordered_matrices (void);
 int test_find_char_by_char_mismatches (void);
 #endif /* mpltestparsimony_h */

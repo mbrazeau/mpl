@@ -65,7 +65,7 @@ void mpl_charbuf_cleanup(mpl_charbuf* cb)
         safe_free(cb->nodechanges[i]);
     }
     safe_free(cb->nodechanges);
-    
+    safe_free(cb->actmask);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->dnset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->upset);
     mpl_charbuf_delete_discr_buffer(2 * cb->num_rows, &cb->prupset);
@@ -146,14 +146,15 @@ void mpl_charbuf_fill_na_column
 {
     int i = 0;
     
+    cb->actmask[cb->num_chars] = ISAPPLIC;
     for (i = 0; i < m->num_rows; ++i) {
         // TODO: For this and related fxns: this will need a conditional for included taxa
         cb->dnset[i][cb->num_chars]   = m->bitmatrix[i][col];
         cb->tempdn[i][cb->num_chars]  = m->bitmatrix[i][col];
         cb->prupset[i][cb->num_chars] = m->bitmatrix[i][col];
         cb->upset[i][cb->num_chars]   = m->bitmatrix[i][col];
-        cb->actives[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
-        cb->tempact[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
+//        cb->actives[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
+//        cb->tempact[i][cb->num_chars] = m->bitmatrix[i][col] & ISAPPLIC;
     }
     
 //    assert(col == ci->index);
@@ -172,48 +173,72 @@ void mpl_charbuf_fill_na_additv_column
     int max = 0;
     mpl_discr d = 0;
     
-    max = ci->maxstate;
+    max = ci->maxstate+1;
     
     for (i = 0; i < m->num_rows; ++i) {
         
         d = m->bitmatrix[i][col];
         if (d == MISSING) {
-            for (j = 0; j < max; ++j) {
+            
+            cb->actmask[cb->num_chars] = ISAPPLIC;
+            
+            cb->dnset[i][cb->num_chars]   = MISSING;
+            cb->tempdn[i][cb->num_chars]  = MISSING;
+            cb->actives[i][cb->num_chars] = ISAPPLIC;
+            cb->tempact[i][cb->num_chars] = ISAPPLIC;
+            for (j = 1; j < max; ++j) {
                 cb->dnset[i][cb->num_chars + j] = MISSING;
+                cb->tempdn[i][cb->num_chars + j]  = MISSING;
+                cb->actives[i][cb->num_chars + j] = 0;
+                cb->tempact[i][cb->num_chars + j] = 0;
             }
             continue;
         }
         
         if (d == NA) {
-            cb->dnset[i][cb->num_chars] = NA;
+            cb->actmask[cb->num_chars] = 0;
+            
+            cb->dnset[i][cb->num_chars]   = NA;
+            cb->tempdn[i][cb->num_chars]  = NA;
+            cb->actives[i][cb->num_chars] = 0;
+            cb->tempact[i][cb->num_chars] = 0;
             // HERE: Set up the actives appropriately: 0
             
             for (j = 1; j < max; ++j) {
-                cb->dnset[i][cb->num_chars + j] = NA;
+                cb->dnset[i][cb->num_chars + j]   = NA;
+                cb->tempdn[i][cb->num_chars + j]  = NA;
+                cb->actives[i][cb->num_chars + j] = 0;
+                cb->tempact[i][cb->num_chars + j] = 0;
                 // HERE: Set up the actives appropriately: 0
             }
             continue;
         }
         
+//        d = d >> 1;
+        
+        cb->actmask[cb->num_chars] = ISAPPLIC;
+        
+        cb->dnset[i][cb->num_chars]     = 0x02;
+        cb->tempdn[i][cb->num_chars]    = 0x02;
+        cb->prupset[i][cb->num_chars]   = 0x02;
+        cb->upset[i][cb->num_chars]     = 0x02;
+        cb->actives[i][cb->num_chars]   = 0x02;
+        cb->tempact[i][cb->num_chars]   = 0x02;
+        
         d = d >> 1;
         
-        cb->dnset[i][cb->num_chars] = 0x2;
-        cb->tempdn[i][cb->num_chars]  = 0x02;
-        cb->prupset[i][cb->num_chars + j] = 0x02;
-        cb->upset[i][cb->num_chars + j]   = 0x02;
-        cb->actives[i][cb->num_chars + j] = 0x02;
-        cb->tempact[i][cb->num_chars + j] = 0x02;
         for (j = 1; j < max; ++j) {
+            cb->actmask[cb->num_chars + j] = 0;
             if (d == 0) {
+                cb->dnset[i][cb->num_chars + j]   = 0x02;
+                cb->tempdn[i][cb->num_chars + j]  = 0x02;
+                cb->prupset[i][cb->num_chars + j] = 0x02;
+                cb->upset[i][cb->num_chars + j]   = 0x02;
+            } else {
                 cb->dnset[i][cb->num_chars + j]   = 0x04;
                 cb->tempdn[i][cb->num_chars + j]  = 0x04;
                 cb->prupset[i][cb->num_chars + j] = 0x04;
                 cb->upset[i][cb->num_chars + j]   = 0x04;
-            } else {
-                cb->dnset[i][cb->num_chars + j]   = 0x06;
-                cb->tempdn[i][cb->num_chars + j]  = 0x06;
-                cb->prupset[i][cb->num_chars + j] = 0x06;
-                cb->upset[i][cb->num_chars + j]   = 0x06;
             }
             cb->actives[i][cb->num_chars + j] = 0;
             cb->tempact[i][cb->num_chars + j] = 0;
@@ -486,6 +511,7 @@ static void mpl_charbuf_setup_discrete_type(mpl_charbuf* cb)
 {
     assert(cb->row_max && cb->char_max);
     
+    cb->actmask  = (mpl_discr*)safe_calloc(cb->char_max, sizeof(mpl_discr));
     cb->dnset    = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->prupset  = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);
     cb->dnsetf   = mpl_charbuf_alloc_discr_buffer(cb->row_max, cb->char_max);

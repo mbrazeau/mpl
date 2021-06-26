@@ -757,6 +757,129 @@ int test_multiple_small_matrices (void)
     return failn;
 }
 
+int test_multiple_small_ordered_matrices (void)
+{
+    theader("Test multiple small ordered matrices");
+    
+    int failn = 0;
+    
+    int ntax = 12;
+    int nchar = 1;
+    //                       111111111122222
+    //              123456789012345678901234
+    char *rawmatrices[] =
+    {
+        (char*)"23--1??--032;", // 0
+        (char*)"1---1111---1;", // 1
+        (char*)"1100----1100;", // 2
+        (char*)"11-------100;", // 3
+        (char*)"----1111---1;", // 4
+        (char*)"01----010101;", // 5
+        (char*)"01---1010101;", // 6
+        (char*)"1??--??--100;", // 7
+        (char*)"21--3??--032;", // 8
+        (char*)"11--1??--111;", // 9
+        (char*)"11--1000001-;", // 10
+        (char*)"01------0101;", // 11
+        (char*)"110--?---100;", // 12
+        (char*)"11--1??--111;", // 13
+        (char*)"210--100--21;", // 14
+        (char*)"????----1???;", // 15
+        (char*)"23--1----032;", // 16
+        (char*)"1----1----1-;", // 17
+        (char*)"-1-1-1--1-1-;", // 18
+        (char*)"23--1??--032;", // 19
+        (char*)"--------0101;", // 20
+        (char*)"10101-----01;", // 21
+        (char*)"011--?--0011;", // 22
+        (char*)"110--??--100;", // 23
+        (char*)"11--1000001-;", // 24
+        (char*)"21--1----012;", // 25
+        (char*)"11----111111;", // 26
+        (char*)"10101-----01;", // 27
+        (char*)"210210------;", // 28
+        (char*)"----1111----;", // 29
+        (char*)"230--??1--32;", // 30
+        (char*)"023--??1--32;", // 31
+        (char*)"023-???1--32;", // 32
+        (char*)"23--1?1--023;", // 33
+        (char*)"----1010----;", // 34
+        (char*)"------11---1;", // 35
+        (char*)"10----11---1;", // 36
+        (char*)"320--??3--21;", // 37
+        (char*)"-------1----;", // 38
+        (char*)"0--11-111111;", // 39
+    };
+    
+    int nummatrices = 40;
+    
+    double expected[] = {6, 2, 3, 2, 1,
+                         5, 5, 2, 6, 2,
+                         2, 4, 3, 2, 5,
+                         0, 6, 2, 4, 6,
+                         2, 4, 3, 3, 2,
+                         5, 1, 4, 4, 0, //29
+                         6, 6, 5, 5, 2,
+                         1, 3, 6, 0, 1};
+    
+    char *newick = "((((((1,2),3),4),5),6),(7,(8,(9,(10,(11,12))))));";
+    
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(newick, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_tree_traverse(t);
+    
+    int i = 0;
+    
+    for (i = 0; i < nummatrices; ++i) {
+        if (i == 33) {
+            printf("Break\n");
+        }
+        double len = 0.0;
+        mpl_matrix* m = mpl_matrix_new();
+        mpl_matrix_set_nrows(ntax, m);
+        mpl_matrix_set_ncols(nchar, m);
+        mpl_matrix_attach_rawdata(rawmatrices[i], m);
+        mpl_matrix_set_parsim_t(0, MPL_WAGNER_T, m);
+        mpl_matrix_apply_data(m);
+        mpl_init_parsimony(m);
+        
+//        int k = 0;
+//        int j = 0;
+//        for (k = 0; k < m->cbufs[0].num_rows; ++k) {
+//            for (j = 0; j < m->cbufs[0].num_chars; ++j) {
+//                printf("%i", m->cbufs[0].dnset[k][j]);
+//                if (j % 5 == 0 && j > 0) {
+//                    printf(" ");
+//                }
+//            }
+//            printf("\n");
+//        }
+        
+        len = mpl_fullpass_parsimony(t);
+        
+        if (len != expected[i]) {
+            ++failn;
+            pfail;
+            printf("Matrix %i", i);
+        }
+        else {
+            ppass;
+        }
+        
+        mpl_matrix_delete(&m);
+    }
+    
+    return failn;
+}
 
 int test_find_char_by_char_mismatches (void)
 {

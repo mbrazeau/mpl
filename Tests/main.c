@@ -114,6 +114,7 @@ int main(int argc, const char * argv[]) {
     fails += test_fullpass_with_large_data_std_parsimony();
     fails += test_fullpass_with_large_data_std_parsimony2();
     fails += test_multiple_small_matrices();
+    fails += test_multiple_small_ordered_matrices();
     fails += test_fullpass_with_inapplicables();
     fails += test_fullpass_with_multiple_inapplics();
     
@@ -123,7 +124,7 @@ int main(int argc, const char * argv[]) {
 //    fails += test_parsimony_shortcut_with_breakout();
 //    fails += test_larger_parsimony_shortcut_with_rerooting();
 //    fails += test_parsimony_shortcut_multiple_tree();
-//    fails += test_parsimony_shortcut_with_wagner();
+    fails += test_parsimony_shortcut_with_wagner();
     fails += test_parsimony_shortcut_with_na_wagner();
 //    
 //    fails += test_find_char_by_char_mismatches();

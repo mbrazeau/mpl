@@ -38,6 +38,7 @@ typedef struct _charbuf {
     long**      indexbufs;
     long**      nodechanges;
     mpl_data_t  datype;
+    mpl_discr*  actmask;
     mpl_discr** dnset; // The set of downpass characters
     mpl_discr** prupset;
     mpl_discr** dnsetf; // second downpass set

@@ -112,6 +112,7 @@ mpl_discr**  tempprup       = NULL;
 mpl_discr**  tempdnf        = NULL;
 mpl_discr**  tempup         = NULL;
 mpl_discr**  tempact        = NULL;
+mpl_discr*   actmask        = NULL;
 double*      weights        = NULL;
 double*      preweight      = NULL;
 short**      regdist        = NULL;
@@ -143,6 +144,7 @@ void mpl_parsim_assign_stateset_ptrs(mpl_charbuf* cb)
     tempprup        = cb->tempprup;
     tempup          = cb->tempup;
     tempact         = cb->tempact;
+    actmask         = cb->actmask;
     weights         = cb->weights;
     preweight       = cb->preweight;
     changes         = cb->charchanges;
@@ -512,18 +514,18 @@ void mpl_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 
         if ((dnset[tipn][i] & upset[anc][i]) == upset[anc][i]) {
             upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
-        } else if (pd->parstype == MPL_WAGNER_T) {
+        } /*else if (pd->parstype == MPL_WAGNER_T) {
             if (dnset[tipn][i] & upset[anc][i]) {
                 upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
             }
-        }
+        }*/
         
-        if (pd->parstype == MPL_WAGNER_T && !(upset[tipn][i] & upset[anc][i])) {
-            mpl_smallest_closed_interval(&rtset[tipn][i], upset[tipn][i], upset[anc][i]);
-            rtset[tipn][i] |= upset[tipn][i] | upset[anc][i];
-        } else {
+//        if (pd->parstype == MPL_WAGNER_T && !(upset[tipn][i] & upset[anc][i])) {
+//            mpl_smallest_closed_interval(&rtset[tipn][i], upset[tipn][i], upset[anc][i]);
+//            rtset[tipn][i] |= upset[tipn][i] | upset[anc][i];
+//        } else {
             rtset[tipn][i] = upset[tipn][i] | upset[anc][i];
-        }
+//        }
         
         
 //        tempdn[tipn][i] = dnset[tipn][i];
@@ -703,9 +705,9 @@ void mpl_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
     for (i = pd->start; i < end; ++i) {
 
         if (dnset[tipn][i] & prupset[anc][i]) {
-            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
+            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & actmask[i];
         } else {
-            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+            actives[tipn][i] |= dnset[tipn][i] & actmask[i];
         }
         
         prupset[tipn][i] = dnset[tipn][i];
@@ -909,24 +911,24 @@ void mpl_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
             upset[tipn][i] = dnset[tipn][i];
         }
         
-        if (pd->parstype == MPL_WAGNER_T) {
-            if (dnset[tipn][i] & upset[anc][i]) {
-                upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
-            }
-        }
+//        if (pd->parstype == MPL_WAGNER_T) {
+//            if (dnset[tipn][i] & upset[anc][i]) {
+//                upset[tipn][i] = dnset[tipn][i] & upset[anc][i];
+//            }
+//        }
     
         tempup[tipn][i] = upset[tipn][i];
     
-        if (pd->parstype == MPL_WAGNER_T && !(upset[tipn][i] & upset[anc][i])) {
-            if (!((upset[tipn][i] | upset[anc][i]) & NA)) {
-                mpl_smallest_closed_interval(&rtset[tipn][i], upset[tipn][i], upset[anc][i]);
-            } else {
-                rtset[tipn][i] = NOCHARS; // Clear it so self-assignment in next line doesn't add old states
-            }
-            rtset[tipn][i] |= upset[tipn][i] | upset[anc][i];
-        } else {
+//        if (pd->parstype == MPL_WAGNER_T && !(upset[tipn][i] & upset[anc][i])) {
+//            if (!((upset[tipn][i] | upset[anc][i]) & NA)) {
+//                mpl_smallest_closed_interval(&rtset[tipn][i], upset[tipn][i], upset[anc][i]);
+//            } else {
+//                rtset[tipn][i] = NOCHARS; // Clear it so self-assignment in next line doesn't add old states
+//            }
+//            rtset[tipn][i] |= upset[tipn][i] | upset[anc][i];
+//        } else {
             rtset[tipn][i] = upset[tipn][i] | upset[anc][i];
-        }
+//        }
     }
 }
 
@@ -1061,9 +1063,9 @@ void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
         i = indices[j];
         
         if (dnset[tipn][i] & prupset[anc][i]) {
-            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & ISAPPLIC;
+            actives[tipn][i] = dnset[tipn][i] & prupset[anc][i] & actmask[i];
         } else {
-            actives[tipn][i] |= dnset[tipn][i] & ISAPPLIC;
+            actives[tipn][i] |= dnset[tipn][i] & actmask[i];
         }
         
         prupset[tipn][i] = dnset[tipn][i];
@@ -1177,9 +1179,9 @@ double mpl_fitch_na_local_check
     const long end   = pd->end;
     double score     = 0.0;
 //    long splits = 0;
-//    double cminscore = pd->cminscore; // Sum of all applicable changes
-//    double testscore = 0.0;
-//    double recall    = pd->crecall;
+    double cminscore = pd->cminscore; // Sum of all applicable changes
+    double testscore = 0.0;
+    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
@@ -2131,7 +2133,7 @@ double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
         tempprup[n][i] = prupset[n][i];
         tempup[n][i]  = upset[n][i];
         
-        actives[n][i] = dnset[n][i] & ISAPPLIC;
+        actives[n][i] = dnset[n][i] & actmask[i];
         tempact[n][i] = actives[n][i];
     }
     
@@ -2165,7 +2167,7 @@ void mpl_update_active_sets(const long left, const long right, const long n, mpl
     
     for (i = pd->start; i < end; ++i) {
 
-        actives[n][i] = (actives[left][i] | actives[right][i]) & ISAPPLIC;
+        actives[n][i] = (actives[left][i] | actives[right][i]) & actmask[i];
         tempact[n][i] = actives[n][i];
     }
 }
