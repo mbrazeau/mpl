@@ -1183,7 +1183,7 @@ double mpl_fitch_na_local_check
 //    long splits = 0;
 //    double cminscore = pd->cminscore; // Sum of all applicable changes
 //    double testscore = 0.0;
-//    double recall    = pd->crecall;
+    double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
@@ -1225,7 +1225,7 @@ double mpl_fitch_na_local_check
         if (lim > -1.0) {
             if ((score + base - pd->scorerecall + pd->minscore) > lim) {
                 pd->minscore += (score + base);
-                pd->scorerecall = 0;
+                pd->scorerecall += recall;
                 return score + base;
             }
 //            cminscore -= (applicchgs[i] * weights[i]);
