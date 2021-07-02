@@ -109,6 +109,11 @@ void mpl_test_print_newick(mpl_node* n)
     printf(")");
 }
 
+void mpl_test_print_tree(mpl_tree* t)
+{
+    mpl_test_print_newick(t->root);
+}
+
 void mpl_test_print_charchanges(mpl_matrix*  m)
 {
     size_t i = 0;

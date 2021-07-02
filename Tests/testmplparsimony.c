@@ -881,6 +881,200 @@ int test_multiple_small_ordered_matrices (void)
     return failn;
 }
 
+int test_wagner_na_parsimony (void)
+{
+    theader("Test Wagner parsimony with multiple characters");
+    
+    int failn = 0;
+    
+    long ntax = 12;
+    long nchar = 2;
+    
+    //23--1??--032; 6 +
+    //320--??3--21; 6
+    
+    char *rawmatrix =
+    "23\
+     32\
+     -0\
+     --\
+     1-\
+     ??\
+     ??\
+     -3\
+     --\
+     0-\
+     32\
+     21;";
+    
+    char* newick = "((((((1,2),3),4),5),6),(7,(8,(9,(10,(11,12))))));";
+    int i = 0;
+    
+    mpl_matrix* m = mpl_matrix_new();
+    mpl_matrix_set_nrows(ntax, m);
+    mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+    // Set all characters to type wagner:
+    for (i = 0; i < nchar; ++i) {
+        mpl_matrix_set_parsim_t(i, MPL_WAGNER_T, m);
+    }
+//    mpl_matrix_set_parsim_t(3, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(4, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(8, MPL_WAGNER_T, m);
+    
+    mpl_matrix_apply_data(m);
+    
+    int j = 0;
+    for (i = 0; i < m->cbufs[0].num_rows; ++i) {
+        for (j = 0; j < m->cbufs[0].num_chars; ++j) {
+            printf("%i", m->cbufs[0].dnset[i][j]);
+        }
+        printf("\n");
+    }
+    
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(newick, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_tree_traverse(t);
+    
+    double len = 0.0;
+    
+    mpl_init_parsimony(m);
+    
+    len = mpl_fullpass_parsimony(t);
+    
+    if (len != 12.0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_matrix_delete(&m);
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
+
+int test_wagner_na_big_single_char (void)
+{
+    theader("Test large Wagner parsimony with single character");
+    
+    int failn = 0;
+    
+    long ntax = 33;
+    long nchar = 1;
+    
+    //23--1??--032; 6 +
+    //320--??3--21; 6
+    
+    char *rawmatrix = "000-2-?---?2???0?---0?2??0????0??;";
+//    "000---???2-?-0?------???2?-??1?0?110?-?-0--0??02?0??0?00??--???1?0?????01-?-???11120?2????00???;";
+    
+    char* newick = "(1,(2,(31,((33,((((11,(32,(((15,(7,((8,(3,18)),(27,29)))),(20,28)),(13,17)))),(24,22)),(16,21)),(23,(10,(12,(5,(9,19))))))),(14,((30,(4,6)),(25,26)))))));";
+//    "(1,(2,((8,(72,((95,(((28,(71,(45,(((22,(75,(((31,(12,((13,(3,40)),(54,65)))),(43,63)),(26,33)))),(49,(46,(((69,(27,(16,(((17,(4,19)),(76,((39,(15,23)),(38,59)))),(60,74))))),(37,(52,57))),(9,(68,(18,(77,(7,62))))))))),(24,(50,(((79,(14,(41,((56,(47,(88,89))),(55,90))))),(94,((73,((30,35),((81,(34,64)),(80,(82,(83,86)))))),((58,91),(87,(84,85)))))),(36,(93,(66,92)))))))))),(32,44)),(48,(21,(25,(10,(20,42))))))),(29,((70,(5,11)),(51,53)))))),(78,(61,(6,67))))));";
+    int i = 0;
+    
+    mpl_matrix* m = mpl_matrix_new();
+    mpl_matrix_set_nrows(ntax, m);
+    mpl_matrix_set_ncols(nchar, m);
+    mpl_matrix_attach_rawdata(rawmatrix, m);
+    // Set all characters to type wagner:
+    for (i = 0; i < nchar; ++i) {
+        mpl_matrix_set_parsim_t(i, MPL_WAGNER_T, m);
+    }
+//    mpl_matrix_set_parsim_t(3, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(4, MPL_WAGNER_T, m);
+//    mpl_matrix_set_parsim_t(8, MPL_WAGNER_T, m);
+    
+    mpl_matrix_apply_data(m);
+    
+    int j = 0;
+    for (i = 0; i < m->cbufs[0].num_rows; ++i) {
+        for (j = 0; j < m->cbufs[0].num_chars; ++j) {
+            printf("%i", m->cbufs[0].dnset[i][j]);
+        }
+        printf("\n");
+    }
+    
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(newick, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_tree_traverse(t);
+    
+    double len = 0.0;
+    
+    mpl_init_parsimony(m);
+    
+    len = mpl_fullpass_parsimony(t);
+    
+    if (len != 2.0) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    // Prune out a branch and re-do it.
+    mpl_node* src = &t->nodes[2];
+    mpl_node* tgt = mpl_node_get_sib(src);
+    mpl_node_bin_clip(src);
+    
+//    len = mpl_fullpass_parsimony(t);
+//    
+//    if (len != 4.0) {
+//        ++failn;
+//        pfail;
+//    }
+//    else {
+//        ppass;
+//    }
+    
+    double tgtlen = 0.0;
+    double srclen = 0.0;
+    double reclen = 0.0;
+    tgtlen = mpl_fullpass_parsimony(t);
+    if (src->tip == 0) {
+        srclen = mpl_fullpass_subtree(src, t);
+    }
+    
+    mpl_node_bin_connect(NULL, tgt, src);
+    
+    reclen = mpl_score_try_parsimony(tgtlen + srclen, -1.0, src, tgt, t);
+    reclen += tgtlen + srclen;
+    
+    if (reclen != len) {
+        ++failn;
+        pfail;
+    }
+    else {
+        ppass;
+    }
+    
+    mpl_matrix_delete(&m);
+    mpl_delete_tree(&t);
+    
+    return failn;
+}
+
 int test_find_char_by_char_mismatches (void)
 {
     theader("Find mismatches between");

@@ -1601,11 +1601,11 @@ int test_parsimony_shortcut_with_na_wagner (void)
     
     //    int ntax = 28;
     //    int nchar = 95;
-    long ntax = Brazeau.ntax;
-    long nchar = Brazeau.nchar;
+    long ntax = Brazeau2.ntax;
+    long nchar = Brazeau2.nchar;
     double testscore = 0.0;
     
-    char* matrix = Brazeau.chardat;
+    char* matrix = Brazeau2.chardat;
     
     int ntests = 2;
     char* testtree[] ={
@@ -1625,7 +1625,8 @@ int test_parsimony_shortcut_with_na_wagner (void)
 //    mpl_matrix_set_gap_handle(GAP_MISSING, m);
     size_t i = 0;
     int numord = 8;
-    int ordered[] = {64, 84, 125, 164, 260, 262, 266, 268};
+//    int ordered[] = {64, 84, 125, 164, 260, 262, 266, 268};
+    int ordered[] = {1, 2, 3, 4, 5, 6, 7, 8};
     for (i = 0; i < numord; ++i) {
         mpl_matrix_set_parsim_t(ordered[i]-1, MPL_WAGNER_T, m);
     }

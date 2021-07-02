@@ -688,7 +688,7 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     if (numna > 0) {
         mpl_parsim_set_type(GAP_INAPPLIC, MPL_FITCH_T, &m->parsets[i]);
         m->parsets[i].start = numstd;
-        m->parsets[i].end = numstd + numna - 1;
+        m->parsets[i].end = numstd + numna;
     }
     
     // Allocate the buffer
@@ -755,35 +755,6 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     }
 }
 
-static mpl_discr* mpl_matrix_write_additive_binary(mpl_discr d, mpl_discr* p, mpl_discr* stop)
-{
-    mpl_discr *temp = p;
-    bool on = false;
-    
-    if (d == MISSING) {
-        while (p != stop) {
-            *p = MISSING;
-            ++p;
-        }
-        return p;
-    }
-
-    d = d >> 1;
-    
-    while (p != stop) {
-        // TODO: Now write the character as non-additive binary
-        if (d == 0) {
-            *p = 0x01;
-        } else {
-            *p = 0x02;
-        }
-        d = d >> 1;
-        ++p;
-    }
-    
-    return p;
-}
-
 static void mpl_matrix_convert_into_discrbuffer
 (mpl_discr* di, const long coln, mpl_matrix* m)
 {
@@ -796,38 +767,38 @@ static void mpl_matrix_convert_into_discrbuffer
     }
 }
 
-static void mpl_matrix_write_discr_parsim_to_buffer
-(mpl_parsdat* pd, mpl_matrix* m)
-{
-    long i = 0;
-
-    mpl_discr* colbuf = NULL;
-    colbuf = (mpl_discr*)safe_calloc(m->num_rows, sizeof(mpl_discr));
-    
-    // Loop over all characters in the matrix and check that the character's
-    // description matches this parsimony data type. Check if it is the
-    // same optimality type (e.g. Fitch, Wagner...) and if it has the same
-    // method of treating gaps.
-    for (i = 0; i < m->num_cols; ++i) {
-
-        // If column is the same parsimony type as the pardat struct:
-        if (m->charinfo[i].parsimtype == pd->parstype) {
-            // And if they have the same value for treating gaps:
-            if (pd->isNAtype == true && m->charinfo[i].num_gaps > 2) {
-                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
-                mpl_parsim_add_data_column_to_buffer
-                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
-            }
-            else if (pd->isNAtype == false && m->charinfo[i].num_gaps < 3){
-                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
-                mpl_parsim_add_data_column_to_buffer
-                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
-            }
-        }
-    }
-    
-    free(colbuf);
-}
+//static void mpl_matrix_write_discr_parsim_to_buffer
+//(mpl_parsdat* pd, mpl_matrix* m)
+//{
+//    long i = 0;
+//
+//    mpl_discr* colbuf = NULL;
+//    colbuf = (mpl_discr*)safe_calloc(m->num_rows, sizeof(mpl_discr));
+//    
+//    // Loop over all characters in the matrix and check that the character's
+//    // description matches this parsimony data type. Check if it is the
+//    // same optimality type (e.g. Fitch, Wagner...) and if it has the same
+//    // method of treating gaps.
+//    for (i = 0; i < m->num_cols; ++i) {
+//
+//        // If column is the same parsimony type as the pardat struct:
+//        if (m->charinfo[i].parsimtype == pd->parstype) {
+//            // And if they have the same value for treating gaps:
+//            if (pd->isNAtype == true && m->charinfo[i].num_gaps > 2) {
+//                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
+//                mpl_parsim_add_data_column_to_buffer
+//                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
+//            }
+//            else if (pd->isNAtype == false && m->charinfo[i].num_gaps < 3){
+//                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
+//                mpl_parsim_add_data_column_to_buffer
+//                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
+//            }
+//        }
+//    }
+//    
+//    free(colbuf);
+//}
 
 /**
  For each character info struct in the charinfo block of the matrix, a count is

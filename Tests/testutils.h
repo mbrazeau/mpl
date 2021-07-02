@@ -14,6 +14,7 @@
 void mpl_tests_tree_traverse(mpl_tree* t);
 int mpl_tree_checker(const mpl_tree* t);
 void mpl_test_print_newick(mpl_node* n);
+void mpl_test_print_tree(mpl_tree* t);
 void mpl_test_print_charchanges(mpl_matrix* m);
 void add_local_changes(mpl_charbuf* cb);
 

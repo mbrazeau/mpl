@@ -1111,7 +1111,9 @@ double mpl_fitch_na_recalc_second_downpass
             if (!dnsetf[n][i]) {
                 dnsetf[n][i] = (dnsetf[left][i] | dnsetf[right][i]) & ISAPPLIC;
 
-                if (actives[left][i] && actives[right][i]) {
+                if (dnsetf[left][i] & ISAPPLIC && dnsetf[right][i] & ISAPPLIC) {
+                    cost += weights[i];
+                }else if (actives[left][i] && actives[right][i]) {
                     cost += weights[i];
                 }
             }
@@ -1966,7 +1968,7 @@ double mpl_na_only_parsim_second_downpass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            score += m->parsets[i].rednfxn2(left, right, n, &m->parsets[i]);
+            score += mpl_fitch_na_recalc_second_downpass(left, right, n, &m->parsets[i]);
         }
     }
     
