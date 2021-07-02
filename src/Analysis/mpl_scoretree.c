@@ -590,7 +590,7 @@ double mpl_score_try_parsimony
 
         // TODO: Add a break condition here for when the number of
         // characters to check is 0.
-        score += mpl_fullpass_parsimony_na_only(-1.0, src, t);
+        score += mpl_fullpass_parsimony_na_only(lim, src, t);
     }
     
     return score;

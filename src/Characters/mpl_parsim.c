@@ -1181,8 +1181,8 @@ double mpl_fitch_na_local_check
     const long end   = pd->end;
     double score     = 0.0;
 //    long splits = 0;
-//    double cminscore = pd->cminscore; // Sum of all applicable changes
-//    double testscore = 0.0;
+    double cminscore = pd->cminscore; // Sum of all applicable changes
+    double testscore = 0.0;
     double recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
@@ -1223,19 +1223,19 @@ double mpl_fitch_na_local_check
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1.0) {
-            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
-                pd->minscore += (score + base);
-                pd->scorerecall += recall;
-                return score + base;
-            }
-//            cminscore -= (applicchgs[i] * weights[i]);
-//            recall -= (changes[i] * weights[i]);
-//            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
-//            if (testscore > lim) {
-//                pd->minscore += cminscore;
+//            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
+//                pd->minscore += (score + base);
 //                pd->scorerecall += recall;
-//                return score;
+//                return score + base;
 //            }
+            cminscore -= (applicchgs[i] * weights[i]);
+            recall -= (changes[i] * weights[i]);
+            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
+            if (testscore > lim) {
+                pd->minscore += cminscore;
+                pd->scorerecall += recall;
+                return score;
+            }
         }
     }
     
