@@ -307,13 +307,6 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     mpl_count_chartypes(m);
     
     
-    // TODO: It may be important to leave this part until a search is ready to be initiated.
-    // Set up the databuffers needed: discrete, continuous, and "model"-based
-    // For each type, set up enough memory to handle the characters
-//    for (i = 0; i < m->ndatypes; ++i) {
-//        // TODO: create a return from this and check it
-//        mpl_charbuf_init((mpl_data_t)i, m->num_rows, m->datypes[i], &m->cbufs[i]);
-//    }
     
     return ret;
 }
@@ -744,61 +737,16 @@ static void mpl_matrix_setup_parsimony(mpl_matrix* m)
     m->nvariable = 0;
     
     for (i = 0; i < m->num_cols; ++i) {
-        if (m->charinfo[i].isvariable == true) {
-            ++m->nvariable;
+        if (m->charinfo[i].isincluded == true) {
+            if (m->charinfo[i].isvariable == true) {
+                ++m->nvariable;
+            }
+            if (m->charinfo[i].isparsinform == true) {
+                ++m->ninform;
+            }
         }
-        if (m->charinfo[i].isparsinform == true) {
-            ++m->ninform;
-        } /*else {
-            printf("Character %i deemed uninformative\n", i+1);
-        }*/
     }
 }
-
-static void mpl_matrix_convert_into_discrbuffer
-(mpl_discr* di, const long coln, mpl_matrix* m)
-{
-    long i = 0;
-    char* cp = NULL;
-    
-    for (i = 0; i < m->num_rows; ++i) {
-        cp = m->rcells[i][coln];//mpl_matrix_get_rawdat_ptr(i, coln, m);
-        di[i] = mpl_rawcharptr2bitset(cp, coln, m);
-    }
-}
-
-//static void mpl_matrix_write_discr_parsim_to_buffer
-//(mpl_parsdat* pd, mpl_matrix* m)
-//{
-//    long i = 0;
-//
-//    mpl_discr* colbuf = NULL;
-//    colbuf = (mpl_discr*)safe_calloc(m->num_rows, sizeof(mpl_discr));
-//    
-//    // Loop over all characters in the matrix and check that the character's
-//    // description matches this parsimony data type. Check if it is the
-//    // same optimality type (e.g. Fitch, Wagner...) and if it has the same
-//    // method of treating gaps.
-//    for (i = 0; i < m->num_cols; ++i) {
-//
-//        // If column is the same parsimony type as the pardat struct:
-//        if (m->charinfo[i].parsimtype == pd->parstype) {
-//            // And if they have the same value for treating gaps:
-//            if (pd->isNAtype == true && m->charinfo[i].num_gaps > 2) {
-//                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
-//                mpl_parsim_add_data_column_to_buffer
-//                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
-//            }
-//            else if (pd->isNAtype == false && m->charinfo[i].num_gaps < 3){
-//                mpl_matrix_convert_into_discrbuffer(colbuf, i, m);
-//                mpl_parsim_add_data_column_to_buffer
-//                (colbuf, &m->charinfo[i], &m->cbufs[MPL_DISCR_T], pd);
-//            }
-//        }
-//    }
-//    
-//    free(colbuf);
-//}
 
 /**
  For each character info struct in the charinfo block of the matrix, a count is
@@ -831,6 +779,44 @@ static void mpl_count_chartypes(mpl_matrix* m)
 //        if (m->parstypes[m->charinfo[i].datatype] == 1) {
 //            ++m->nparsimtypes;
 //        }
+    }
+}
+
+static void mpl_count_invars(mpl_matrix* m)
+{
+    long i = 0;
+    long j = 0;
+    mpl_discr s = NOCHARS;
+    mpl_discr scounts[MAXSTATES];
+    int pinform = 0;
+    int isvar = 0;
+    
+    for (i = 0; i < m->num_cols; ++i) {
+        pinform = 0;
+        memset(scounts, 0, sizeof(mpl_discr) * MAXSTATES);
+        for (j = 0; j < m->num_rows; ++j) {
+            s = m->bitmatrix[j][i];
+            if (s < UNKNOWN) {
+                ++scounts[s];
+            }
+        }
+        
+        for (j = 0; j < MAXSTATES; ++j) {
+            if (scounts[j] > 1) {
+                ++pinform;
+            }
+        }
+        
+        if (pinform > 1) {
+            m->charinfo[i].isparsinform = true;
+        } else {
+            m->charinfo[i].isparsinform = false;
+        }
+        if (pinform <= 1) {
+            m->charinfo[i].isvariable = false;
+        } else {
+            m->charinfo[i].isvariable = true;
+        }
     }
 }
 

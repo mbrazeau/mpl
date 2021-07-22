@@ -886,6 +886,11 @@ void mpl_fitch_na_second_uppass
         }
         else {
             upset[n][i] = dnsetf[n][i];
+            if (upset[anc][i] & ISAPPLIC) {
+                regdist[n][i] = 1;
+            } else {
+                regdist[n][i] = regdist[anc][i] + 1;
+            }
         }
         
         rtset[n][i] = upset[n][i] | upset[anc][i];
@@ -1191,11 +1196,13 @@ double mpl_fitch_na_local_check
                 if (!(rtset[tgt1][i] & upset[src][i])) {
                     score += weights[i];
                 }
-            } else if (upset[src][i] < MISSING) {
+            } else if (upset[src][i] < UNKNOWN) {
                 if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
+                    // using changes[] is POSSIBLY less accurate but much faster
+                    // pd->minscore    += (changes[i] * weights[i]);
                     pd->minscore    += (applicchgs[i] * weights[i]);
                 } else {
                     pd->indexbuf[pd->nchars] = i;
@@ -1230,7 +1237,7 @@ double mpl_fitch_na_local_check
 //            }
             cminscore -= (applicchgs[i] * weights[i]);
             recall -= (changes[i] * weights[i]);
-            testscore = score + pd->minscore + cminscore + base - pd->scorerecall - recall;
+            testscore = score + pd->minscore + base + cminscore - pd->scorerecall - recall;
             if (testscore > lim) {
                 pd->minscore += cminscore;
                 pd->scorerecall += recall;
@@ -2216,7 +2223,7 @@ double mpl_parsim_local_check
 (const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
     double score = 0.0;
-    double cscore = m->naminscore;//base;
+    double cscore = base;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {

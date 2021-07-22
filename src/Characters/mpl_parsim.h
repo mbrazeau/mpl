@@ -47,6 +47,7 @@ typedef struct mpl_parsdat {
     double          cminscore; // A current minimum score based on state of tree and applicable-only changes
     double          crecall;
     long*           minchanges;
+    bool            dobreak;
     int             doeschange; // Number of times a character changes
     double          scorerecall; // For characters needing full-pass estimation during a partial reopt.
     double          score; // The score for this parsimony type.
