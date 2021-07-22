@@ -37,6 +37,7 @@ static void mpl_matrix_get_symbols_from_matrix(mpl_matrix* m);
 static void mpl_matrix_setup_cell_ptrs(mpl_matrix* m);
 static void mpl_matrix_count_num_states(mpl_matrix *m);
 static void mpl_matrix_setup_bitmatrix(mpl_matrix* m);
+static void mpl_count_invars(mpl_matrix* m);
 static mpl_discr* mpl_matrix_write_additive_binary(mpl_discr d, mpl_discr* p, mpl_discr* stop);
 
 /*******************************************************************************
@@ -306,7 +307,12 @@ MPL_RETURN mpl_matrix_attach_rawdata(const char* rawdat, mpl_matrix* m)
     // TODO: This should be changed to something that checks for continuous, Sankoff, and other types
     mpl_count_chartypes(m);
     
+    mpl_count_invars(m);
     
+    // Set all characters to included
+    for (i = 0; i < m->num_cols; ++i) {
+        m->charinfo[i].isincluded = true;
+    }
     
     return ret;
 }
@@ -406,14 +412,32 @@ MPL_RETURN mpl_matrix_add_symbol(const char symb, mpl_matrix* m)
 
 MPL_RETURN  mpl_matrix_report(mpl_matrix *m)
 {
+    int nuninfo;
+    int ninvar;
+    char *is = " is";
+    char *are = "s are";
+    char *isare = are;
+    
     MPL_RETURN ret = MPL_SUCCESS;
     
     RET_IF_NULL(m);
     
     printf("Dataset has %li characters\n", m->num_cols);
     
-    // TODO: This needs implementing and a grammatical condition is/are
-    printf("\t %li characters are parsimony uninformative\n", m->num_cols - m->ninform);
+  
+    nuninfo = m->num_cols - m->ninform;
+    ninvar = m->num_cols - m->nvariable;
+    
+    if (nuninfo == 1) {
+        isare = is;
+    }
+    printf("\t %li character%s parsimony uninformative\n", m->num_cols - m->ninform, isare);
+    if (ninvar == 1) {
+        isare = is;
+    } else {
+        isare = are;
+    }
+    printf("\t %li character%s invariant\n", m->num_cols - m->nvariable, isare);
     
     long nNA = 0;
     
@@ -787,54 +811,59 @@ static void mpl_count_invars(mpl_matrix* m)
     long i = 0;
     long j = 0;
     mpl_discr s = NOCHARS;
-    mpl_discr scounts[MAXSTATES];
-    int pinform = 0;
-    int isvar = 0;
+    mpl_discr p = NOCHARS;
+    mpl_discr scounts[MAXSTATES+1];
+    int npinform = 0;
     
     for (i = 0; i < m->num_cols; ++i) {
-        pinform = 0;
-        memset(scounts, 0, sizeof(mpl_discr) * MAXSTATES);
+        
+        s = NOCHARS;
+        npinform = 0;
+        memset(scounts, 0, sizeof(mpl_discr) * (MAXSTATES + 1));
+        
         for (j = 0; j < m->num_rows; ++j) {
-            s = m->bitmatrix[j][i];
-            if (s < UNKNOWN) {
-                ++scounts[s];
+        
+            p = m->bitmatrix[j][i];
+            
+            if (p < UNKNOWN && p > NA) {
+                if ((s & p) && (s ^ p)) {
+                    ++npinform;
+                } else {
+                    s |= p;
+                }
             }
         }
         
-        for (j = 0; j < MAXSTATES; ++j) {
-            if (scounts[j] > 1) {
-                ++pinform;
-            }
-        }
-        
-        if (pinform > 1) {
+        if (npinform > 1) {
             m->charinfo[i].isparsinform = true;
         } else {
             m->charinfo[i].isparsinform = false;
         }
-        if (pinform <= 1) {
+        
+        if (npinform == 1) {
             m->charinfo[i].isvariable = false;
         } else {
             m->charinfo[i].isvariable = true;
         }
-    }
-}
-
-static void mpl_count_inapplics_by_parstype(mpl_matrix* m)
-{
-    long i = 0;
     
-    memset(m->nasbytype, 0, MPL_PARSIM_T_MAX * sizeof(int));
-
-    for (i = 0; i < m->num_cols; ++i) {
-        
-        m->charinfo[i].num_gaps = mpl_matrix_count_gaps_in_column((const long)i, (const mpl_matrix*)m);
-        
-        if (m->charinfo[i].num_gaps > 2) {
-            ++m->nasbytype[m->charinfo[i].parsimtype];
-        }
     }
 }
+
+//static void mpl_count_inapplics_by_parstype(mpl_matrix* m)
+//{
+//    long i = 0;
+//
+//    memset(m->nasbytype, 0, MPL_PARSIM_T_MAX * sizeof(int));
+//
+//    for (i = 0; i < m->num_cols; ++i) {
+//
+//        m->charinfo[i].num_gaps = mpl_matrix_count_gaps_in_column((const long)i, (const mpl_matrix*)m);
+//
+//        if (m->charinfo[i].num_gaps > 2) {
+//            ++m->nasbytype[m->charinfo[i].parsimtype];
+//        }
+//    }
+//}
 
 static char mpl_get_opposite_bracket(const char bracket)
 {
