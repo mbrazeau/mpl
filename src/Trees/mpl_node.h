@@ -65,5 +65,6 @@ void        mpl_node_collapse(mpl_node* n);
 inline void mpl_node_lock(mpl_node* n);
 inline void mpl_node_unlock(mpl_node* n);
 inline bool mpl_node_islocked(const mpl_node* n);
+void        mpl_node_set_bipart(mpl_bitset* desc, mpl_bitset* p);
 
 #endif /* mpl_node_h */

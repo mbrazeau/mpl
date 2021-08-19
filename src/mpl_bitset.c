@@ -12,6 +12,22 @@
 #include "mpl_utils.h"
 #include "mpl_bitset.h"
 
+mpl_bitset *mpl_bitset_init(const int minbits, mpl_bitset *b)
+{
+    b->nfields = minbits / NULONGBITS;
+    
+    if (minbits % NULONGBITS != 0) {
+        b->nfields += 1;
+    }
+    
+    b->data = NULL;
+    b->data = (unsigned long*)safe_calloc(b->nfields, sizeof(unsigned long));
+    
+    b->maxbit = minbits;//nb->nfields * NULONGBITS;
+    
+    return b;
+}
+
 mpl_bitset* mpl_bitset_new(const int minbits)
 {
     mpl_bitset* nb = NULL;
@@ -20,23 +36,12 @@ mpl_bitset* mpl_bitset_new(const int minbits)
     if (nb == NULL) {
         return NULL;
     }
-    
-    nb->nfields = minbits / NULONGBITS;
-    
-    if (minbits % NULONGBITS != 0) {
-        nb->nfields += 1;
-    }
-    
-    nb->data = NULL;
-    nb->data = (unsigned long*)safe_calloc(nb->nfields, sizeof(unsigned long));
-    
-    if (nb->data == NULL) {
+  
+    if (!mpl_bitset_init(minbits, nb)) {
         safe_free(nb);
-        nb = NULL; // Just precautionary
+        nb = NULL; // Precautionary.
     }
-    
-    nb->maxbit = minbits;//nb->nfields * NULONGBITS;
-    
+
     return nb;
 }
 

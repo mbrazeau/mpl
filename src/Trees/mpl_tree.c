@@ -409,6 +409,22 @@ inline mpl_node* mpl_tree_dummy_root(mpl_tree* t)
     return t->dummy;
 }
 
+void mpl_tree_calc_biparts(mpl_tree *t)
+{
+    mpl_node* n = NULL;
+    mpl_node** p = NULL;
+    
+    int i = 0;
+    for (i = 0; i < t->nintern; ++i) {
+        n = t->postord_intern[i];
+        p = n->descs;
+        do {
+            mpl_node_set_bipart((*p)->bipart, n->bipart);
+            ++p;
+        } while (*p);
+    }
+}
+
 mpl_node* mpl_tree_bin_clip(mpl_node* n, mpl_tree* t)
 {
     assert(!t->num_polys);

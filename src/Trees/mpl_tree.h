@@ -48,5 +48,6 @@ int         mpl_tree_rebase(long tgt, mpl_tree* t);
 int         mpl_root_tree(long tgt, mpl_tree* t);
 int         mpl_unroot_tree(mpl_tree* t);
 mpl_node*   mpl_tree_dummy_root(mpl_tree* t);
+void        mpl_tree_calc_biparts(mpl_tree *t);
 
 #endif /* mpl_tree_h */

@@ -22,7 +22,6 @@ static inline void mpl_push_to_desc_array(mpl_node* tgt, mpl_node* src);
 static void mpl_extend_desc_array(mpl_node* n, const size_t nelems);
 static inline void mpl_update_left_right_ptrs(mpl_node* n);
 static inline mpl_node** mpl_node_find_desc_ptr(const mpl_node* tgt);
-static inline void mpl_node_set_bipart(mpl_bitset* desc, mpl_bitset* p);
 /*
  *  PUBLIC FUNCTION DEFINITIONS
  */
@@ -121,7 +120,7 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     p = &n->descs[0];
     do {
         mpl_node_poly_traverse(*p, t, i, j);
-        mpl_node_set_bipart((*p)->bipart, n->bipart);
+//        mpl_node_set_bipart((*p)->bipart, n->bipart);
         ++p;
 #ifdef DEBUG
         ++_countcheck;
@@ -151,7 +150,7 @@ void mpl_node_bipart_traverse(mpl_node* n, mpl_tree* t)
     p = &n->descs[0];
     do {
         mpl_node_bipart_traverse(*p, t);
-        mpl_node_set_bipart((*p)->bipart, n->bipart);
+//        mpl_node_set_bipart((*p)->bipart, n->bipart);
         ++p;
 #ifdef DEBUG
         ++_countcheck;
@@ -477,6 +476,13 @@ inline bool mpl_node_islocked(const mpl_node* n)
     return n->lock;
 }
 
+void mpl_node_set_bipart(mpl_bitset* desc, mpl_bitset* p)
+{
+    if (desc != NULL) {
+        mpl_bitset_OR(p, desc, p);
+    }
+}
+
 /*******************************************************************************
  *                                                                             *
  *  PRIVATE FUNCTION DEFINITIONS                                               *
@@ -535,9 +541,3 @@ static inline mpl_node** mpl_node_find_desc_ptr(const mpl_node* tgt)
     return ret;
 }
 
-static inline void mpl_node_set_bipart(mpl_bitset* desc, mpl_bitset* p)
-{
-    if (desc != NULL) {
-        mpl_bitset_OR(p, desc, p);
-    }
-}
