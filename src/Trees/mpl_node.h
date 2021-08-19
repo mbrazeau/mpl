@@ -38,7 +38,8 @@ typedef struct _node {
     bool        clipmark;
     bool        inpath;
     int         marked;
-    
+    int         x; // For tree drawing
+    int         y; // For tree drawing
 } mpl_node;
 
 //#define mpl_node_get_sib(n) ((n)->anc->left == n) ? (n)->anc->right : (n)->anc->left

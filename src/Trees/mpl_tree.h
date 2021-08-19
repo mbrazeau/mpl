@@ -28,7 +28,6 @@ typedef struct _tree {
     mpl_node*   root;
     long        num_polys;
     double      score;
-    
 } mpl_tree;
 
 #define mpl_get_intern_postord(tree, index) ((const long)(tree->postord_intern[index]->mem_index))

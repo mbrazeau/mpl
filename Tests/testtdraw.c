@@ -11,6 +11,7 @@
 #include "testtdraw.h"
 #include "mpl_tdraw.h"
 #include "mpl_taxblock.h"
+#include "mpl_newick_rdr.h"
 
 int test_new_tree_drawing (void)
 {
@@ -33,6 +34,8 @@ int test_new_tree_drawing (void)
         "Zeta"
     };
     
+    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    
     mpl_taxablock *tb = mpl_taxablock_new(ntax);
     
     int i = 0;
@@ -49,8 +52,24 @@ int test_new_tree_drawing (void)
     else {
         ppass;
     }
-    
     printf("\n");
+
+    mpl_tree* t = mpl_new_tree(ntax);
+    mpl_topol top;
+    top.num_taxa = 1;
+    top.edges = NULL;
+    mpl_topol_init(ntax, &top);
+    mpl_newick_rdr rdr;
+    mpl_newick_rdr_init(ntax, &rdr);
+    mpl_newick_read(nwkstring, &top, &rdr);
+    
+    mpl_tree_read_topol(t, &top);
+    
+    mpl_tdraw_do(t, tdrw);
+    
+    for (i = 0; i < tdrw->height; ++i) {
+        printf("%s", tdrw->canvas[i]);
+    }
     
     mpl_tdraw_delete(&tdrw);
     

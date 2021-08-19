@@ -1197,21 +1197,21 @@ double mpl_fitch_na_local_check
                     score += weights[i];
                 }
             } else if (upset[src][i] < UNKNOWN) {
-                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+//                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     // using changes[] is POSSIBLY less accurate but much faster
-                    // pd->minscore    += (changes[i] * weights[i]);
-                    pd->minscore    += (applicchgs[i] * weights[i]);
-                } else {
-                    pd->indexbuf[pd->nchars] = i;
-                    ++pd->nchars;
-                    pd->scorerecall += (changes[i] * weights[i]);
-                    // using changes[] is less accurate but much faster
-                    // pd->minscore    += (changes[i] * weights[i]);
-                    pd->minscore    += (applicchgs[i] * weights[i]);
-                }
+                    pd->minscore    += (changes[i] * weights[i]);
+//                    pd->minscore    += (applicchgs[i] * weights[i]);
+//                } else {
+//                    pd->indexbuf[pd->nchars] = i;
+//                    ++pd->nchars;
+//                    pd->scorerecall += (changes[i] * weights[i]);
+//                    // using changes[] is less accurate but much faster
+//                    // pd->minscore    += (changes[i] * weights[i]);
+//                    pd->minscore    += (applicchgs[i] * weights[i]);
+//                }
             }
         } else {
             if (rtset[tgt1][i] & NA) {

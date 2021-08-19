@@ -13,6 +13,7 @@
 #include "mpl_taxblock.h"
 
 #define DEFAULT_CANVAS_WIDTH 80
+#define DEFAULT_TIP_COLUMN 63
 #define NAME_BUFFER_WIDTH 15
 
 typedef struct _tdraw {
@@ -21,7 +22,7 @@ typedef struct _tdraw {
     long                    height; // Display height
     long                    ttop;   // Top of the tree branches
     char**                  canvas;
-    const mpl_taxablock*    taxa;
+    mpl_taxablock*          taxa;
     
 } mpl_tdraw;
 
