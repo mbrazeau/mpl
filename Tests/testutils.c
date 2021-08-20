@@ -121,3 +121,8 @@ void mpl_test_print_charchanges(mpl_matrix*  m)
         printf("%li\n", m->cbufs[0].charchanges[i]);
     }
 }
+
+void mpl_test_draw_tree(mpl_tree *t)
+{
+    // TODO: Finish this utility function
+}

@@ -87,18 +87,29 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
     int lastx = 0;
     int firstrow = 0;
     
+    t->num_polys = 1; // TODO: needs to be a more elegant way to do this
     mpl_tree_traverse(t);
     
     // Set coordinates on the branches
-    lastx = mpl_tdraw_set_coords(t, &firstrow, DEFAULT_TIP_COLUMN / t->num_taxa );
-    
-    // rescale the tree based on the root coordinates
-    if (lastx > 0) {
-        int i = 0;
-        for (i = t->num_taxa; i < t->num_nodes; ++i) {
-            t->nodes[i].x -= lastx;
-        }
+    int brlen = DEFAULT_TIP_COLUMN / t->num_taxa;
+    if (brlen == 0) {
+        brlen = 2;
     }
+    
+//    if (brlen * )
+    
+    lastx = mpl_tdraw_set_coords(t, &firstrow, brlen);
+    if (lastx > 0) {
+          int i = 0;
+          for (i = t->num_taxa; i < t->num_nodes; ++i) {
+              t->nodes[i].x -= 1;
+//              if (t->nodes[i].x % 3) {
+//                  t->nodes[i].x -= 2;
+//              } else {
+//                  t->nodes[i].x -= 1;
+//              }
+          }
+      }
     
     // Fillin the drawing
     mpl_tdraw_fillin(t, td);

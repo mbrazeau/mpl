@@ -10,6 +10,7 @@
 #define testtdraw_h
 
 int test_new_tree_drawing (void);
+int test_large_tree_drawing (void);
 int test_drawing_collapsed (void);
 
 #endif /* testtdraw_h */

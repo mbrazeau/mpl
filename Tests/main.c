@@ -100,6 +100,7 @@ int main(int argc, const char * argv[]) {
     
     // Test mpl_tdraw.c
     fails += test_new_tree_drawing();
+    fails += test_large_tree_drawing();
     fails += test_drawing_collapsed();
     
     // Test mpl_contree.c
