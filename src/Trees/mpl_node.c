@@ -91,11 +91,13 @@ void mpl_node_bin_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
         if (n->tip) {
             t->postord_all[*i] = n;
             (*i)++;
+            n->weight = 1;
         }
         else {
 //            if (n->bipart != NULL) {
 //                mpl_bitset_OR(n->bipart, n->left->bipart, n->right->bipart);
 //            }
+            n->weight += (n->left->weight + n->right->weight);
             t->postord_all[*i] = t->postord_intern[*j] = n;
             (*i)++;
             (*j)++;
@@ -114,6 +116,7 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     if (n->tip) {
         t->postord_all[*i] = n;
         (*i)++;
+        n->weight = 1;
         //printf(")");
         return;
     }
@@ -121,6 +124,7 @@ void mpl_node_poly_traverse(mpl_node* n, mpl_tree* t, int* i, int* j)
     p = &n->descs[0];
     do {
         mpl_node_poly_traverse(*p, t, i, j);
+        n->weight += (*p)->weight;
 //        mpl_node_set_bipart((*p)->bipart, n->bipart);
         ++p;
 #ifdef DEBUG

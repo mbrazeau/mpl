@@ -428,6 +428,27 @@ void mpl_tree_calc_biparts(mpl_tree *t)
     }
 }
 
+void mpl_tree_ladderize(int mode, mpl_tree *t)
+{
+    int i = 0;
+    mpl_node *n, *temp;
+    
+    mpl_tree_traverse(t);
+    
+    for (i = 0; i < t->nintern; ++i) {
+        n = t->postord_intern[i];
+        
+        if (n->left->weight > n->right->weight) {
+            temp = n->left;
+            n->descs[0] = n->right;
+            n->descs[n->ndescs-1] = temp;
+            n->left = n->descs[0];
+            n->right = n->descs[n->ndescs-1];
+        }
+    }
+    
+}
+
 mpl_node* mpl_tree_bin_clip(mpl_node* n, mpl_tree* t)
 {
     assert(!t->num_polys);

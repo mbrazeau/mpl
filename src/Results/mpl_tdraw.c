@@ -88,6 +88,8 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
     int firstrow = 0;
     
     t->num_polys = 1; // TODO: needs to be a more elegant way to do this
+    
+    mpl_tree_ladderize(1, t);
     mpl_tree_traverse(t);
     
     // Set coordinates on the branches
