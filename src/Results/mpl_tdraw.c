@@ -31,7 +31,7 @@ static void calc_dimensions(const long ntax, mpl_tdraw *td);
 static void mpl_tdraw_fill_nodebar(mpl_node* n, mpl_tdraw *td);
 static void mpl_tdraw_fill_subbranch(mpl_node *n, mpl_tdraw *td);
 static void mpl_tdraw_fillin(mpl_tree *t, mpl_tdraw *td);
-static void mpl_tdraw_set_coords(mpl_tree *t, int *currentrow);
+static int  mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen);
 
 mpl_tdraw* mpl_tdraw_new(const mpl_taxablock *taxa)
 {
@@ -84,12 +84,21 @@ void mpl_tdraw_delete(mpl_tdraw **td)
 
 void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
 {
+    int lastx = 0;
     int firstrow = 0;
     
     mpl_tree_traverse(t);
     
     // Set coordinates on the branches
-    mpl_tdraw_set_coords(t, &firstrow);
+    lastx = mpl_tdraw_set_coords(t, &firstrow, DEFAULT_TIP_COLUMN / t->num_taxa );
+    
+    // rescale the tree based on the root coordinates
+    if (lastx > 0) {
+        int i = 0;
+        for (i = t->num_taxa; i < t->num_nodes; ++i) {
+            t->nodes[i].x -= lastx;
+        }
+    }
     
     // Fillin the drawing
     mpl_tdraw_fillin(t, td);
@@ -119,10 +128,10 @@ static void mpl_tdraw_write_tipname(mpl_node *n, mpl_tdraw *td)
     if (td->taxa != NULL) {
         i = 0;
         // These conditions should prevent any line or buffer overflow
-        while (td->canvas[n->y][n->x + i] != '\n'
-               && td->canvas[n->y][n->x + i]
+        while (td->canvas[n->y][n->x + i + 1] != '\n'
+               && td->canvas[n->y][n->x + i + 1]
                && name[i]) {
-            td->canvas[n->y][n->x + i] = name[i];
+            td->canvas[n->y][n->x + i + 1] = name[i];
             ++i;
         }
     }
@@ -187,10 +196,9 @@ static void mpl_tdraw_fillin(mpl_tree *t, mpl_tdraw *td)
     
 }
 
-static void mpl_tdraw_set_coords(mpl_tree *t, int *currentrow)
+static int mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen)
 {
     int i = 0;
-    int brlen = 5; // TODO: Replace this with a branch length estimate
     mpl_node* n = NULL;
     
     for (i = 0; i < t->size; ++i) {
@@ -216,4 +224,6 @@ static void mpl_tdraw_set_coords(mpl_tree *t, int *currentrow)
             n->x = n->right->x - brlen;
         }
     }
+    
+    return n->x;
 }

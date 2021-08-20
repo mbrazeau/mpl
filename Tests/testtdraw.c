@@ -34,7 +34,8 @@ int test_new_tree_drawing (void)
         "Zeta"
     };
     
-    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
+    char* nwkstring = "(1,(2,(3,(4,(5,(6,(7,(8,(9,10)))))))));";
+//    char* nwkstring = "((((1,((2,7),(5,9))),(4,8)),6),(3,10));";
     
     mpl_taxablock *tb = mpl_taxablock_new(ntax);
     

@@ -6,7 +6,6 @@
 //
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "mpl_contree.h"
 #include "mpl_tree.h"
@@ -94,7 +93,6 @@ void mpl_contree_strict(mpl_contree* ctree)
             for (k = 0; k < ctree->biparts->num_splits; ++k) {
                 if (!mpl_bitset_cmp(n->bipart, ctree->biparts->biparts[k])) {
                     ctree->biparts->counts[k] += 1;
-                    printf("k: %i\n", ctree->biparts->counts[k]);
                 }
             }
         }
@@ -115,7 +113,6 @@ static void mpl_contree_collapse_nodes(int numtrees, mpl_contree *ctree)
     for (i = 0; i < ctree->t->nintern-1; ++i) {
         n = ctree->t->postord_intern[i];
         if (ctree->biparts->counts[n->mem_index] < numtrees-1) {
-            printf("count: %i\n", ctree->biparts->counts[n->mem_index]);
             mpl_node_collapse(n);
         }
     }
