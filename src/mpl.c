@@ -18,6 +18,8 @@
 #include "mpl_scoretree.h"
 #include "mpl_newick_rdr.h"
 #include "mpl_bbreak.h"
+#include "mpl_contree.h"
+#include "mpl_tdraw.h"
 
 typedef struct _handle {
     
@@ -28,6 +30,7 @@ typedef struct _handle {
     mpl_results*    results;
     mpl_matrix*     matrix;
     mpl_treelist*   treebuf;
+    mpl_contree*    contree;
     mpl_newick_rdr* newickrdr;
     
 } mpl_handle;
@@ -50,6 +53,7 @@ mpl_handle* mpl_handle_new(void)
         newhandl->matrix    = NULL;
         newhandl->treebuf   = NULL;
         newhandl->newickrdr = NULL;
+        newhandl->contree   = NULL;
     }
     
     return newhandl;
@@ -72,7 +76,9 @@ int mpl_handle_delete(mpl_handle** handl)
     mpl_treelist_delete(&(*handl)->treebuf);
     // ret = Cleanup newickrdr
     mpl_newick_rdr_delete(&(*handl)->newickrdr);
-
+    // ret = Cleanup contree
+    // TODO: Delete contree!!!
+    
     free(*handl);
     *handl = NULL;
 
@@ -141,6 +147,21 @@ long mpl_get_nchar(const mpl_handle* handl)
     RET_IF_NULL(handl);
     
     return handl->nchar;
+}
+
+int mpl_add_taxon(const char *taxname, mpl_handle *handl)
+{
+    RET_IF_NULL(handl);
+    
+    MPL_RETURN ret = MPL_ERR;
+    
+    if (handl->ntax == 0) {
+        return MPL_NODIMENSIONS;
+    }
+    
+    ret = mpl_taxablock_add_taxon(taxname, handl->taxablock);
+    
+    return ret;
 }
 
 int mpl_attach_rawdata(const mpl_data_t datype, const char* rawmatrix, mpl_handle* handl)
@@ -317,6 +338,52 @@ int mpl_score_tree(double* score, const long index, mpl_handle* handl)
     
     mpl_delete_tree(&t);
 
+    return ret;
+}
+
+int mpl_do_consensus(mpl_contree_t consenset, mpl_handle* handl)
+{
+    RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+    
+    if (handl->treebuf != NULL) {
+//        mpl_contree_delete(handl->contree);
+        int ntax = handl->treebuf->num_taxa;
+        handl->contree = mpl_contree_new(ntax, handl->treebuf);
+        mpl_contree_strict(handl->contree);
+        ret = MPL_SUCCESS;
+    } else {
+        ret = MPL_NOTREES;
+    }
+    
+    return ret;
+}
+
+#include <stdio.h> // TODO: Remove this shit
+int mpl_show_ascii_contree(mpl_contree_t consenset, mpl_handle *handl)
+{
+    RET_IF_NULL(handl);
+    MPL_RETURN ret = MPL_ERR;
+    
+    if (handl->treebuf != NULL) {
+        mpl_tdraw *td = mpl_tdraw_new(handl->taxablock);
+        
+        // TODO: Check taxablock and data compatibility
+        
+        mpl_tdraw_do(handl->contree->t, td);
+        
+        int i = 0;
+        for (i = 0; i < td->height; ++i) {
+            printf("%s", td->canvas[i]);  // TODO: Don't print from here Convert to a single string and return it
+        }
+        
+        // TODO: Delete tree drawing
+        
+        ret = MPL_SUCCESS;
+    } else {
+        ret = MPL_NOTREES;
+    }
+    
     return ret;
 }
 

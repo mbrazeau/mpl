@@ -7,10 +7,10 @@
 #include <assert.h>
 #include <string.h>
 
-#include "mpl_contree.h"
 #include "mpl_tree.h"
 #include "mpl_bipartlist.h"
 #include "mpl_treelist.h"
+#include "mpl_contree.h"
 
 static void mpl_contree_collapse_nodes(int numtrees, mpl_contree *ctree);
 

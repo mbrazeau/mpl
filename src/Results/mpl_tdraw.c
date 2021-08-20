@@ -211,29 +211,44 @@ static int mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen)
 {
     int i = 0;
     mpl_node* n = NULL;
+    mpl_node** p;
     
     for (i = 0; i < t->size; ++i) {
         n = t->postord_all[i];
-        
         if (n->tip) {
             // set the coords
             n->x = DEFAULT_TIP_COLUMN;
             n->y = *currentrow;
             *currentrow += 2;
-            continue;
+//            continue;
+        }
+        else {
+            n->left = n->descs[0];
+            n->right = n->descs[n->ndescs-1];
+            if (n->right->y > n->left->y) {
+                n->y = n->left->y + ((n->right->y - n->left->y) / 2);
+            } else {
+                n->y = n->right->y + ((n->left->y - n->right->y) / 2);
+            }
+            
+            p = n->descs;
+            
+            int deepest = (*p)->x;
+            do {
+                if ((*p)->x < deepest) {
+                    deepest = (*p)->x;
+                }
+                ++p;
+            } while (*p);
+            
+            n->x = deepest - brlen;
+//            if (n->left->x < n->right->x) {
+//                n->x = n->left->x - brlen;
+//            } else {
+//                n->x = n->right->x - brlen;
+//            }
         }
         
-        if (n->right->y > n->left->y) {
-            n->y = n->left->y + ((n->right->y - n->left->y) / 2);
-        } else {
-            n->y = n->right->y + ((n->left->y - n->right->y) / 2);
-        }
-        
-        if (n->left->x < n->right->x) {
-            n->x = n->left->x - brlen;
-        } else {
-            n->x = n->right->x - brlen;
-        }
     }
     
     return n->x;

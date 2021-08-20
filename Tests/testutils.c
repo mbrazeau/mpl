@@ -102,9 +102,18 @@ void mpl_test_print_newick(mpl_node* n)
     
     printf("(");
     
-    mpl_test_print_newick(n->left);
-    printf(",");
-    mpl_test_print_newick(n->right);
+    mpl_node **p = n->descs;
+    
+    do {
+        mpl_test_print_newick(*p);
+        ++p;
+        if (*p) {
+            printf(",");
+        }
+    } while (*p);
+//    mpl_test_print_newick(n->left);
+//    printf(",");
+//    mpl_test_print_newick(n->right);
     
     printf(")");
 }

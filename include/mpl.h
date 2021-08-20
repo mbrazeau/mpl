@@ -65,6 +65,7 @@ long        mpl_get_ntax(const mpl_handle handl);
 */
 long        mpl_get_nchar(const mpl_handle handl);
 
+int         mpl_add_taxon(const char *taxname, mpl_handle handl);
 /**
  @brief Attach a raw character data matrix.
  
@@ -214,6 +215,9 @@ int         mpl_set_numreps(const unsigned long nreps, mpl_handle handle);
 int         mpl_use_ratchet(const bool useratchet, mpl_handle handl);
 int         mpl_do_search(mpl_handle handle);
 int         mpl_score_tree(double* score, const long index, mpl_handle handl);
+int         mpl_do_consensus(mpl_contree_t consenset, mpl_handle handl);
+int         mpl_show_ascii_contree(mpl_contree_t consenset, mpl_handle handl);
+char*       mpl_get_consensus_newick(mpl_contree_t consenset, mpl_handle handl);
 long        mpl_get_num_trees(mpl_handle handl);
 int         mpl_clear_trees(mpl_handle handl);
 int         mpl_add_newick(const char* newick, mpl_handle handl);

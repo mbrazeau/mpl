@@ -147,5 +147,11 @@ typedef enum {
     
 } mpl_bbreak_t;
 
+typedef enum {
+    MPL_STRICT_T,
+    MPL_MAJRULE_T,
+    
+    MPL_CONTREE_MAX
+} mpl_contree_t;
 
 #endif /* mpl_defs_h */
