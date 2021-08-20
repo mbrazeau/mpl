@@ -9,8 +9,9 @@
 #ifndef testtdraw_h
 #define testtdraw_h
 
-#include <stdio.h>
+int test_new_tree_drawing (void);
+int test_drawing_collapsed (void);
 
 #endif /* testtdraw_h */
 
-int test_new_tree_drawing (void);
+

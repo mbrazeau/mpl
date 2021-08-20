@@ -22,6 +22,7 @@
 #include "testmplstepwise.h"
 #include "testparsshortcut.h"
 #include "testtdraw.h"
+#include "testmplcontree.h"
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -99,7 +100,10 @@ int main(int argc, const char * argv[]) {
     
     // Test mpl_tdraw.c
     fails += test_new_tree_drawing();
+    fails += test_drawing_collapsed();
     
+    // Test mpl_contree.c
+    fails += test_strict_consensus_tree();
     
     // Test mpl_stepwise.c
     fails += test_initial_fork();

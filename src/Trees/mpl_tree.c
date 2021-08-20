@@ -270,6 +270,9 @@ int mpl_tree_reset(mpl_tree* t)
     
     for (i = 0; i <= t->num_nodes; ++i) {
         mpl_reset_node(&t->nodes[i]);
+        if (i < t->num_taxa) {
+            mpl_bitset_set(i, t->nodes[i].bipart);
+        }
 //        t->postord_all[i] = NULL;
 //        if (i < t->num_taxa) {
 //            t->postord_intern[i] = NULL;

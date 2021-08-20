@@ -67,6 +67,7 @@ int mpl_reset_node(mpl_node* n)
     n->right = NULL;
     
     memset(n->descs, 0, n->ndescs * sizeof(mpl_node*));
+    memset(n->bipart->data, 0, n->bipart->nfields * sizeof(unsigned long));
     n->ndescs       = 0;
     
     // Don't touch n->capacity unless freeing the node
@@ -448,12 +449,12 @@ void mpl_node_collapse(mpl_node* n)
     
     // TODO: Verify that the node is correctly set up.
     
-    lim = n->ndescs;
+    mpl_node_remove_desc(n);
     
+    lim = n->ndescs;  // Because n->ndescs updates in this loop
     for (i = 0; i < lim; ++i) {
-        p = NULL;
         p = mpl_node_pop_desc(n);
-        n->descs[i] = NULL;
+        mpl_node_push_desc(anc, p);
     }
     
     n->left  = NULL;
