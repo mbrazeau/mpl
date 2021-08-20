@@ -95,23 +95,23 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
     // Set coordinates on the branches
     int brlen = DEFAULT_TIP_COLUMN / t->num_taxa;
     if (brlen == 0) {
-        brlen = 2;
+        brlen = 3;
     }
     
 //    if (brlen * )
     
     lastx = mpl_tdraw_set_coords(t, &firstrow, brlen);
+    
     if (lastx > 0) {
           int i = 0;
           for (i = t->num_taxa; i < t->num_nodes; ++i) {
-              t->nodes[i].x -= 1;
-//              if (t->nodes[i].x % 3) {
-//                  t->nodes[i].x -= 2;
-//              } else {
-//                  t->nodes[i].x -= 1;
-//              }
+              t->nodes[i].x -= lastx;
           }
-      }
+    } else if (lastx < 0) {
+        // Uh oh...
+        lastx = mpl_tdraw_set_coords(t, &firstrow, 1);
+        assert(lastx > 0);
+    }
     
     // Fillin the drawing
     mpl_tdraw_fillin(t, td);

@@ -12,8 +12,8 @@
 #include "mpl_tree.h"
 #include "mpl_taxblock.h"
 
-#define DEFAULT_CANVAS_WIDTH 80
-#define DEFAULT_TIP_COLUMN 63
+#define DEFAULT_CANVAS_WIDTH 100
+#define DEFAULT_TIP_COLUMN 83
 #define NAME_BUFFER_WIDTH 15
 
 typedef struct _tdraw {
