@@ -9,5 +9,6 @@
 #define testmplcontree_h
 
 int test_strict_consensus_tree (void);
+int test_big_consensus_tree (void);
 
 #endif /* testmplcontree_h */

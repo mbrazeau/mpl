@@ -26,7 +26,7 @@ typedef struct _tdraw {
     
 } mpl_tdraw;
 
-mpl_tdraw* mpl_tdraw_new(const mpl_taxablock *taxa);
+mpl_tdraw* mpl_tdraw_new(mpl_taxablock *taxa);
 void mpl_tdraw_delete(mpl_tdraw **td);
 void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td);
 void mpl_tdraw_print(mpl_tdraw *td);

@@ -105,6 +105,7 @@ int main(int argc, const char * argv[]) {
     
     // Test mpl_contree.c
     fails += test_strict_consensus_tree();
+    fails += test_big_consensus_tree();
     
     // Test mpl_stepwise.c
     fails += test_initial_fork();

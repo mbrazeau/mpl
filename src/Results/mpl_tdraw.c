@@ -33,7 +33,7 @@ static void mpl_tdraw_fill_subbranch(mpl_node *n, mpl_tdraw *td);
 static void mpl_tdraw_fillin(mpl_tree *t, mpl_tdraw *td);
 static int  mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen);
 
-mpl_tdraw* mpl_tdraw_new(const mpl_taxablock *taxa)
+mpl_tdraw* mpl_tdraw_new(mpl_taxablock *taxa)
 {
     long i = 0;
     long j = 0;
@@ -108,6 +108,7 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
               t->nodes[i].x -= lastx;
           }
     } else if (lastx < 0) {
+        firstrow = 0;
         // Uh oh...
         lastx = mpl_tdraw_set_coords(t, &firstrow, 1);
         assert(lastx > 0);
