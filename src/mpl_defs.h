@@ -36,7 +36,7 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 
 #define MPL_RAND_MAX        2147483646U
 #define MPL_EPSILON         (1E-15) // Could be as low as 30, but this is safe for now
-#define MPL_MAXSCORE        DBL_MAX
+#define MPL_MAXSCORE        LONG_MAX
 #define MPL_MAX_DEPENDECIES 2 // Maximum number of root characters
 
 // Define all defaults:
@@ -51,7 +51,7 @@ c = (unsigned long)(v * ((unsigned long)~(unsigned long)0/255)) \
 #define DEFAULT_DATA_T       MPL_DISCR_T
 #define DEFAULT_PARSIM_T     MPL_FITCH_T
 #define DEFAULT_GAP_T        GAP_INAPPLIC
-#define DEFAULT_WEIGHT       1.0000000000
+#define DEFAULT_WEIGHT       1
 #define DEFAULT_PREWEIGHT    0.2000000000
 #define DEFAULT_BBREAK       MPL_TBR_T
 #define DEFAULT_ASTYPE       MPL_AST_ASIS

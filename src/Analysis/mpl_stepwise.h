@@ -25,8 +25,8 @@ typedef struct mpl_stepwise {
     long            nsites;
     mpl_node**      sites;
     mpl_tree*       tree;
-    double          shortest;
-    double          longest;
+    long            shortest;
+    long            longest;
     mpl_treelist*   held;
     mpl_treelist*   queued;
     

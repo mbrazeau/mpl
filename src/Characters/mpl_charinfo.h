@@ -28,8 +28,8 @@ typedef struct _charinfo {
     bool         isincluded;
     bool         isparsinform;
     bool         isvariable;
-    double       weight;
-    double*      wtptr; // Points to the weight in the derived char buf.
+    long         weight;
+    long*        wtptr; // Points to the weight in the derived char buf.
     double       preweight; // Probability of reweighting
     long         depends[MPL_MAX_DEPENDECIES];
     long         nsubchars;
@@ -49,8 +49,8 @@ void mpl_charinfo_set_statecount(const int n, mpl_charinfo* ci);
 void mpl_charinfo_include(mpl_charinfo* ci);
 void mpl_charinfo_exclude(mpl_charinfo* ci);
 bool mpl_charinfo_isincluded(mpl_charinfo* ci);
-void mpl_charinfo_set_weight(double wt, mpl_charinfo* ci);
-double mpl_charinfo_get_weight(mpl_charinfo* ci);
+void mpl_charinfo_set_weight(long wt, mpl_charinfo* ci);
+long mpl_charinfo_get_weight(mpl_charinfo* ci);
 void mpl_charinfo_set_states(mpl_discr d, mpl_charinfo *ci);
 mpl_discr mpl_charinfo_get_states(mpl_charinfo *ci);
 

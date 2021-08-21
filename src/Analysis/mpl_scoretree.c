@@ -28,9 +28,9 @@ MPL_RETURN mpl_init_parsimony(mpl_matrix* m)
     return MPL_SUCCESS;
 }
 
-double mpl_fullpass_parsimony(mpl_tree* t)
+long mpl_fullpass_parsimony(mpl_tree* t)
 {
-    double len = 0.0;
+    long len = 0;
     long i = 0;
     mpl_node* n;
 
@@ -99,9 +99,9 @@ double mpl_fullpass_parsimony(mpl_tree* t)
     return len;
 }
 
-double mpl_length_only_parsimony(const double lim, mpl_tree* t)
+long mpl_length_only_parsimony(const long lim, mpl_tree* t)
 {
-    double len = 0.0;
+    long len = 0;
     long i = 0;
     mpl_node* n;
     
@@ -172,9 +172,9 @@ void mpl_traverse_subtree(mpl_node* n, mpl_node** internals, mpl_node** allnodes
 }
 
 
-double mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
+long mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
 {
-    double len = 0.0;
+    long len = 0;
     long i = 0;
     mpl_node* n = NULL;
     
@@ -352,15 +352,15 @@ void mpl_use_ndidx(const bool useflag)
     mpl_parsim_use_nodeidx(useflag, glmatrix);
 }
 
-double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tree* t)
+long mpl_fullpass_parsimony_na_only(const long lim, mpl_node* start, mpl_tree* t)
 {
-    double len = 0.0;
+    long len = 0;
     long i = 0;
     mpl_node* n;
     mpl_node* p;
     mpl_node* t1 = NULL;
     mpl_node* t2 = NULL;
-    double chgs = 0.0;
+    long chgs = 0;
     
     mpl_tree_traverse(t);
     
@@ -384,7 +384,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                           n->mem_index, glmatrix);
         n->marked = 1;
         
-        if (chgs == 0.0 && n != start && n != start->anc) {
+        if (chgs == 0 && n != start && n != start->anc) {
             break;
         }
         
@@ -399,7 +399,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     t->nsubnodes = 0;
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     
-    len = 0.0;
+    len = 0;
     mpl_use_ndidx(false);
     
     for (i = 0; i < t->nsubnodes; ++i) {
@@ -417,7 +417,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
                                                   n->mem_index,
                                                   glmatrix);
 
-        if (lim > -1.0) {
+        if (lim > -1) {
             if (len > lim) {
                 // Copy the temp buffers back in and exit the loop
                 for ( ; i < t->nsubnodes; ++i) {
@@ -437,7 +437,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     mpl_use_ndidx(false);
     n = n->anc;
     
-    if (len <= lim || lim < 0.0) {
+    if (len <= lim || lim < 0) {
         while (n != t->base->anc) {
             len += mpl_na_only_parsim_second_downpass(n->left->mem_index,
                                                       n->right->mem_index,
@@ -446,7 +446,7 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
             t->partial_pass[t->nsubnodes] = n;
             ++t->nsubnodes;
 
-            if (lim > -1.0) {
+            if (lim > -1) {
                 if (len > lim) {
                     while (n != t->base->anc){
                         n = t->partial_pass[i];
@@ -479,9 +479,9 @@ double mpl_fullpass_parsimony_na_only(const double lim, mpl_node* start, mpl_tre
     return len;
 }
 
-double mpl_partpass_parsimony(mpl_node* start, mpl_tree* t)
+long mpl_partpass_parsimony(mpl_node* start, mpl_tree* t)
 {
-    double len = 0.0;
+    long len = 0;
 //    long i = 0;
     mpl_node* n;
 
@@ -521,9 +521,9 @@ double mpl_partpass_parsimony(mpl_node* start, mpl_tree* t)
  @param csite Pointer to the sister node of the clipped subtree.
  @param t Pointer to the tree struct itself.
  */
-double mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
+long mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
 {
-    double score = 0.0; // Sum of scores of clipped subtrees
+    long score = 0; // Sum of scores of clipped subtrees
     
     // FOR NOW: Do full-pass on both subtrees:
     // This requires a modification of how downpass sets are collected
@@ -547,19 +547,19 @@ double mpl_clipped_tree_parsimony(mpl_node* src, mpl_node* csite, mpl_tree* t)
  @param t Pointer to the tree struct itself.
  @return The calculated length added to the tree by proposed move.
  */
-double mpl_score_try_parsimony
-(const double sttlen, const double lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
+long mpl_score_try_parsimony
+(const long sttlen, const long lim, mpl_node* src, mpl_node* tgt, mpl_tree* t)
 {
-    double score       = 0.0;
-    double minscore    = 0.0;
-    double scorerecall = 0.0;
-    double diff        = -1.0;
+    long score       = 0;
+    long minscore    = 0;
+    long scorerecall = 0;
+    long diff        = -1;
     
     // Do the fast check on any characters that can be compared quickly at
     // this junction.
     
     // If the lim is set and the score exceeds the limit already, return score.
-    if (lim > -1.0) {
+    if (lim > -1) {
         diff = lim-sttlen;
     }
 
@@ -579,7 +579,7 @@ double mpl_score_try_parsimony
         score -= scorerecall;
         minscore = mpl_parsim_get_na_remaining_minscore(glmatrix);
         
-        if (lim > -1.0) {
+        if (lim > -1) {
             if ((score + sttlen + minscore) > lim) {
                 return score + minscore;
             }
@@ -596,9 +596,9 @@ double mpl_score_try_parsimony
     return score;
 }
 
-double mpl_scoretree_calc_abs_minscores(void)
+long mpl_scoretree_calc_abs_minscores(void)
 {
-    double naminscore = 0.0;
+    long naminscore = 0;
     naminscore = mpl_parsim_calc_abs_minscore(glmatrix);
     glmatrix->naminscore = naminscore;
     return naminscore;

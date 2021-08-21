@@ -86,7 +86,7 @@ int mpl_bbreak_init(mpl_search* s, mpl_bbreak* bbk)
     bbk->numtaxa        = s->num_taxa;
     bbk->num_nodes      = 2 * s->num_taxa - 1;
     bbk->doislandcheck  = true;
-    bbk->limit          = 0.0;
+    bbk->limit          = 0;
     bbk->bestinrep      = MPL_MAXSCORE;
     bbk->shortest       = MPL_MAXSCORE;
     
@@ -257,8 +257,8 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
                    bbk->treelist->num_trees); // Use arithmetic on indices
 //            printf("\tNumber of hits to shortest tree: %i\n", bbk->nhits);
             if (bbk->treelist->num_trees > 0) {
-                printf("\tShortest tree found this rep: %.0f\n", bbk->bestinrep);
-                printf("\tBest tree overall: %.0f\n\n", bbk->shortest);
+                printf("\tShortest tree found this rep: %ld\n", bbk->bestinrep);
+                printf("\tBest tree overall: %ld\n\n", bbk->shortest);
             }
 
             if (search_interrupt == 1) {
@@ -284,7 +284,7 @@ void mpl_do_bbreak(mpl_bbreak* bbk)
            compl_msg,
            timeout - timein);
     printf("\t%lu rearrangements tried.\n", bbk->num_rearrangs);
-    printf("\tShortest tree found: %.3f steps\n", bbk->shortest);
+    printf("\tShortest tree found: %ld steps\n", bbk->shortest);
     printf("\t%li trees saved\n", bbk->treelist->num_trees);
     
     mpl_delete_tree(&t);
@@ -295,9 +295,9 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
 {
     int i = 0;
     
-    double  oldbest = 0.0;
-    double  iterbest = 0.0;
-    long    oldsavelim = 0;
+    long  oldbest = 0;
+    long  iterbest = 0;
+    long  oldsavelim = 0;
     mpl_topol* oldrepstart = NULL;
     
     printf("Initiating ratchet search\n");
@@ -334,7 +334,7 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
     for (i = 0; i < bbk->nratchets; ++i) {
         
         printf("\r                                                          ");
-        printf("\r\tRatchet iteration %i. Best tree: %.0f steps",
+        printf("\r\tRatchet iteration %i. Best tree: %ld steps",
                i + 1,
                oldbest);
         fflush(stdout);
@@ -425,8 +425,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     
     long        clipmax = 0; // Limit for number of clippings to perform
     long        tgtnum  = 0; // Limit for number of reconnection target sites
-    double      score   = 0.0;  // Local storage for tree score
-//    double      diff    = 0.0;
+    long      score   = 0;  // Local storage for tree score
+//    long      diff    = 0;
     mpl_node*   left    = NULL;
     mpl_node*   right   = NULL;
     mpl_node*   csite   = NULL;
@@ -488,8 +488,8 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
         
         // << Reoptimise the subtrees as quickly as possible >>
         
-        double tgtlen = 0.0;
-        double srclen = 0.0;
+        long tgtlen = 0;
+        long srclen = 0;
 
         tgtlen = mpl_fullpass_parsimony(t);
 
@@ -582,16 +582,16 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 mpl_node_bin_connect(tgts[j], NULL, clips[i]);
                 ++bbk->num_rearrangs;
                 
-                double limit = -1.0;
-                if (bbk->bestinrep == 0.0) {
-                    limit = -1.0;
+                long limit = -1;
+                if (bbk->bestinrep == 0) {
+                    limit = -1;
                 }
                 else {
                     limit = bbk->bestinrep;
                 }
                 
                 score = mpl_score_try_parsimony(tgtlen + srclen,
-//                                                -1.0,
+//                                                -1,
                                                 bbk->bestinrep,
                                                 clips[i],
                                                 tgts[j],
@@ -687,7 +687,7 @@ static void mpl_bbreak_print_status_header(mpl_bbreak* bbk)
 
 static void mpl_bbreak_print_status(long rep, mpl_bbreak* bbk)
 {
-    printf(" %li\t\t\t\t%li\t\t\t\t%li\t\t\t\t%.0f\t\t\t\t%.0f\n",
+    printf(" %li\t\t\t\t%li\t\t\t\t%li\t\t\t\t%ld\t\t\t\t%ld\n",
            rep+1,
            bbk->treelist->back->index,
            bbk->treelist->num_trees,
@@ -708,7 +708,7 @@ static void mpl_swap_all(const bool report, mpl_tree* t, mpl_bbreak* bbk)
         bbk->foundbetter = false;
         if (report == true && bbk->bestinrep < MPL_MAXSCORE) {
             printf("\r                                                                              ");
-            printf("\r\tShortest tree found: %.0f; swapping %li of %li trees saved.",
+            printf("\r\tShortest tree found: %ld; swapping %li of %li trees saved.",
                    bbk->bestinrep,
                    bbk->head->index+1,
                    bbk->treelist->num_trees);

@@ -113,7 +113,7 @@ mpl_discr**  tempdnf        = NULL;
 mpl_discr**  tempup         = NULL;
 mpl_discr**  tempact        = NULL;
 mpl_discr*   actmask        = NULL;
-double*      weights        = NULL;
+long*        weights        = NULL;
 double*      preweight      = NULL;
 short**      regdist        = NULL;
 long*        changes        = NULL;
@@ -439,12 +439,12 @@ void mpl_parsim_setup_tips(mpl_matrix* m, mpl_parsdat* pd)
 
 /// Parsimony state set functions
 
-double mpl_fitch_downpass
+long mpl_fitch_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     const long end = pd->end;
-    double cost = 0.0;
+    long cost = 0;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -551,9 +551,9 @@ void add_local_changes(mpl_charbuf* cb)
 
 #endif
 
-double mpl_fitch_local_check
-(const double lim,
- const double base,
+long mpl_fitch_local_check
+(const long lim,
+ const long base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -562,13 +562,13 @@ double mpl_fitch_local_check
 {
     long i;
     const long end = pd->end;
-    double score = 0.0;
+    long score = 0;
 
 #ifdef DEBUG
     clear_local_changes();
 #endif
     
-//    if (lim < 0.0) {
+//    if (lim < 0) {
         for (i = pd->start; i < end; ++i) {
             if (!(rtset[tgt1][i] & dnset[src][i])) {
                 score += weights[i];
@@ -593,7 +593,7 @@ double mpl_fitch_local_check
 }
 
 
-double
+long
 mpl_fitch_na_first_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
@@ -630,7 +630,7 @@ mpl_fitch_na_first_downpass
     // Only returns a value because it's regular fitch counterpart does but
     // could be changed during program optimisation to get some step changes
     // at this point in the analysis
-    return 0.0;
+    return 0;
 }
 
 
@@ -728,13 +728,13 @@ void mpl_na_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 }
 
 
-double mpl_fitch_na_second_downpass
+long mpl_fitch_na_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     long end = pd->end;
     mpl_discr t = 0;
-    double cost = 0.0;
+    long cost = 0;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -782,13 +782,13 @@ double mpl_fitch_na_second_downpass
     return cost;
 }
 
-double mpl_fitch_na_down_reroot
+long mpl_fitch_na_down_reroot
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     long end = pd->end;
     mpl_discr t = 0;
-    double cost = 0.0;
+    long cost = 0;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -942,7 +942,7 @@ void mpl_na_tip_finalize(const long tipn, const long anc, mpl_parsdat* pd)
 
 // For inapplicables
 
-double
+long
 mpl_fitch_na_recalc_first_downpass
 (const long left, const long right, const long n, mpl_parsdat*  pd)
 {
@@ -950,7 +950,7 @@ mpl_fitch_na_recalc_first_downpass
     long j;
     long*  indices = pd->indexbuf;
     mpl_discr t = 0;
-    double chgs = 0.0;
+    long chgs = 0;
     
     for (j = 0; j < pd->nchars; ++j) {
 
@@ -1086,13 +1086,13 @@ void mpl_na_recalc_tip_update(const long tipn, const long anc, mpl_parsdat* pd)
 }
 
 
-double mpl_fitch_na_recalc_second_downpass
+long mpl_fitch_na_recalc_second_downpass
 (const long left, const long right, const long n, mpl_parsdat*  pd)
 {
     size_t i;
     size_t j;
     long end = 0;
-    register double cost = 0.0;
+    register long cost = 0;
     
     long*  indices = pd->indexbuf;
     end = pd->nchars;
@@ -1168,9 +1168,9 @@ int mpl_parsim_check_nas_updated(mpl_matrix* m)
 
 /// Local reoptimsation functions for inapplicable characters
 
-double mpl_fitch_na_local_check
-(const double lim,
- const double base,
+long mpl_fitch_na_local_check
+(const long lim,
+ const long base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -1184,11 +1184,11 @@ double mpl_fitch_na_local_check
     
     size_t i;
     const long end   = pd->end;
-    double score     = 0.0;
+    long score     = 0;
 //    long splits = 0;
-    double cminscore = pd->cminscore; // Sum of all applicable changes
-    double testscore = 0.0;
-    double recall    = pd->crecall;
+    long cminscore = pd->cminscore; // Sum of all applicable changes
+    long testscore = 0;
+    long recall    = pd->crecall;
     
     for (i = pd->start; i < end; ++i) {
         if (upset[src][i] & ISAPPLIC) {
@@ -1201,7 +1201,7 @@ double mpl_fitch_na_local_check
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
-                    // using changes[] is POSSIBLY less accurate but much faster
+                    // using changes[] is less accurate but much faster
                     pd->minscore    += (changes[i] * weights[i]);
 //                    pd->minscore    += (applicchgs[i] * weights[i]);
 //                } else {
@@ -1209,8 +1209,8 @@ double mpl_fitch_na_local_check
 //                    ++pd->nchars;
 //                    pd->scorerecall += (changes[i] * weights[i]);
 //                    // using changes[] is less accurate but much faster
-//                    // pd->minscore    += (changes[i] * weights[i]);
-//                    pd->minscore    += (applicchgs[i] * weights[i]);
+//                    pd->minscore    += (changes[i] * weights[i]);
+////                    pd->minscore    += (applicchgs[i] * weights[i]);
 //                }
             }
         } else {
@@ -1229,7 +1229,7 @@ double mpl_fitch_na_local_check
 //        assert(recall >= 0);
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
-        if (lim > -1.0) {
+        if (lim > -1) {
 //            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
 //                pd->minscore += (score + base);
 //                pd->scorerecall += recall;
@@ -1304,12 +1304,12 @@ static inline unsigned int mpl_largest_closed_interval
     return 0;
 }
 
-double mpl_wagner_downpass
+long mpl_wagner_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     const long end = pd->end;
-    double cost = 0.0;
+    long cost = 0;
     
     for (i = pd->start; i < end; ++i) {
         
@@ -1393,9 +1393,9 @@ void mpl_wagner_uppass
     }
 }
 
-double mpl_wagner_local_check
-(const double lim,
- const double base,
+long mpl_wagner_local_check
+(const long lim,
+ const long base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -1404,7 +1404,7 @@ double mpl_wagner_local_check
 {
     long i;
     const long end = pd->end;
-    double score = 0.0;
+    long score = 0;
     
     for (i = pd->start; i < end; ++i) {
         if (!(rtset[tgt1][i] & dnset[src][i])) {
@@ -1417,13 +1417,13 @@ double mpl_wagner_local_check
     return score;
 }
 
-double mpl_wagner_na_second_downpass
+long mpl_wagner_na_second_downpass
 (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     long end = pd->end;
     mpl_discr t = 0;
-    double cost = 0.0;
+    long cost = 0;
     long lchanges = 0;
     
 //    pd->nndindices[n] = 0L;
@@ -1480,13 +1480,13 @@ double mpl_wagner_na_second_downpass
     return cost;
 }
 
-double mpl_wagner_na_down_reroot
+long mpl_wagner_na_down_reroot
  (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i;
     long end = pd->end;
     mpl_discr t = 0;
-    double cost = 0.0;
+    long cost = 0;
     long lchanges = 0;
     
     //    pd->nndindices[n] = 0L;
@@ -1619,9 +1619,9 @@ void mpl_wagner_na_second_uppass
     }
 }
 
-double mpl_wagner_na_local_check
-(const double lim,
- const double base,
+long mpl_wagner_na_local_check
+(const long lim,
+ const long base,
  const long src,
  const long tgt1,
  const long tgt2,
@@ -1635,10 +1635,10 @@ double mpl_wagner_na_local_check
     
     size_t i;
     const long end   = pd->end;
-    double score     = 0.0;
-    double cminscore = pd->cminscore; // Sum of all applicable changes
-    double testscore = 0.0;
-    double recall    = pd->crecall;
+    long score     = 0;
+    long cminscore = pd->cminscore; // Sum of all applicable changes
+    long testscore = 0;
+    long recall    = pd->crecall;
 //    mpl_discr t = 0UL;
     
     for (i = pd->start; i < end; ++i) {
@@ -1693,14 +1693,14 @@ double mpl_wagner_na_local_check
     return score;
 }
 
-double mpl_wagner_na_recalc_second_downpass
+long mpl_wagner_na_recalc_second_downpass
  (const long left, const long right, const long n, mpl_parsdat* pd)
 {
     size_t i;
     size_t j;
     long end = pd->end;
     mpl_discr t = 0;
-    double cost = 0.0;
+    long cost = 0;
     
     long*  indices = pd->indexbuf;
     end = pd->nchars;
@@ -1789,7 +1789,7 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
     int j = 0;
     
     for (i = 0; i < m->nparsets; ++i) {
-        m->parsets[i].score = 0.0;
+        m->parsets[i].score = 0;
         // Re-set the nodal index buffers
         if (m->parsets[i].isNAtype == true) {
             for (j = 0; j < m->parsets[i].nnodes; ++j) {
@@ -1810,10 +1810,10 @@ void mpl_parsim_reset_scores(mpl_matrix* m)
 }
 
 
-double mpl_parsim_get_std_scores(mpl_matrix* m)
+long mpl_parsim_get_std_scores(mpl_matrix* m)
 {
     int i =  0;
-    double ret = 0.0;
+    long ret = 0;
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == false) {
@@ -1825,10 +1825,10 @@ double mpl_parsim_get_std_scores(mpl_matrix* m)
 }
 
 
-double mpl_parsim_get_na_scores(mpl_matrix* m)
+long mpl_parsim_get_na_scores(mpl_matrix* m)
 {
     int i =  0;
-    double ret = 0.0;
+    long ret = 0;
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
@@ -1840,10 +1840,10 @@ double mpl_parsim_get_na_scores(mpl_matrix* m)
 }
 
 
-double mpl_parsim_first_downpass
+long mpl_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
 {
-    double score = 0.0;
+    long score = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1873,10 +1873,10 @@ void mpl_parsim_first_uppass
 }
 
 
-double mpl_parsim_second_downpass
+long mpl_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
 {
-    double score = 0.0;
+    long score = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1914,10 +1914,10 @@ void mpl_parsim_tip_finalize(const long n, const long anc, mpl_matrix* m)
 
 // NA-only passes
 
-double mpl_na_only_parsim_first_downpass
+long mpl_na_only_parsim_first_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
 {
-    double score = 0.0;
+    long score = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -1967,10 +1967,10 @@ void mpl_na_only_parsim_tip_update(const long n, const long anc, mpl_matrix* m)
     }
 }
 
-double mpl_na_only_parsim_second_downpass
+long mpl_na_only_parsim_second_downpass
 (const long left, const long right, const long n, mpl_matrix* m)
 {
-    double score = 0.0;
+    long score = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -2049,7 +2049,7 @@ void mpl_parsim_reset_root_state_buffers(const long n, const long anc, mpl_matri
     }
 }
 
-double mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+long mpl_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -2058,11 +2058,11 @@ double mpl_do_src_root(const long left, const long right, const long n, mpl_pars
         dnset[n][i] = upset[left][i] | upset[right][i];
     }
     
-    return 0.0;
+    return 0;
 }
 
 
-double mpl_wagner_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+long mpl_wagner_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -2077,10 +2077,10 @@ double mpl_wagner_src_root(const long left, const long right, const long n, mpl_
         }
     }
     
-    return 0.0;
+    return 0;
 }
 
-double mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+long mpl_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -2096,10 +2096,10 @@ double mpl_na_do_src_root(const long left, const long right, const long n, mpl_p
         tempup[n][i]  = upset[n][i];
     }
     
-    return 0.0;
+    return 0;
 }
 
-double mpl_wagner_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
+long mpl_wagner_na_do_src_root(const long left, const long right, const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -2124,10 +2124,10 @@ double mpl_wagner_na_do_src_root(const long left, const long right, const long n
         tempup[n][i]  = upset[n][i];
     }
     
-    return 0.0;
+    return 0;
 }
 
-double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
+long mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
 {
     long i = 0;
     long end = pd->end;
@@ -2146,7 +2146,7 @@ double mpl_na_do_src_tip(const long n, mpl_parsdat* pd)
         tempact[n][i] = actives[n][i];
     }
     
-    return 0.0;
+    return 0;
 }
 
 void mpl_parsim_do_src_root(const long left, const long right, const long n, mpl_matrix* m)
@@ -2219,17 +2219,17 @@ void mpl_parsim_update_active_sets(const long left, const long right, const long
     }
 }
 
-double mpl_parsim_local_check
-(const double lim, const double base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
+long mpl_parsim_local_check
+(const long lim, const long base, const long src, const long tgt1, const long tgt2, const long troot, mpl_matrix* m)
 {
-    double score = 0.0;
-    double cscore = base;
+    long score = 0;
+    long cscore = base;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
-        m->parsets[i].scorerecall = 0.0;
+        m->parsets[i].scorerecall = 0;
         m->parsets[i].nchars = 0;
-        m->parsets[i].minscore = 0.0;
+        m->parsets[i].minscore = 0;
         score += m->parsets[i].locfxn(lim, cscore, src, tgt1, tgt2, troot, &m->parsets[i]);
         cscore += score;
     }
@@ -2237,9 +2237,9 @@ double mpl_parsim_local_check
     return score;
 }
 
-double mpl_parsim_get_score_recall(mpl_matrix* m)
+long mpl_parsim_get_score_recall(mpl_matrix* m)
 {
-    double recall = 0.0;
+    long recall = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -2251,9 +2251,9 @@ double mpl_parsim_get_score_recall(mpl_matrix* m)
     return recall;
 }
 
-double mpl_parsim_get_standard_tryscore(mpl_matrix* m)
+long mpl_parsim_get_standard_tryscore(mpl_matrix* m)
 {
-    double tryscore = 0.0;
+    long tryscore = 0;
     int i;
     
     for (i = 0; i < m->nparsets; ++i) {
@@ -2265,10 +2265,10 @@ double mpl_parsim_get_standard_tryscore(mpl_matrix* m)
     return tryscore;
 }
 
-double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
+long mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
 {
     int i;
-    double minremain = 0.0;
+    long minremain = 0;
 
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
@@ -2279,16 +2279,16 @@ double mpl_parsim_get_na_remaining_minscore(mpl_matrix* m)
     return minremain;
 }
 
-double mpl_parsim_calc_abs_minscore(mpl_matrix* m)
+long mpl_parsim_calc_abs_minscore(mpl_matrix* m)
 {
     size_t i = 0;
     size_t j = 0;
-    double minscore = 0.0;
+    long minscore = 0;
 
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-            m->parsets[i].cminscore = 0.0;
-            m->parsets[i].crecall   = 0.0;
+            m->parsets[i].cminscore = 0;
+            m->parsets[i].crecall   = 0;
             for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
                 m->parsets[i].cminscore += (applicchgs[j] * weights[j]);
                 m->parsets[i].crecall   += (changes[j] * weights[j]);

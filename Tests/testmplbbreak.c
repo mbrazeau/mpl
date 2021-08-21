@@ -445,7 +445,7 @@ int test_mutliple_replicate_heuristic_search_large (void)
 
     long ntax = Miyashita.ntax;
     long nchar = Miyashita.nchar;
-    double testscore = 0.0;
+    double testscore = 0;
     
     int hold = 1; // Hold up to 3 trees
     

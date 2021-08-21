@@ -118,8 +118,8 @@ void mpl_stepwise_do_search(mpl_stepwise* sw)
 //    float timeout;
 //    float timeused;
     
-    sw->longest     = 0.0;
-    sw->shortest    = 0.0;
+    sw->longest     = 0;
+    sw->shortest    = 0;
 
 //    for (i = 0; i < sw->num_tips; ++i) {
 //        sw->addseq[i] = i;
@@ -295,7 +295,7 @@ static void mpl_try_all_sites
 {
     long i = 0;
     long nsites = 0;
-    double sttlen = 0.0;
+    long sttlen = 0;
 
     sw->shortest    = MPL_MAXSCORE;
     sw->longest     = MPL_MAXSCORE;
@@ -311,7 +311,7 @@ static void mpl_try_all_sites
 
         // Test insertion at
         mpl_node_bin_connect(sw->sites[i], NULL, n);
-        t->score = sttlen + mpl_score_try_parsimony(-1.0, -1.0, n, sw->sites[i], t);
+        t->score = sttlen + mpl_score_try_parsimony(-1, -1, n, sw->sites[i], t);
         
         // Check the result and save as appropriate
         if (sw->held->num_trees == 0) {
@@ -331,7 +331,7 @@ static void mpl_try_all_sites
                 if (sw->held->num_trees > 1) {
                     mpl_treelist_overwrite_longest(t, sw->held);
                     mpl_topol* p = sw->held->trees;
-                    double longest = 0.0;
+                    long longest = 0;
                     long it = 0;
                     longest = p->score;
                     for (it = 0; it < sw->held->num_trees; ++it) {

@@ -34,9 +34,9 @@ typedef struct _matrix {
     char            unknownsymb;
     long            ninform;
     long            nvariable;
-    double          naminscore;
-//    double*         weights; // The vector of user-defined weights
-//    double**        weightptrs; // A vector of pointers to weights in the data blocks
+    long            naminscore;
+//    long*         weights; // The vector of user-defined weights
+//    long**        weightptrs; // A vector of pointers to weights in the data blocks
     mpl_gap_t       gaphandl;
     int             ndatypes; // Number of discrete data types (e.g. discrete, continuous)
     int             datypes[MPL_DATA_T_MAX];

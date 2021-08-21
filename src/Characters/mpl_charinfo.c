@@ -65,12 +65,12 @@ bool mpl_charinfo_isincluded(mpl_charinfo* ci)
     return ci->isincluded;
 }
 
-void mpl_charinfo_set_weight(double wt, mpl_charinfo* ci)
+void mpl_charinfo_set_weight(long wt, mpl_charinfo* ci)
 {
     ci->weight = wt;
 }
 
-double mpl_charinfo_get_weight(mpl_charinfo* ci)
+long mpl_charinfo_get_weight(mpl_charinfo* ci)
 {
     return ci->weight;
 }

@@ -33,9 +33,9 @@ void mpl_charbuf_init
     
     mpl_charbuf_init_datatype(cb);
     
-    cb->weights         = (double*)safe_calloc(ncols, sizeof(double));
+    cb->weights         = (long*)safe_calloc(ncols, sizeof(long));
     cb->preweight       = (double*)safe_calloc(ncols, sizeof(double));
-    cb->minchanges      = (long*)safe_calloc(ncols, sizeof(double));
+    cb->minchanges      = (long*)safe_calloc(ncols, sizeof(long));
     cb->orig_indices    = (long*)safe_calloc(ncols, sizeof(long));
     cb->charchanges     = (long*)safe_calloc(ncols, sizeof(long));
     cb->appliccanges    = (long*)safe_calloc(ncols, sizeof(long));
@@ -290,13 +290,13 @@ void mpl_charbuf_add_data_column
 
 
 void mpl_charbuf_set_weight
-(const long charnum, const double weight, mpl_charbuf* cb)
+(const long charnum, const long weight, mpl_charbuf* cb)
 {
     cb->weights[charnum] = weight;
 }
 
 
-void mpl_charbuf_set_weights_equal(const double weight, mpl_charbuf* cb)
+void mpl_charbuf_set_weights_equal(const long weight, mpl_charbuf* cb)
 {
     long i = 0;
     for (i = 0; i < cb->char_max; ++i) {

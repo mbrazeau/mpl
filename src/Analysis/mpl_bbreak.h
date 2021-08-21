@@ -50,10 +50,10 @@ typedef struct _bbreak {
     mpl_topol*      ratchhead;
     mpl_stepwise    stepwise;
     
-    double          keepscore; // Allowance for longer trees
-    double          limit;  // Overall limit
-    double          shortest; // Shortest overall
-    double          bestinrep; // Shortest in a given replicate
+    long            keepscore; // Allowance for longer trees
+    long            limit;  // Overall limit
+    long            shortest; // Shortest overall
+    long            bestinrep; // Shortest in a given replicate
 
 } mpl_bbreak;
 
