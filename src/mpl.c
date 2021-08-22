@@ -77,7 +77,7 @@ int mpl_handle_delete(mpl_handle** handl)
     // ret = Cleanup newickrdr
     mpl_newick_rdr_delete(&(*handl)->newickrdr);
     // ret = Cleanup contree
-    // TODO: Delete contree!!!
+    mpl_contree_delete(&(*handl)->contree);
     
     free(*handl);
     *handl = NULL;
@@ -347,10 +347,19 @@ int mpl_do_consensus(mpl_contree_t consenset, mpl_handle* handl)
     MPL_RETURN ret = MPL_ERR;
     
     if (handl->treebuf != NULL) {
-//        mpl_contree_delete(handl->contree);
         int ntax = handl->treebuf->num_taxa;
+        
+        // Delete any old contree
+        mpl_contree_delete(&handl->contree);
         handl->contree = mpl_contree_new(ntax, handl->treebuf);
-        mpl_contree_strict(handl->contree);
+        if (handl->contree == NULL) {
+            return MPL_NOMEM;
+        }
+        
+        if (!mpl_contree_strict(handl->contree)) {
+            return MPL_NOMEM;
+        }
+        
         ret = MPL_SUCCESS;
     } else {
         ret = MPL_NOTREES;
@@ -377,7 +386,7 @@ int mpl_show_ascii_contree(mpl_contree_t consenset, mpl_handle *handl)
             printf("%s", td->canvas[i]);  // TODO: Don't print from here Convert to a single string and return it
         }
         
-        // TODO: Delete tree drawing
+        mpl_tdraw_delete(&td);
         
         ret = MPL_SUCCESS;
     } else {
