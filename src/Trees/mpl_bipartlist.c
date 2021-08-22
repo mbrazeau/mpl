@@ -67,3 +67,14 @@ static void mpl_bipartlist_cleanup(mpl_bipartlist *bpts)
     safe_free(bpts->counts);
     safe_free(bpts->indexes);
 }
+
+void mpl_bipartlist_delete(mpl_bipartlist **bpts)
+{
+    if (bpts != NULL) {
+        if (*bpts != NULL) {
+            mpl_bipartlist_cleanup(*bpts);
+            free(*bpts);
+            *bpts = NULL;
+        }
+    }
+}

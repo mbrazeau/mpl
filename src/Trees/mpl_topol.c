@@ -273,6 +273,19 @@ int mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest)
     return 0;
 }
 
+int mpl_topol_destroy_linked(mpl_topol* firsttop)
+{
+    mpl_topol *p = firsttop;
+    mpl_topol *q;
+    while (p) {
+        q = p->next;
+        mpl_topol_delete(&p);
+        p = q;
+    }
+    
+    return 0; // TODO: Use error code
+}
+
 //void mpl_topol_compress(mpl_topol* top)
 //{
 //    long i = 0;

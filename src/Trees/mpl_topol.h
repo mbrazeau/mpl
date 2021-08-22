@@ -40,7 +40,8 @@ int         mpl_topol_rebase(const long newbase, mpl_topol* top);
 int         mpl_topol_compare(const mpl_topol* t1, const mpl_topol* t2);
 int         mpl_topol_init(long num_taxa, mpl_topol* top);
 int         mpl_topol_copy_data(const mpl_topol* src, mpl_topol* dest);
-void mpl_topol_compress(mpl_topol* top);
+int         mpl_topol_destroy_linked(mpl_topol *firstop);
+void        mpl_topol_compress(mpl_topol* top);
 
 
 #endif /* mpl_topol_h */

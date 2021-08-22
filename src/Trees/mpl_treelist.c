@@ -68,11 +68,11 @@ void mpl_treelist_delete(mpl_treelist** tl)
     if (tli != NULL) {
         
         if (tli->trees != NULL) {
-            // TODO: Call new fxn mpl_topol_destroy_linked(tli->trees);
+            mpl_topol_destroy_linked(tli->trees);
             tli->trees = NULL;
         }
         if (tli->pool != NULL) {
-            // TODO: Call new fxn mpl_topol_destroy_linked(tli->pool);
+            mpl_topol_destroy_linked(tli->pool);
             tli->pool = NULL;
         }
     }

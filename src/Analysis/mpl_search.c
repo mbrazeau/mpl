@@ -56,6 +56,8 @@ void mpl_search_delete(mpl_search** s)
         return;
     }
     
+    mpl_delete_tree(&(*s)->tree);
+    
     safe_free(*s);
 }
 

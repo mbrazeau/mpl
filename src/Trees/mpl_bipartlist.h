@@ -21,5 +21,6 @@ typedef struct mpl_bipartlist {
 } mpl_bipartlist;
 
 mpl_bipartlist* mpl_bipartlist_new (int ntax);
+void mpl_bipartlist_delete(mpl_bipartlist **bpts);
 
 #endif /* mpl_bipartlist_h */

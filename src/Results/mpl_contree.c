@@ -32,14 +32,18 @@ mpl_contree *mpl_contree_new(int ntax, mpl_treelist *tl)
     return newct;
 }
 
-void mpl_contree_delete(mpl_contree *ctree)
+void mpl_contree_delete(mpl_contree **ctree)
 {
-    mpl_delete_tree(&ctree->t);
-    
-    // TODO: Other cleanup
+    if (ctree != NULL) {
+        if (*ctree != NULL) {
+            mpl_delete_tree(&(*ctree)->t);
+            mpl_bipartlist_delete(&(*ctree)->biparts);
+            (*ctree)->treelist = NULL;
+        }
+    }
 }
 
-void mpl_contree_strict(mpl_contree* ctree)
+mpl_tree* mpl_contree_strict(mpl_contree* ctree)
 {
     assert(ctree != NULL);
     
@@ -49,7 +53,9 @@ void mpl_contree_strict(mpl_contree* ctree)
     mpl_node *n;
     mpl_node **p;
     mpl_tree *t = mpl_new_tree(ctree->t->num_taxa);
-    // TODO: Error if failed.
+    if (t == NULL) {
+        return NULL;
+    }
     
     ctree->biparts->num_splits = 0;
     
@@ -102,6 +108,8 @@ void mpl_contree_strict(mpl_contree* ctree)
     mpl_contree_collapse_nodes(mpl_treelist_get_numtrees(ctree->treelist), ctree);
     
     mpl_delete_tree(&t);
+    
+    return ctree->t;
 }
 
 

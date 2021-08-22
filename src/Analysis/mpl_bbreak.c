@@ -137,6 +137,8 @@ void mpl_bbreak_cleanup(mpl_bbreak* bbk)
     safe_free(bbk->tgtslong);
     safe_free(bbk->tgtsshort);
     safe_free(bbk->clips);
+    
+    mpl_stepwise_reset(&bbk->stepwise);
 }
 
 void mpl_bbreak_set_type(const mpl_bbreak_t bbkt, mpl_bbreak* bbk)

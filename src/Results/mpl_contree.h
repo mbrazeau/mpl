@@ -19,6 +19,6 @@ typedef struct _contree {
 } mpl_contree;
 
 mpl_contree *mpl_contree_new(int ntax, mpl_treelist *tl);
-void mpl_contree_delete(mpl_contree *ctree);
-void mpl_contree_strict(mpl_contree* ctree);
+void mpl_contree_delete(mpl_contree **ctree);
+mpl_tree* mpl_contree_strict(mpl_contree* ctree);
 #endif /* mpl_contree_h */

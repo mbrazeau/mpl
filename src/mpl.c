@@ -8,6 +8,7 @@
 
 //#include "mpl_handle.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "mpl_defs.h"
 #include "mpl_utils.h"
@@ -96,6 +97,8 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
 {
     RET_IF_NULL(handl);
     
+    MPL_RETURN ret = MPL_ERR;
+    
     if (ntax == 0 || nchar == 0) {
         return MPL_NODIMENSIONS;
     }
@@ -110,26 +113,53 @@ int mpl_set_dimensions(const long ntax, const long nchar, mpl_handle* handl)
             return MPL_NOMEM;
         }
         
-        mpl_matrix_init(ntax, nchar, 2 * ntax, handl->matrix);
+        ret = mpl_matrix_init(ntax, nchar, 2 * ntax, handl->matrix);
+        if (ret != MPL_SUCCESS) {
+            mpl_matrix_delete(&handl->matrix);
+            return ret;
+        }
         
         // Add taxablock
         handl->taxablock = mpl_taxablock_new(handl->ntax);
+        if (handl->taxablock == NULL) {
+            mpl_matrix_delete(&handl->matrix);
+            return MPL_NOMEM;
+        }
         
-        // Add results
+        // TODO: Add results
         // handl->results
         
         handl->treebuf = mpl_treelist_new(handl->ntax, MPL_DEFAULT_MAXTREES, MPL_DEFAULT_AUTOINCR);
+        if (handl->treebuf == NULL) {
+            mpl_matrix_delete(&handl->matrix);
+            mpl_taxablock_delete(&handl->taxablock);
+            return MPL_NOMEM;
+        }
         
         // Add search
         handl->search    = mpl_search_new(handl->ntax, handl->treebuf);
-        // TODO: Probably not needed
+        if (handl->search == NULL) {
+            mpl_matrix_delete(&handl->matrix);
+            mpl_taxablock_delete(&handl->taxablock);
+            mpl_treelist_delete(&handl->treebuf);
+            return MPL_NOMEM;
+        }
+        
         mpl_search_set_stepw_t(DEFAULT_ASTYPE, handl->search);
         mpl_search_set_bbreak_t(DEFAULT_BBREAK, handl->search);
         
-        // TODO: Check all returns. If any are NULL, then cleanup and return error
         handl->newickrdr = mpl_newick_rdr_new(ntax);
+        if (handl->newickrdr == NULL) {
+            mpl_matrix_delete(&handl->matrix);
+            mpl_taxablock_delete(&handl->taxablock);
+            mpl_treelist_delete(&handl->treebuf);
+            mpl_search_delete(&handl->search);
+            return MPL_NOMEM;
+        }
         
-        return MPL_SUCCESS;
+        ret = MPL_SUCCESS;
+        
+        return ret;
     }
     
     return MPL_ILLEGOVERWRITE;
@@ -173,8 +203,7 @@ int mpl_attach_rawdata(const mpl_data_t datype, const char* rawmatrix, mpl_handl
     if (handl->nchar == 0 || handl->ntax == 0) {
         return MPL_NODIMENSIONS;
     }
-    
-    // TODO: Attach the data
+
     ret = mpl_matrix_attach_rawdata(rawmatrix, handl->matrix);
     
     return ret;
@@ -242,8 +271,6 @@ int mpl_set_brswap(const mpl_bbreak_t bbkt, mpl_handle* handl)
     }
     
     mpl_bbreak_set_type(bbkt, handl->search->bbreak);
-    // TODO: Don't keep doing it like this:
-    handl->search->bbreak_type = bbkt;
     
     return MPL_SUCCESS;
 }
@@ -368,7 +395,6 @@ int mpl_do_consensus(mpl_contree_t consenset, mpl_handle* handl)
     return ret;
 }
 
-#include <stdio.h> // TODO: Remove this shit
 int mpl_show_ascii_contree(mpl_contree_t consenset, mpl_handle *handl)
 {
     RET_IF_NULL(handl);
@@ -383,7 +409,7 @@ int mpl_show_ascii_contree(mpl_contree_t consenset, mpl_handle *handl)
         
         int i = 0;
         for (i = 0; i < td->height; ++i) {
-            printf("%s", td->canvas[i]);  // TODO: Don't print from here Convert to a single string and return it
+            printf("%s", td->canvas[i]);
         }
         
         mpl_tdraw_delete(&td);
@@ -455,13 +481,22 @@ char* mpl_get_newick(const long tnum, mpl_handle* handl)
     char* ret = NULL;
     
     mpl_tree* t  = mpl_new_tree(handl->treebuf->num_taxa);
+    if (t == NULL) {
+        return NULL;
+    }
     mpl_topol* top = mpl_treelist_get_topol(tnum, handl->treebuf);
     
     mpl_tree_read_topol(t, top);
     
+    // TODO: Check return from this
     mpl_tree_write_newick(&ret, t);
-    // TODO: Make this safer
+    
     top->newick = ret;
+    
+    ret = safe_calloc(strlen(ret) + 1, sizeof(char));
+    if (ret == NULL) {
+        return NULL;
+    }
     
     mpl_delete_tree(&t);
     
