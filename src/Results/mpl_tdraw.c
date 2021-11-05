@@ -31,7 +31,7 @@ static void calc_dimensions(const long ntax, mpl_tdraw *td);
 static void mpl_tdraw_fill_nodebar(mpl_node* n, mpl_tdraw *td);
 static void mpl_tdraw_fill_subbranch(mpl_node *n, mpl_tdraw *td);
 static void mpl_tdraw_fillin(mpl_tree *t, mpl_tdraw *td);
-static int  mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen);
+static int  mpl_tdraw_set_coords(mpl_tree *t, int brlen);
 
 mpl_tdraw* mpl_tdraw_new(mpl_taxablock *taxa)
 {
@@ -84,8 +84,8 @@ void mpl_tdraw_delete(mpl_tdraw **td)
 
 void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
 {
+    int i = 0;
     int lastx = 0;
-    int firstrow = 0;
     
     t->num_polys = 1; // TODO: needs to be a more elegant way to do this
     
@@ -93,26 +93,35 @@ void mpl_tdraw_do(mpl_tree *t, mpl_tdraw *td)
     mpl_tree_traverse(t);
     
     // Set coordinates on the branches
-    int brlen = DEFAULT_TIP_COLUMN / t->num_taxa;
+    int brlen = DEFAULT_TIP_COLUMN / t->num_taxa - 1;
     if (brlen == 0) {
-        brlen = 3;
+        brlen = 1;
     }
     
-//    if (brlen * )
+    lastx = mpl_tdraw_set_coords(t, brlen);
     
-    lastx = mpl_tdraw_set_coords(t, &firstrow, brlen);
+    while (lastx >= 0) {
+        ++brlen;
+        lastx = mpl_tdraw_set_coords(t, brlen);
+    }
+    --brlen;
+    lastx = mpl_tdraw_set_coords(t, brlen);
     
     if (lastx > 0) {
-          int i = 0;
           for (i = t->num_taxa; i < t->num_nodes; ++i) {
               t->nodes[i].x -= lastx;
           }
-    } else if (lastx < 0) {
-        firstrow = 0;
-        // Uh oh...
-        lastx = mpl_tdraw_set_coords(t, &firstrow, 1);
-        assert(lastx > 0);
     }
+//    else if (lastx < 0) {
+//        // Problem: the root would fall below thebottom of the buffer
+//        firstrow = 0;
+//        lastx = mpl_tdraw_set_coords(t, &firstrow, 1);
+//        assert(lastx > 0);
+//
+//        for (i = t->num_taxa; i < t->num_nodes; ++i) {
+//            t->nodes[i].x -= lastx;
+//        }
+//    }
     
     // Fillin the drawing
     mpl_tdraw_fillin(t, td);
@@ -210,9 +219,10 @@ static void mpl_tdraw_fillin(mpl_tree *t, mpl_tdraw *td)
     
 }
 
-static int mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen)
+static int mpl_tdraw_set_coords(mpl_tree *t, int brlen)
 {
     int i = 0;
+    int currentrow = 0;
     mpl_node* n = NULL;
     mpl_node** p;
     
@@ -221,8 +231,8 @@ static int mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen)
         if (n->tip) {
             // set the coords
             n->x = DEFAULT_TIP_COLUMN;
-            n->y = *currentrow;
-            *currentrow += 2;
+            n->y = currentrow;
+            currentrow += 2;
 //            continue;
         }
         else {
@@ -245,11 +255,6 @@ static int mpl_tdraw_set_coords(mpl_tree *t, int *currentrow, int brlen)
             } while (*p);
             
             n->x = deepest - brlen;
-//            if (n->left->x < n->right->x) {
-//                n->x = n->left->x - brlen;
-//            } else {
-//                n->x = n->right->x - brlen;
-//            }
         }
         
     }
