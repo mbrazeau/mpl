@@ -491,7 +491,9 @@ static void mpl_matrix_count_num_states(mpl_matrix *m)
         
         m->charinfo[i].num_states = num_states;
         
-        mpl_charinfo_set_states(d, &m->charinfo[i]);
+        if (num_states != 0) {
+            mpl_charinfo_set_states(d, &m->charinfo[i]);
+        }
     }
     
 }
