@@ -1135,13 +1135,11 @@ long mpl_fitch_na_recalc_second_downpass
         dnset[left][i]    = tempdn[left][i];
         dnsetf[left][i]   = tempdnf[left][i];
         prupset[left][i]  = tempprup[left][i];
-//        upset[left][i]    = tempup[left][i];
         actives[left][i]  = tempact[left][i];
         // Reset the right buffers
         dnset[right][i]   = tempdn[right][i];
         dnsetf[right][i]  = tempdnf[right][i];
         prupset[right][i] = tempprup[right][i];
-//        upset[right][i]   = tempup[right][i];
         actives[right][i] = tempact[right][i];
 
     }
@@ -1197,21 +1195,21 @@ long mpl_fitch_na_local_check
                     score += weights[i];
                 }
             } else if (upset[src][i] < UNKNOWN) {
-//                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                if ((tempdn[tgt1][i] & ISAPPLIC) || (tempdn[tgt2][i] & ISAPPLIC)) {
+                    pd->indexbuf[pd->nchars] = i;
+                    ++pd->nchars;
+                    pd->scorerecall += (changes[i] * weights[i]);
+                    // using changes[] is less accurate but much faster
+//                    pd->minscore    += (changes[i] * weights[i]);
+                    pd->minscore    += (applicchgs[i] * weights[i]);
+                } else {
                     pd->indexbuf[pd->nchars] = i;
                     ++pd->nchars;
                     pd->scorerecall += (changes[i] * weights[i]);
                     // using changes[] is less accurate but much faster
                     pd->minscore    += (changes[i] * weights[i]);
 //                    pd->minscore    += (applicchgs[i] * weights[i]);
-//                } else {
-//                    pd->indexbuf[pd->nchars] = i;
-//                    ++pd->nchars;
-//                    pd->scorerecall += (changes[i] * weights[i]);
-//                    // using changes[] is less accurate but much faster
-//                    pd->minscore    += (changes[i] * weights[i]);
-////                    pd->minscore    += (applicchgs[i] * weights[i]);
-//                }
+                }
             }
         } else {
             if (rtset[tgt1][i] & NA) {
@@ -1226,15 +1224,9 @@ long mpl_fitch_na_local_check
             }
         }
         
-//        assert(recall >= 0);
         // NOTE: It's possible that the complexity of checking this offsets the
         // efficiency of terminating the loop early.
         if (lim > -1) {
-//            if ((score + base - pd->scorerecall + pd->minscore) > lim) {
-//                pd->minscore += (score + base);
-//                pd->scorerecall += recall;
-//                return score + base;
-//            }
             cminscore -= (applicchgs[i] * weights[i]);
             recall -= (changes[i] * weights[i]);
             testscore = score + pd->minscore + base + cminscore - pd->scorerecall - recall;
@@ -1948,7 +1940,6 @@ int mpl_na_only_parsim_first_uppass
     
     for (i = 0; i < m->nparsets; ++i) {
         if (m->parsets[i].isNAtype == true) {
-//            m->parsets[i].upfxn1(left, right, n, anc, &m->parsets[i]);
             chgs += mpl_fitch_na_recalc_first_uppass(left, right, n, anc, &m->parsets[i]);
         }
     }
@@ -2293,7 +2284,9 @@ long mpl_parsim_calc_abs_minscore(mpl_matrix* m)
                 m->parsets[i].cminscore += (applicchgs[j] * weights[j]);
                 m->parsets[i].crecall   += (changes[j] * weights[j]);
             }
+#ifdef DEBUG
             assert(m->parsets[i].crecall >= 0);
+#endif
             minscore += m->parsets[i].cminscore;
         } else {
             for (j = m->parsets[i].start; j < m->parsets[i].end; ++j) {
