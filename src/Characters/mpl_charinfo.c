@@ -104,6 +104,10 @@ void mpl_charinfo_set_hilobit(mpl_charinfo *ci)
     
     ci->maxstate = 0;
     ci->minstate = 0;
+
+    if (!d) { // Then there are no states
+        return;
+    }
     
     while (!(d & 1)) {
         d = d >> 1;
