@@ -15,7 +15,7 @@
 #include "mpl_parsim.h"
 #include "mpl_scoretree.h"
 
-static void mpl_part_parsim_uppass(mpl_node* n, mpl_node* ostart, long* i, mpl_tree* t);
+static void mpl_part_parsim_uppass(mpl_node* n, const mpl_node* ostart, long* i, mpl_tree* t);
 
 mpl_matrix* glmatrix = NULL;
 
@@ -44,9 +44,10 @@ long mpl_fullpass_parsimony(mpl_tree* t)
         
         n = t->postord_intern[i];
         
-        len += mpl_parsim_first_downpass(n->left->mem_index,
+        n->score = mpl_parsim_first_downpass(n->left->mem_index,
                                          n->right->mem_index,
                                          n->mem_index, glmatrix);
+        len += n->score;
     }
     
     n = t->postord_intern[i-1];
@@ -264,13 +265,12 @@ long mpl_fullpass_subtree(mpl_node* subtr, mpl_tree* t)
  @param t A pointer to the tree being worked on.
  */
 static void mpl_part_parsim_uppass
-(mpl_node* n, mpl_node* ostart, long* i, mpl_tree* t)
+(mpl_node* n, const mpl_node* ostart, long* i, mpl_tree* t)
 {
     if (n->tip > 0) {
         mpl_na_only_parsim_tip_update(n->mem_index, n->anc->mem_index, glmatrix);
         return;
     }
-
 
     if (!mpl_na_only_parsim_first_uppass(n->left->mem_index,
         n->right->mem_index, n->mem_index, n->anc->mem_index, glmatrix)) {
@@ -400,7 +400,7 @@ long mpl_fullpass_parsimony_na_only(const long lim, mpl_node* start, mpl_tree* t
     mpl_part_parsim_uppass(n, start, &t->nsubnodes, t);
     
     len = 0;
-    mpl_use_ndidx(false);
+    mpl_use_ndidx(true);
     
     for (i = 0; i < t->nsubnodes; ++i) {
 
@@ -587,9 +587,7 @@ long mpl_score_try_parsimony
         }
         
         score += scorerecall;
-
-        // TODO: Add a break condition here for when the number of
-        // characters to check is 0.
+        
         score += mpl_fullpass_parsimony_na_only(lim, src, t);
     }
     
