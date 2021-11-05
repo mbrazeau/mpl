@@ -31,6 +31,7 @@ typedef struct _node {
     long        po_index;
     long        copy_index;
     long        weight;
+    long        score;
     // NOTE: Any variables added should be reset in mpl_reset_node()
     char*       label; // Only points, no memory allocated by mpl_node.h functions
     double      length;
