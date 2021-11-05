@@ -371,8 +371,9 @@ void mpl_do_ratchet_search(mpl_tree* t, mpl_bbreak* bbk)
         // Restore that tree
         bbk->head = bbk->treelist->back;
         mpl_tree_read_topol(t, bbk->head);
-        bbk->bestinrep = t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
-
+        bbk->bestinrep = //t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
+        MPL_MAXSCORE;
+        
         // Swap the tree
         bbk->rep_ntrees = 0;
         mpl_swap_all(false, t, bbk);
@@ -446,9 +447,9 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
     
     // TODO: Might be good to use the tips first; then the postorder list of internal nodes
     // TODO: Doing this could allow you to minimize times the buffers are copied back
-    for (i = 1, clipmax = 0; i < t->size; ++i) {
-        if (&t->nodes[i] != t->base && t->nodes[i].anc != t->base) {
-            clips[clipmax] = &t->nodes[i];
+    for (i = 0, clipmax = 0; i < t->size; ++i) {
+        if (t->postord_all[i] != t->base && t->postord_all[i]->anc != t->base) {
+            clips[clipmax] = t->postord_all[i];
             ++clipmax;
         }
     }
@@ -484,15 +485,17 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
             right = NULL;
         }
         
-        mpl_node_bin_clip(clips[i]);
         *src = clips[i];
+        
+        mpl_node_bin_clip(clips[i]);
         srcs = bbk->srcs;
         
         // << Reoptimise the subtrees as quickly as possible >>
         
         long tgtlen = 0;
         long srclen = 0;
-
+        
+        
         tgtlen = mpl_fullpass_parsimony(t);
 
         if ((*src)->tip == 0) {
@@ -593,15 +596,12 @@ void mpl_branch_swap(mpl_tree* t, mpl_bbreak* bbk)
                 }
                 
                 score = mpl_score_try_parsimony(tgtlen + srclen,
-//                                                -1,
                                                 bbk->bestinrep,
                                                 clips[i],
                                                 tgts[j],
                                                 t);
 
                 t->score = (score + tgtlen + srclen);
-//                t->score = mpl_fullpass_parsimony(t);
-//                t->score = mpl_length_only_parsimony(MPL_MAXSCORE, t);
 
                 if (t->score <= bbk->bestinrep) {
                     if (t->score < bbk->bestinrep) {
@@ -718,6 +718,7 @@ static void mpl_swap_all(const bool report, mpl_tree* t, mpl_bbreak* bbk)
             fflush(stdout);
         }
 
+//        t->score = mpl_fullpass_parsimony(t);
         mpl_branch_swap(t, bbk);
 
         if (bbk->foundbetter) {
